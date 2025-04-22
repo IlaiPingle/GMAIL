@@ -2,15 +2,12 @@
 
 class hashable {
         public:
-            // Constructor
-            hashable() {}
             
             // Destructor
-            virtual ~hashable() {}
+            virtual ~hashable() = default;
             
-            // Pure virtual function to be implemented by derived classes
-            virtual int hashString(std::string key, int seed) = 0;
+            // function that must be implemented by derived classes
+            // take input string and return a hash value
+            virtual size_t operator()(const std::string& str) const = 0;
             
-            // Pure virtual function to be implemented by derived classes
-            virtual bool isEqual(std::string key1, std::string key2) = 0;
 };
