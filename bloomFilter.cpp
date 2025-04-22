@@ -2,40 +2,31 @@
 #include <string>
 #include "bloomFilter.h"
 #include <functional> // For std::hash
+#include <memory>
 
 using namespace std;
 
-// Hash function implementation
-int bloomFilter::hash(const string& key, int seed) const {
-    // Simple hash function implementation using std::hash with a seed
-    std::hash<string> hasher;
-    unsigned int hashValue = hasher(key);
-    return (hashValue ^ seed) % bitArray.size();
-}
-
 // Constructor implementation
-bloomFilter::bloomFilter(int size, int numHashes) {
-    bitArray.resize(size, false); // Initialize the bit array with false values
-    numHashFunctions = numHashes; // Set the number of hash functions
-}
+bloomFilter::bloomFilter(size_t size, const std::vector<std::shared_ptr<hashable>>& hashFuncs)
+    : m_bitArray(size, false), m_hashFunctions(hashFuncs), m_arraySize(size) {};
+
 
 // Add implementation
-void bloomFilter::add(const string& key) {
-    // Hash the key and set the corresponding bits in the bit array
-    for (int i = 0; i < numHashFunctions; i++) {
-        int hashValue = hash(key, i);
-        bitArray[hashValue] = true;
+void bloomFilter::add(const std::string& url) {
+    for (const auto& func : m_hashFunctions) {
+        size_t index = (*func)(url);
+        m_bitArray[index] = true;
     }
+    /* NEED TO SAVE REAL URL IN THE BLACKLIST FILE HERE!!!*/
 }
 
-// Contains implementation
-bool bloomFilter::contains(const string& key) const {
-    // Check if all the bits corresponding to the hashes are set to true
-    for (int i = 0; i < numHashFunctions; i++) {
-        int hashValue = hash(key, i);
-        if (!bitArray[hashValue]) {
-            return false; // If any bit is false, the key is definitely not in the filter
-        }
+bool bloomFilter::contains(const std::string& url) const {
+    for (const auto& func :m_hashFunctions) {
+        size_t index = (*func)(url);
+        if (!m_bitArray[index])
+            return false;
     }
-    return true; // If all bits are true, the key is possibly in the filter
+    return true;
 }
+
+bool checkFalsePositive(const bloomFilter& bf, const std::string& url) {}
