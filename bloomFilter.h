@@ -5,6 +5,7 @@ class bloomFilter {
 private:
     std::vector<bool> bitArray;
     int numHashFunctions;
+    
 
     int hash(const std::string& key, int seed) const;
 
