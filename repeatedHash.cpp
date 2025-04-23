@@ -2,8 +2,8 @@
 #include "repeatedHash.h"
 #include <functional>
 // constructor
-repeatedHash::repeatedHash(size_t reps, size_t size)
-    : m_repeats(reps), m_arraySize(size) {}
+repeatedHash::repeatedHash(size_t repeats, size_t arraySize)
+    : m_repeats(repeats), m_arraySize(arraySize) {}
 
 // implemnt hush multiple times 
 size_t repeatedHash::operator()(const std::string& input) const {

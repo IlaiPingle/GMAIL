@@ -2,23 +2,23 @@
 #include <iostream>
 #include <fstream>
 #include "bloomFilter.h"
+#include "repeatedHash.h"
 
 // Test saving the Bloom filter to a file
 void testSaveToFile() {
-    // Arrange
     int arraySize = 100;
     int numHashes = 3;
     bloomFilter bf(arraySize, numHashes);
     std::string testFile = "test_bloom_filter_save.bin";
 
-    // Add some data to the Bloom filter
+    // Add data to the Bloom filter
     bf.add("example.com");
     bf.add("test.com");
 
-    // Act
+    // Save to file
     bf.saveToFile(testFile);
 
-    // Assert
+    // Verify file exists
     std::ifstream file(testFile, std::ios::binary);
     assert(file.good() && "File should exist after saving.");
     file.close();
@@ -30,22 +30,21 @@ void testSaveToFile() {
 
 // Test loading the Bloom filter from a file
 void testLoadFromFile() {
-    // Arrange
     int arraySize = 100;
     int numHashes = 3;
     bloomFilter bf(arraySize, numHashes);
     std::string testFile = "test_bloom_filter_load.bin";
 
-    // Add some data to the Bloom filter and save it
+    // Add data and save
     bf.add("example.com");
     bf.add("test.com");
     bf.saveToFile(testFile);
 
-    // Create a new Bloom filter and load the data
+    // Load into a new Bloom filter
     bloomFilter bfLoaded(arraySize, numHashes);
     bfLoaded.loadFromFile(testFile);
 
-    // Act & Assert
+    // Verify data
     assert(bfLoaded.contains("example.com") && "Loaded Bloom filter should contain 'example.com'.");
     assert(bfLoaded.contains("test.com") && "Loaded Bloom filter should contain 'test.com'.");
     assert(!bfLoaded.contains("notadded.com") && "Loaded Bloom filter should not contain 'notadded.com'.");
@@ -57,20 +56,19 @@ void testLoadFromFile() {
 
 // Test saving and loading an empty Bloom filter
 void testSaveAndLoadEmptyFilter() {
-    // Arrange
     int arraySize = 100;
     int numHashes = 3;
     bloomFilter bf(arraySize, numHashes);
     std::string testFile = "test_bloom_filter_empty.bin";
 
-    // Save the empty Bloom filter
+    // Save empty Bloom filter
     bf.saveToFile(testFile);
 
-    // Create a new Bloom filter and load the data
+    // Load into a new Bloom filter
     bloomFilter bfLoaded(arraySize, numHashes);
     bfLoaded.loadFromFile(testFile);
 
-    // Act & Assert
+    // Verify no data
     assert(!bfLoaded.contains("example.com") && "Empty Bloom filter should not contain 'example.com'.");
 
     // Cleanup

@@ -47,7 +47,7 @@ int main() {
             std::ofstream out(filePath, std::ios::app);
             out << url << '\n';
         } else if (cmd == 2) {
-            bool possibly = filter.possiblyContains(url);
+            bool possibly = filter.contains(url);
             std::cout << (possibly ? "true " : "false ");
             if (possibly) {
                 std::cout << (filter.isTrulyBlacklisted(url) ? "true" : "false");
