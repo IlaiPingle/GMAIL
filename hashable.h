@@ -1,8 +1,9 @@
+#ifndef HASHABLE_H
+#define HASHABLE_H
 #include <string>
 
 class hashable {
         public:
-            
             // Destructor
             virtual ~hashable() = default;
             
@@ -11,3 +12,4 @@ class hashable {
             virtual size_t operator()(const std::string& str) const = 0;
             
 };
+#endif // HASHABLE_H

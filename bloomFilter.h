@@ -7,10 +7,12 @@ class bloomFilter {
 private:
     std::vector<bool> m_bitArray;
     size_t m_arraySize;
+    int numHashFunctions;
     std::vector<std::shared_ptr<hashable>> m_hashFunctions;
     
 
 public:
+    bloomFilter(int size, int numHashes);
     void add(const std::string& key);
     bool contains(const std::string& key) const;
     void saveToFile(const std::string& filename) const;

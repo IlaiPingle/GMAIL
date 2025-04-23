@@ -4,6 +4,7 @@
 #include <functional> // For std::hash
 #include <fstream> // For std::ifstream
 #include <stdexcept> // For std::runtime_error
+#include "repeatedHash.h"
 
 using namespace std;
 
@@ -22,12 +23,20 @@ bool bloomFilter::fileExists(const string& filename) const {
 // Constructor implementation
 bloomFilter::bloomFilter(size_t size, const std::vector<std::shared_ptr<hashable>>& hashFuncs)
     : m_bitArray(size, false), m_hashFunctions(hashFuncs), m_arraySize(size) {};
+// Constructor with size and number of hash functions
+bloomFilter::bloomFilter(int size, int numHashes)
+    : m_bitArray(size, false), m_arraySize(size), numHashFunctions(numHashes) {
+    // Initialize hash functions
+    for (int i = 0; i < numHashes; ++i) {
+        m_hashFunctions.push_back(std::make_shared<repeatedHash>(i + 1, size));
+    }
+}
 
 
 // Add implementation
 void bloomFilter::add(const std::string& url) {
     for (const auto& func : m_hashFunctions) {
-        size_t index = (*func)(url);
+        size_t index = (*func)(url) % m_arraySize;
         m_bitArray[index] = true;
     }
     /* NEED TO SAVE REAL URL IN THE BLACKLIST FILE HERE!!!*/
@@ -35,7 +44,7 @@ void bloomFilter::add(const std::string& url) {
 
 bool bloomFilter::contains(const std::string& url) const {
     for (const auto& func :m_hashFunctions) {
-        size_t index = (*func)(url);
+        size_t index = (*func)(url) % m_arraySize;
         if (!m_bitArray[index])
             return false;
     }
@@ -48,34 +57,47 @@ void bloomFilter::saveToFile(const string& filename) const {
        throw runtime_error("Failed to open file for saving Bloom filter.");
     }
     for (bool bit :m_bitArray) {
-        outFile.write(reinterpret_cast<const char*>(&bit), sizeof(bit));
+        char byte = bit ? 1 : 0; // Convert bool to byte (1 or 0)
+        outFile.write(&byte, sizeof(byte));
     }
     outFile.close();
 }
 //load the bloom filter from a file
 void bloomFilter::loadFromFile(const string& filename) {
+    if (!fileExists(filename)) {
+        throw runtime_error("File does not exist.");
+    }
+
     ifstream inFile(filename, ios::binary);
     if (!inFile) {
         throw runtime_error("Failed to open file for loading Bloom filter.");
     }
-    if (!fileExists(filename)) {
-        throw runtime_error("File does not exist.");
-        saveToFile(filename); // Save the current state to a file
+
+    // Validate file size
+    inFile.seekg(0, ios::end);
+    size_t fileSize = inFile.tellg();
+    inFile.seekg(0, ios::beg);
+
+    if (fileSize != m_bitArray.size() * sizeof(bool)) {
+        throw runtime_error("File size does not match Bloom filter size.");
     }
-    
-    for (bool bit : m_bitArray) {
-            inFile.read(reinterpret_cast<char*>(&bit), sizeof(bit));
-        }
-        inFile.close();
+
+    for (size_t i = 0; i < m_bitArray.size(); ++i) {
+        char byte;
+        inFile.read(&byte, sizeof(byte));
+        m_bitArray[i] = (byte != 0); // Convert byte to bool
+    }
+    inFile.close();
 }
 
 
-bool checkFalsePositive(const bloomFilter& bf, const std::string& url) {
+
+/*bool checkFalsePositive(const bloomFilter& bf, const std::string& url) {
     if(bf.contains(url)) {
         // check if url is in the real blcklisst file:
         while 
         
         return true; // False positive
     }
-}
+}*/
 

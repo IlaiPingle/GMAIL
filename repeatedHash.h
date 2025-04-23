@@ -5,7 +5,7 @@
 #include <string>
 #include "hashable.h"
 
-class repeatedHash : virtual hashable {
+class repeatedHash : public hashable {
     
     private:
     size_t m_repeats;
