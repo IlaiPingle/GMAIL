@@ -1,34 +1,60 @@
-#include <iostream>
 #include "bloomFilter.h"
-using namespace std;
-int main(){
-    int arraySize;
-    int numHashes;
-    bloomFilter bf(arraySize, numHashes); // Create a bloom filter with the specified size and number of hash functions
-    bf.loadFromFile("bloom_filter_state.bin"); // Load the bloom filter from a file
-    while (true) {
-        cin >> arraySize >> numHashes; // Read the size of the bloom filter and the number of hash functions
-        string url;
-        int choice;
-        cin >> choice >> url; // Read the user's choice and the URL
-        switch (choice) {
-        case 1: // Add URL
-            URL1(bf, url); // Add the URL to the bloom filter
-        case 2: // Check URL
-            if (bf.contains(url)) { // Check if the URL is in the bloom filter
-                cout << "URL is possibly in the bloom filter." << endl;
-            } else {
-                cout << "URL is definitely not in the bloom filter." << endl;
+#include "hashFactory.h"
+#include <fstream>
+#include <iostream>
+#include <sstream>
+
+bool fileExistsAndNotEmpty(const std::string& path) {
+    std::ifstream in(path);
+    return in.peek() != std::ifstream::traits_type::eof();
+}
+
+int main() {
+    std::string filePath = "data/bloom.txt";
+    std::string configLine;
+    bloomFilter filter(1, {});  // Dummy init
+
+    if (fileExistsAndNotEmpty(filePath)) {
+        std::ifstream in(filePath);
+        std::getline(in, configLine);
+        auto [size, funcs] = HashFactory::createFromConfigLine(configLine);
+        filter = bloomFilter(size, funcs);
+
+        std::string url;
+        while (std::getline(in, url)) {
+            if (!url.empty()) filter.add(url);
+        }
+        in.close();
+    } else {
+        std::getline(std::cin, configLine);
+        auto [size, funcs] = HashFactory::createFromConfigLine(configLine);
+        filter = bloomFilter(size, funcs);
+        std::ofstream out(filePath);
+        out << configLine << '\n';
+        out.close();
+    }
+
+    std::string input;
+    while (std::getline(std::cin, input)) {
+        std::istringstream iss(input);
+        int cmd;
+        std::string url;
+
+        if (!(iss >> cmd >> url)) continue;
+
+        if (cmd == 1) {
+            filter.add(url);
+            std::ofstream out(filePath, std::ios::app);
+            out << url << '\n';
+        } else if (cmd == 2) {
+            bool possibly = filter.possiblyContains(url);
+            std::cout << (possibly ? "true " : "false ");
+            if (possibly) {
+                std::cout << (filter.isTrulyBlacklisted(url) ? "true" : "false");
             }
-            break;
-        default: // Invalid choice
-            cout << "Invalid choice. Please enter 1 or 2." << endl;
-            break;
+            std::cout << '\n';
         }
     }
-   
-}
-void URL1(bloomFilter& bf, string url) {
-    bf.add(url); // Add the URL to the bloom filter
-    bf.saveToFile("bloom_filter_state.bin"); // Save the bloom filter to a file
+
+    return 0;
 }

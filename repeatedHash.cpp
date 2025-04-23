@@ -12,5 +12,5 @@ size_t repeatedHash::operator()(const std::string& input) const {
     for (size_t i = 1; i < m_repeats; ++i) {
         hash = hasher(std::to_string(hash));
     }
-    return hash %m_arraySize;
+    return hash % m_arraySize;
 }

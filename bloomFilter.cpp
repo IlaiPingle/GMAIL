@@ -70,5 +70,12 @@ void bloomFilter::loadFromFile(const string& filename) {
 }
 
 
-bool checkFalsePositive(const bloomFilter& bf, const std::string& url) {}
+bool checkFalsePositive(const bloomFilter& bf, const std::string& url) {
+    if(bf.contains(url)) {
+        // check if url is in the real blcklisst file:
+        while 
+        
+        return true; // False positive
+    }
+}
 
