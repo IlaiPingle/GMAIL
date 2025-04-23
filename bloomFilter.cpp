@@ -47,7 +47,7 @@ void bloomFilter::saveToFile(const string& filename) const {
     if (!outFile) {
        throw runtime_error("Failed to open file for saving Bloom filter.");
     }
-    for (bool bit : bitArray) {
+    for (bool bit :m_bitArray) {
         outFile.write(reinterpret_cast<const char*>(&bit), sizeof(bit));
     }
     outFile.close();
@@ -63,7 +63,7 @@ void bloomFilter::loadFromFile(const string& filename) {
         saveToFile(filename); // Save the current state to a file
     }
     
-    for (bool bit : bitArray) {
+    for (bool bit : m_bitArray) {
             inFile.read(reinterpret_cast<char*>(&bit), sizeof(bit));
         }
         inFile.close();
