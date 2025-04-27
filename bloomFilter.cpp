@@ -8,43 +8,38 @@
 
 using namespace std;
 
-// Hash function implementation
-/*int bloomFilter::hash(const string& key, int seed) const {
-    // Simple hash function implementation using std::hash with a seed
-    std::hash<string> hasher;
-    unsigned int hashValue = hasher(key);
-    return (hashValue ^ seed) % bitArray.size();
-}*/
 // Helper function to check if a file exists
 bool bloomFilter::fileExists(const string& filename) const {
     ifstream file(filename);
     return file.good();
 }
 // Constructor implementation
-bloomFilter::bloomFilter(size_t size, const std::vector<std::shared_ptr<hashable>>& hashFuncs)
-    : m_bitArray(size, false), m_hashFunctions(hashFuncs), m_arraySize(size) {};
+bloomFilter::bloomFilter(size_t size, const vector<function<size_t(const string&)>>& hashFuncs)
+    : m_bitArray(size, false), m_hashFunctions(hashFuncs), m_arraySize(size) {}
 // Constructor with size and number of hash functions
 bloomFilter::bloomFilter(int size, int numHashes)
     : m_bitArray(size, false), m_arraySize(size), numHashFunctions(numHashes) {
     // Initialize hash functions
     for (int i = 0; i < numHashes; ++i) {
-        m_hashFunctions.push_back(std::make_shared<repeatedHash>(i + 1, size));
+        m_hashFunctions.push_back([hash = repeatedHash(i + 1, size)](const string& input) {
+            return hash(input);
+        });
     }
 }
 
 
 // Add implementation
-void bloomFilter::add(const std::string& url) {
+void bloomFilter::add(const string& url) {
     for (const auto& func : m_hashFunctions) {
-        size_t index = (*func)(url) % m_arraySize;
+        size_t index = func(url) % m_arraySize;
         m_bitArray[index] = true;
     }
-    /* NEED TO SAVE REAL URL IN THE BLACKLIST FILE HERE!!!*/
+    m_blackList.insert(url); // Store the real URL in the blacklist
 }
 
-bool bloomFilter::contains(const std::string& url) const {
+bool bloomFilter::contains(const string& url) const {
     for (const auto& func :m_hashFunctions) {
-        size_t index = (*func)(url) % m_arraySize;
+        size_t index = func(url) % m_arraySize;
         if (!m_bitArray[index])
             return false;
     }
@@ -90,14 +85,10 @@ void bloomFilter::loadFromFile(const string& filename) {
     inFile.close();
 }
 
-
-
-/*bool checkFalsePositive(const bloomFilter& bf, const std::string& url) {
-    if(bf.contains(url)) {
-        // check if url is in the real blcklisst file:
-        while 
-        
-        return true; // False positive
-    }
-}*/
+bool bloomFilter::isFalsePositive(const string& url) const {
+    return contains(url) && m_blackList.find(url) == m_blackList.end();
+}
+bool bloomFilter::checkFalsePositive(const bloomFilter& bf, const string& url) {
+    return bf.isFalsePositive(url);
+}
 

@@ -1,23 +1,26 @@
 #include <vector>
 #include <string>
 #include "hashable.h" 
-#include <memory>
+#include <functional> // For std::hash
+#include <unordered_set>
 
 class bloomFilter {
 private:
     std::vector<bool> m_bitArray;
     size_t m_arraySize;
     int numHashFunctions;
-    std::vector<std::shared_ptr<hashable>> m_hashFunctions;
+    std::vector<std::function<size_t(const std::string&)>> m_hashFunctions;
+    std::unordered_set<std::string> m_blackList; // To store the real URLs
     
 
 public:
     bloomFilter(int size, int numHashes);
-    void add(const std::string& key);
-    bool contains(const std::string& key) const;
+    void add(const std::string& url);
+    bool contains(const std::string& url) const;
     void saveToFile(const std::string& filename) const;
     void loadFromFile(const std::string& filename);
     bool fileExists(const std::string& filename) const;
-    bloomFilter(size_t size, const std::vector<std::shared_ptr<hashable>>& hashFuncs);
-    bool checkFalsePositive(const bloomFilter& bf, const std::string& url)  const;
+    bloomFilter(size_t size, const std::vector<std::function<size_t(const std::string&)>>& hashFuncs);
+    bool isFalsePositive(const std::string& url) const;
+    bool checkFalsePositive(const bloomFilter& bl, const std::string& url);
 };
