@@ -1,11 +1,11 @@
-#include <vector>
-#include <string>
+#include "repetedHash.h"
 #include "bloomFilter.h"
+#include "repeatedHash.h"
 #include <functional> // For std::hash
 #include <fstream> // For std::ifstream
 #include <stdexcept> // For std::runtime_error
-#include "repeatedHash.h"
-
+#include <string>
+#include <vector>
 using namespace std;
 
 // Helper function to check if a file exists
@@ -13,11 +13,14 @@ bool bloomFilter::fileExists(const string& filename) const {
     ifstream file(filename);
     return file.good();
 }
+
 // Constructor implementation
 bloomFilter::bloomFilter(size_t size, const vector<function<size_t(const string&)>>& hashFuncs)
     : m_bitArray(size, false), m_hashFunctions(hashFuncs), m_arraySize(size) {}
+
+
 // Constructor with size and number of hash functions
-bloomFilter::bloomFilter(int size, int numHashes)
+bloomFilter::bloomFilter(size_t size, size_t numHashes)
     : m_bitArray(size, false), m_arraySize(size), numHashFunctions(numHashes) {
     // Initialize hash functions
     for (int i = 0; i < numHashes; ++i) {
@@ -37,6 +40,15 @@ void bloomFilter::add(const string& url) {
     m_blackList.insert(url); // Store the real URL in the blacklist
 }
 
+void bloomFilter::add(const string& url) {
+    for (const auto& func : m_hashFunctions) {
+        size_t index = func(url) % m_arraySize;
+        m_bitArray[index] = true;
+    }
+    m_blackList.insert(url); // Store the real URL in the blacklist
+}
+
+
 bool bloomFilter::contains(const string& url) const {
     for (const auto& func :m_hashFunctions) {
         size_t index = func(url) % m_arraySize;
@@ -45,6 +57,7 @@ bool bloomFilter::contains(const string& url) const {
     }
     return true;
 }
+
 //save the bloom filter to a file
 void bloomFilter::saveToFile(const string& filename) const {
     ofstream outFile(filename, ios::binary);

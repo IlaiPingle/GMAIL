@@ -14,7 +14,7 @@ private:
     
 
 public:
-    bloomFilter(int size, int numHashes);
+    bloomFilter(size_t size, size_t numHashes);
     void add(const std::string& url);
     bool contains(const std::string& url) const;
     void saveToFile(const std::string& filename) const;
