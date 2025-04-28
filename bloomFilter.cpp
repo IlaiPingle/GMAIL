@@ -57,6 +57,35 @@ void bloomFilter::saveToFile(const string& filename) const {
     }
     outFile.close();
 }
+
+void bloomFilter::saveBlackListToFile(const string& filename) const {
+    ofstream outFile(filename, ios::binary);
+    if (!outFile) {
+        throw runtime_error("Failed to open file for saving Bloom filter.");
+    }
+    for (const auto& url : m_blackList) {
+        outFile << url << '\n';
+    }
+    outFile.close();
+}
+
+void bloomFilter::loadBlackListFromFile(const string& filename) {
+    if (!fileExists(filename)) {
+        throw runtime_error("Blacklist file does not exist.");
+    }
+    ifstream inFile(filename);
+    if (!inFile) {
+        throw runtime_error("Failed to open file for loading Blacklist.");
+    }
+    m_blackList.clear(); // Clear existing blacklist
+    string url;
+    while (getline(inFile, url)) {
+        if (!url.empty()) {
+            m_blackList.insert(url); // Add URL to the blacklist
+        }
+    }
+    inFile.close();
+}
 //load the bloom filter from a file
 void bloomFilter::loadFromFile(const string& filename) {
     if (!fileExists(filename)) {
@@ -73,7 +102,7 @@ void bloomFilter::loadFromFile(const string& filename) {
     size_t fileSize = inFile.tellg();
     inFile.seekg(0, ios::beg);
 
-    if (fileSize != m_bitArray.size() * sizeof(bool)) {
+    if (fileSize != m_bitArray.size() * sizeof(char)) {
         throw runtime_error("File size does not match Bloom filter size.");
     }
 
