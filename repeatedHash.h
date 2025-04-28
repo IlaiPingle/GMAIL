@@ -9,11 +9,10 @@ class repeatedHash : public hashable {
     
     private:
     size_t m_repeats;
-    size_t m_arraySize;
     
     public:
     // Constructor
-    repeatedHash(size_t repeats, size_t arraySize); 
+    repeatedHash(size_t repeats); 
 
     // Destructor
     ~repeatedHash() override = default;
