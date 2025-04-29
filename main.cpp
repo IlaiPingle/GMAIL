@@ -4,55 +4,60 @@
 #include <iostream>
 #include <sstream>
 
-bool fileExistsAndNotEmpty(const std::string& path) {
-    std::ifstream in(path);
-    return in.peek() != std::ifstream::traits_type::eof();
+using namespace std;
+
+bool fileExistsAndNotEmpty(const string& path) {
+    ifstream in(path);
+    if (!in.is_open()){
+         return false; // File does not exist or cannot be opened
+    }
+    return in.peek() != ifstream::traits_type::eof();
 }
 
 int main() {
-    std::string filePath = "data/bloom.txt";
-    std::string configLine;
+    string filePath = "data/bloom.txt";
+    string configLine;
     bloomFilter filter(1, {});  // Dummy init
 
     if (fileExistsAndNotEmpty(filePath)) {
-        std::ifstream in(filePath);
-        std::getline(in, configLine);
+        ifstream in(filePath);
+        getline(in, configLine);
         auto [size, funcs] = HashFactory::createFromConfigLine(configLine);
         filter = bloomFilter(size, funcs);
 
-        std::string url;
-        while (std::getline(in, url)) {
+        string url;
+        while (getline(in, url)) {
             if (!url.empty()) filter.add(url);
         }
         in.close();
     } else {
-        std::getline(std::cin, configLine);
+        getline(cin, configLine);
         auto [size, funcs] = HashFactory::createFromConfigLine(configLine);
         filter = bloomFilter(size, funcs);
-        std::ofstream out(filePath);
+        ofstream out(filePath);
         out << configLine << '\n';
         out.close();
     }
 
-    std::string input;
-    while (std::getline(std::cin, input)) {
-        std::istringstream iss(input);
+    string input;
+    while (getline(cin, input)) {
+        istringstream iss(input);
         int cmd;
-        std::string url;
+        string url;
 
         if (!(iss >> cmd >> url)) continue;
 
         if (cmd == 1) {
             filter.add(url);
-            std::ofstream out(filePath, std::ios::app);
+            ofstream out(filePath, ios::app);
             out << url << '\n';
         } else if (cmd == 2) {
             bool possibly = filter.contains(url);
-            std::cout << (possibly ? "true " : "false ");
+            cout << (possibly ? "true " : "false ");
             if (possibly) {
-                std::cout << (filter.isTrulyBlacklisted(url) ? "true" : "false");
+                cout << (filter.checkFalsePositive(filter, url) ? "true" : "false");
             }
-            std::cout << '\n';
+            cout << '\n';
         }
     }
 

@@ -1,83 +1,140 @@
-// filepath: c:\Users\Matan-Laptop\Bar Ilan\GitHub\Ex1\.git\EX1\EX1\test_bloomFilter.cpp
-#include <cassert>
 #include <iostream>
-#include <memory>
 #include "bloomFilter.h"
-#include "repeatedHash.h"
+#include <random>
+#include <sstream>
+#include <direct.h>
 
-size_t arraySize = 100;
-int numHashes = 3;
-bloomFilter bf(arraySize, numHashes);
-
-void testCreateBlacklist() {
-    // Ensure the bloom filter is created with the correct size
-    assert(arraySize > 0 && "Array size should be greater than 0.");
-    std::cout << "testCreateBlacklist passed!" << std::endl;
-}
-
-void testAddUrlToBlacklist() {
-    std::string url = "example.com";
-    bf.add(url);
-
-    // Verify that the URL is added (Bloom filter cannot guarantee absence)
-    assert(bf.contains(url) && "URL should be in the blacklist.");
-    std::cout << "testAddUrlToBlacklist passed!" << std::endl;
-}
-
-void testCheckUrlInBlacklist() {
-    std::string url = "example.com";
-    std::string url2 = "test.com";
-    // Verify that the added URL is in the blacklist
-    assert(bf.contains(url) && "URL1 should be in the blacklist.");
-    // Verify that a non-added URL is not guaranteed to be in the blacklist
-    assert(!bf.contains(url2) && "URL2 should not be in the blacklist.");
-    std::cout << "testCheckUrlInBlacklist passed!" << std::endl;
-}
-void testFalsePositives() {
-    // Check a completely unrelated URL
-    std::string unrelatedUrl = "anotherexample1.com";
-    // Check if the unrelated URL is falsely reported as in the Bloom filter
-    bool isFalsePositive = bf.contains(unrelatedUrl);
-    if (bf.isFalsePositive(unrelatedUrl)) {
-        std::cout << "False positive detected for " << unrelatedUrl << std::endl;
-        std::cout << "testFalsePositives failed!" << std::endl;
-    } else {
-        std::cout << "No false positive for " << unrelatedUrl << std::endl;
-        std::cout << "testFalsePositives passed!" << std::endl;
+// Function to generate random URLs
+std::string generateRandomUrl() {
+    static const char alphanum[] =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+    
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> length_dist(5, 15);
+    std::uniform_int_distribution<> char_dist(0, sizeof(alphanum) - 2);
+    
+    int length = length_dist(gen);
+    std::stringstream ss;
+    ss << "http://";
+    
+    for (int i = 0; i < length; ++i) {
+        ss << alphanum[char_dist(gen)];
     }
-}
-void testMultipleHashFunctions() {
-    // Define multiple hash functions
-    auto hashFunc1 = [](const std::string& str) { return std::hash<std::string>{}(str); };
-    auto hashFunc2 = [](const std::string& str) { return std::hash<std::string>{}(str + "salt1"); };
-    auto hashFunc3 = [](const std::string& str) { return std::hash<std::string>{}(str + "salt2"); };
-
-    std::vector<std::function<size_t(const std::string&)>> hashFuncs = {hashFunc1, hashFunc2, hashFunc3};
-
-    // Create a Bloom filter with multiple hash functions
-    bloomFilter bf(100, hashFuncs);
-
-    // Add a URL
-    bf.add("example.com");
-
-    // Check if the URL is in the Bloom filter
-    assert(bf.contains("example.com") && "example.com should be in the Bloom filter");
-
-    // Check for a false positive
-    std::string unrelatedUrl = "notinthelist.com";
-    if (bf.isFalsePositive(unrelatedUrl)) {
-        std::cout << "False positive detected for " << unrelatedUrl << std::endl;
-    } else {
-        std::cout << "No false positive for " << unrelatedUrl << std::endl;
-    }
+    
+    ss << ".com";
+    return ss.str();
 }
 
 int main() {
-    testCreateBlacklist();
-    testAddUrlToBlacklist();
-    testCheckUrlInBlacklist();
-    testFalsePositives();
-    testMultipleHashFunctions();
-    std::cout << "All tests passed!" << std::endl;
-    return 0;
+    try {
+        if (_mkdir("data") != 0 && errno != EEXIST) {
+            std::cerr << "Error creating directory" << std::endl;
+            return 1;
+        }
+        /*std::filesystem::path dataDir = "data";
+        if (!std::filesystem::exists(dataDir)) {
+            std::filesystem::create_directory(dataDir);
+        }*/
+        // Create a bloom filter
+        bloomFilter filter(1000, 5);
+        
+        // Add some URLs to the blacklist
+        filter.add("http://malicious-site1.com");
+        filter.add("http://malicious-site2.com");
+        filter.add("http://malicious-site3.com");
+        
+        // Save both the filter and blacklist to files
+        std::cout << "Saving filter and blacklist..." << std::endl;
+        filter.saveToFile("data/bloom filter.dat");
+        filter.saveBlackListToFile("data/blacklist.txt");
+        
+        // Create a new filter
+        bloomFilter newFilter(1000, 5);
+        
+        // Load the saved data
+        std::cout << "Loading filter and blacklist..." << std::endl;
+        newFilter.loadFromFile("data/bloom filter.dat");
+        newFilter.loadBlackListFromFile("data/blacklist.txt");
+        
+        // Test if the loaded filter contains the same URLs
+        std::vector<std::string> testUrls = {
+            "http://malicious-site1.com",
+            "http://malicious-site2.com",
+            "http://malicious-site3.com",
+            "http://innocent-site.com"  // Should not be in the filter
+        };
+        
+        std::cout << "\nTesting loaded filter:" << std::endl;
+        for (const auto& url : testUrls) {
+            std::cout << "URL: " << url << std::endl;
+            std::cout << "  In filter: " << (newFilter.contains(url) ? "Yes" : "No") << std::endl;
+            std::cout << "  False positive: " << (newFilter.isFalsePositive(url) ? "Yes" : "No") << std::endl;
+        }
+
+        // NEW CODE: Test for false positives
+        std::cout << "\n\n=== Testing for False Positives ===" << std::endl;
+        
+        // Create a small Bloom filter to increase chance of false positives
+        bloomFilter smallFilter(50, 3);  // Small size, fewer hash functions
+        
+        // Add many URLs to increase bit density
+        std::cout << "Adding 30 URLs to small filter..." << std::endl;
+        std::vector<std::string> addedUrls;
+        for (int i = 0; i < 30; ++i) {
+            std::string url = "http://added-" + std::to_string(i) + ".com";
+            smallFilter.add(url);
+            addedUrls.push_back(url);
+        }
+        
+        // Test random URLs until we find a false positive
+        std::cout << "Searching for false positives..." << std::endl;
+        int testedCount = 0;
+        bool foundFalsePositive = false;
+        std::string falsePositiveUrl;
+        
+        while (!foundFalsePositive && testedCount < 1000) {
+            std::string testUrl = generateRandomUrl();
+            testedCount++;
+            
+            // Skip if this is a URL we actually added
+            bool wasAdded = false;
+            for (const auto& url : addedUrls) {
+                if (url == testUrl) {
+                    wasAdded = true;
+                    break;
+                }
+            }
+            
+            if (wasAdded) continue;
+            
+            // Check if it's a false positive
+            if (smallFilter.contains(testUrl) && smallFilter.isFalsePositive(testUrl)) {
+                foundFalsePositive = true;
+                falsePositiveUrl = testUrl;
+            }
+            
+            if (testedCount % 100 == 0) {
+                std::cout << "  Tested " << testedCount << " URLs so far..." << std::endl;
+            }
+        }
+        
+        if (foundFalsePositive) {
+            std::cout << "Found a false positive after testing " << testedCount << " URLs!" << std::endl;
+            std::cout << "False positive URL: " << falsePositiveUrl << std::endl;
+            std::cout << "Verification:" << std::endl;
+            std::cout << "  Contains() returns: " << (smallFilter.contains(falsePositiveUrl) ? "true" : "false") << std::endl;
+            std::cout << "  isFalsePositive() returns: " << (smallFilter.isFalsePositive(falsePositiveUrl) ? "true" : "false") << std::endl;
+        } else {
+            std::cout << "No false positives found after testing " << testedCount << " URLs." << std::endl;
+        }
+        
+        return 0;
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 1;
+    }
 }
