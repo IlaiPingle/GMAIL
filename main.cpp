@@ -5,11 +5,6 @@
 
 using namespace std;
 
-bool fileExistsAndNotEmpty(const string& path) {
-    ifstream in(path);
-    return in.peek() != ifstream::traits_type::eof();
-}
-
 int main() {
     string initialLine;
     unique_ptr<InputManager> manager = nullptr;
