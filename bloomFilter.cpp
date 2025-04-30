@@ -23,22 +23,15 @@ bloomFilter::bloomFilter(size_t size, size_t numHashes)
     : m_bitArray(size, false), m_arraySize(size), numHashFunctions(numHashes) {
     // Initialize hash functions
     for (int i = 0; i < numHashes; ++i) {
-        m_hashFunctions.push_back([hash = repeatedHash(i + 1, size)](const string& input) {
-            return hash(input);
+        repeatedHash hash(i + 1);
+        m_hashFunctions.push_back([hash, size](const string& input) {
+            return hash(input) % size;
         });
     }
 }
 
 
 // Add implementation
-void bloomFilter::add(const string& url) {
-    for (const auto& func : m_hashFunctions) {
-        size_t index = func(url) % m_arraySize;
-        m_bitArray[index] = true;
-    }
-    m_blackList.insert(url); // Store the real URL in the blacklist
-}
-
 void bloomFilter::add(const string& url) {
     for (const auto& func : m_hashFunctions) {
         size_t index = func(url) % m_arraySize;
@@ -59,7 +52,7 @@ bool bloomFilter::contains(const string& url) const {
 
 //save the bloom filter to a file
 void bloomFilter::saveToFile(const string& filename) const {
-    ofstream outFile(filename, ios::binary);
+    ofstream outFile(filename, ios::binary | ios::trunc); // Open in binary mode and truncate the file
     if (!outFile) {
        throw runtime_error("Failed to open file for saving Bloom filter.");
     }
@@ -131,5 +124,9 @@ bool bloomFilter::isFalsePositive(const string& url) const {
 }
 bool bloomFilter::checkFalsePositive(const bloomFilter& bf, const string& url) {
     return bf.isFalsePositive(url);
+}
+void bloomFilter::clear() {
+    std::fill(m_bitArray.begin(), m_bitArray.end(), false); // Clear the bit array
+    m_blackList.clear(); // Clear the blacklist
 }
 
