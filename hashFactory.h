@@ -4,12 +4,10 @@
 #include "hashable.h"
 #include <vector>
 #include <memory>
-#include <string>
-
+using namespace std;
 class HashFactory {
 public:
-    static std::pair<size_t, std::vector<std::shared_ptr<hashable>>>
-    createFromConfigLine(const std::string& line);
+    static vector < shared_ptr < hashable >> createHashFunctions ( const string& line ) ;
 };
 
 #endif 

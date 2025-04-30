@@ -1,18 +1,19 @@
 #include "hashFactory.h"
 #include "repeatedHash.h"
+#include "hashable.h"
 #include <sstream>
+using namespace std;
 
-std::pair<size_t, std::vector<std::shared_ptr<hashable>>>
-HashFactory::createFromConfigLine(const std::string& line) {
-    std::istringstream iss(line);
-    size_t arraySize = 0, numFunctions = 0;
-    iss >> arraySize >> numFunctions;
-
-    std::vector<std::shared_ptr<hashable>> hashFunctions;
+// function which creates the hash functions for now it creates only repeatedHash
+// it takes the string which contains the number of times to repeat the hash function and
+// returns a vector of hashable functions.
+vector < shared_ptr < hashable >> HashFactory :: createHashFunctions (const string& hashInfoStr) {
+    vector < shared_ptr< hashable > > hashFunctions; 
+    istringstream nextWord(hashInfoStr);
     size_t reps;
-    for (size_t i = 0; i < numFunctions && iss >> reps; ++i) {
-        hashFunctions.push_back(std::make_shared<repeatedHash>(reps, arraySize));
+    while (nextWord >> reps) {
+        shared_ptr<repeatedHash> hash = make_shared<repeatedHash>(reps);
+        hashFunctions.push_back(hash);
     }
-
-    return { arraySize, hashFunctions };
+    return hashFunctions;
 }
