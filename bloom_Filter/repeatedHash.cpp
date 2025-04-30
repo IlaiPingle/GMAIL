@@ -1,6 +1,6 @@
 
 #include "repeatedHash.h"
-#include <functional>
+
 // constructor
 repeatedHash::repeatedHash(size_t repeats)
     : m_repeats(repeats) {}

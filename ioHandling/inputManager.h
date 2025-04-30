@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include "../bloomFilter/bloom_filter.h"
-#include "../bloomFilter/hash_function.h"
-#include "../ioHandling/file_manager.h"
+#include "../bloom_Filter/bloomFilter.h"
+#include "../bloom_Filter/hashable.h"
+#include "../ioHandling/fileManager.h"
 using namespace std; 
 class inputManager {
     private:
@@ -23,3 +23,4 @@ class inputManager {
         string runAddToBlacklist(const string& url);
 
         string runCheckBlacklist(const std::string& url);
+}

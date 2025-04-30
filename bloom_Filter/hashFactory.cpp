@@ -1,6 +1,5 @@
 #include "hashFactory.h"
-#include "repeatedHash.h"
-#include "hashable.h"
+
 
 using namespace std;
 

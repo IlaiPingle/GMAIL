@@ -1,20 +1,7 @@
-#include "repeatedHash.h"
 #include "bloomFilter.h"
-#include "repeatedHash.h"
-#include "hashable.h"
-#include <functional> // For std::hash
-#include <fstream> // For std::ifstream
-#include <stdexcept> // For std::runtime_error
-#include <string>
-#include <vector>
-#include <memory>
+#include <algorithm>
 using namespace std;
 
-// Helper function to check if a file exists
-bool bloomFilter::fileExists(const string& filename) const {
-    ifstream file(filename);
-    return file.good();
-}
 
 // Constructor
 bloomFilter::bloomFilter(size_t size, const vector<shared_ptr<hashable>>& hashFunctions)

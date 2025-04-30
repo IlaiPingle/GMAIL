@@ -39,7 +39,7 @@ bool fileManager :: loadBloomFilter(const bloomFilter& filter) const {
     for (size_t i = 0; i < m_bitArray.size(); ++i) {
         char byte;
         inFile.read(&byte, sizeof(byte));
-        filter->m_bitArray[i] = (byte != 0); // Convert byte to bool
+        filter -> m_bitArray[i] = (byte != 0); // Convert byte to bool
     }
     inFile.close();
     return true;
