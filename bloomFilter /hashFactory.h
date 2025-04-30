@@ -7,7 +7,7 @@
 using namespace std;
 class HashFactory {
 public:
-    static vector < shared_ptr < hashable >> createHashFunctions ( const string& line ) ;
+ static vector < shared_ptr < hashable >> HashFactory :: createHashFunctions ( const vector <size_t> & hashInfo);
 };
 
 #endif 
