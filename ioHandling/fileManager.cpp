@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <filesystem>
+
 using namespace std;
 
 fileManager::fileManager(const string& blackListFilePath, const string& bitArrayFilePath)
@@ -79,6 +80,8 @@ bool fileManager::loadBlackList(unordered_set<string>& blackList) const {
 bool fileManager::fileExistsAndNotEmpty(const string& filename) const {
     return filesystem::exists(filename) && filesystem::file_size(filename) > 0;
 }
+
+fileManager::~fileManager() {}
 
 
 

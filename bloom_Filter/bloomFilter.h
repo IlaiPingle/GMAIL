@@ -1,3 +1,5 @@
+#ifndef BLOOMFILTER_H
+#define BLOOMFILTER_H
 #include <vector>
 #include <string>
 #include <functional>  // For std::hash
@@ -13,6 +15,7 @@ private:
     unordered_set < string > m_blackList;                   // To store the real URLs
 
 public:
+    bloomFilter();
     bloomFilter(size_t size, const vector<shared_ptr<hashable>>& hashFunctions);
     bloomFilter(const bloomFilter& other) = default; // Copy constructor
     void add(const std::string& url);
@@ -26,3 +29,4 @@ public:
     
     ~bloomFilter();
 };
+#endif // BLOOMFILTER_H

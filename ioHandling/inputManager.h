@@ -17,7 +17,11 @@ class inputManager {
         string runCheckBlacklist(const std::string& url);
         void tryLoadFile();
 
+        string standardizeURL(const string& url);
+        
     public:
+        inputManager();
+        inputManager(const inputManager&) = default; // Copy constructor
         inputManager(unique_ptr<bloomFilter> bloomFilter,unique_ptr<fileManager> fileManager);
         string convertLine(const string& line);
         static unique_ptr<inputManager> initFirstLine(const string& Line);

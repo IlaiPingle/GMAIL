@@ -11,8 +11,10 @@ class repeatedHash : public hashable {
     size_t m_repeats;
     
     public:
-    // Constructor
-    repeatedHash(size_t repeats); 
+    // Constructors
+    repeatedHash();
+    repeatedHash(size_t repeats);
+    repeatedHash(const repeatedHash& other) = default; // Copy constructor 
 
     // Destructor
     ~repeatedHash() override = default;
