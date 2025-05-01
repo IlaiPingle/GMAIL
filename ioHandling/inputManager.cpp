@@ -5,12 +5,12 @@
 #include <sstream>
 #include <algorithm>
 
-inputManager::inputManager(unique_ptr<bloomFilter> bloomFilter, unique_ptr<fileManager> fileManager)
+inputManager::inputManager(unique_ptr<bloomFilter> bloomFilter,unique_ptr<fileManager> fileManager)
     : m_bloomFilter(move(bloomFilter)), m_fileManager(move(fileManager)) {
-        if ( this->m_fileManager->fileExistsAndNotEmpty("data/blackList.txt") && this->m_fileManager->fileExistsAndNotEmpty("data/bitArray.txt")) {
-            this->m_fileManager->loadBloomFilter(*this->m_bloomFilter);
-        }
-    };
+        tryLoadFile();
+    }
+
+
 
 void inputManager::tryLoadFile() {
     // טוען את ה-bit array אם הקובץ קיים
@@ -86,6 +86,6 @@ unique_ptr <inputManager> inputManager::initFirstLine(const string& line) {
     unique_ptr<fileManager> manager = make_unique<fileManager>("data/blackList.txt", "data/bitArray.txt");
 
     return make_unique<inputManager>(move(filter), move(manager));
-}
+}.
     
 
