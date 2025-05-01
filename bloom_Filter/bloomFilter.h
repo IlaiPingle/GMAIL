@@ -18,8 +18,11 @@ public:
     void add(const std::string& url);
     bool contains(const std::string& url) const;
     bool containsAbsolutely(const std::string& url) const;
-    const unordered_set < string >& bloomFilter::getBlackList() const;
-    bool fileExists(const std::string& filename) const;
+    const unordered_set < string >& getBlackList() const;
     void setBlackList(const unordered_set <string>& blackList);
+    const vector<bool>& getBitArray() const;
+    void setBitArray(const vector<bool>& bitArray);
+    bool fileExists(const std::string& filename) const;
+    
     ~bloomFilter();
 };

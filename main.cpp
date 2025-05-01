@@ -7,16 +7,15 @@ using namespace std;
 
 int main() {
     string initialLine;
-    unique_ptr<InputManager> manager = nullptr;
+    unique_ptr <inputManager> manager = nullptr;
 
     while (getline(cin, initialLine)) {
-        manager = InputManager::initFirstLine(initialLine);
+        manager = inputManager::initFirstLine(initialLine);
         if (manager){
             break;
         }
     }
     if (!manager){
-        cout << "Error: Invalid input format." << endl;
         return 1;
     }
     string line;

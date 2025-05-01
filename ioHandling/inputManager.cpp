@@ -6,11 +6,27 @@
 #include <algorithm>
 
 inputManager::inputManager(unique_ptr<bloomFilter> bloomFilter, unique_ptr<fileManager> fileManager)
-    : m_bloomFilter(std::move(bloomFilter)), m_fileManager(std::move(fileManager)) {
-        if ( this->m_fileManager->fileExistsAndNotEmpty("data/bloom.txt") && this->m_fileManager->fileExistsAndNotEmpty("data/bitArray.txt")) {
+    : m_bloomFilter(move(bloomFilter)), m_fileManager(move(fileManager)) {
+        if ( this->m_fileManager->fileExistsAndNotEmpty("data/blackList.txt") && this->m_fileManager->fileExistsAndNotEmpty("data/bitArray.txt")) {
             this->m_fileManager->loadBloomFilter(*this->m_bloomFilter);
         }
     };
+
+void inputManager::tryLoadFile() {
+    // טוען את ה-bit array אם הקובץ קיים
+    vector<bool> bits = m_bloomFilter->getBitArray();
+    if (m_fileManager->fileExistsAndNotEmpty("data/bit_array.dat")) {
+        m_fileManager->loadBitArray(bits);
+        m_bloomFilter->setBitArray(bits);
+    }
+
+    // טוען את ה-blacklist אם הקובץ קיים
+    unordered_set<string> bl;
+    if (m_fileManager->fileExistsAndNotEmpty("data/blacklist.txt")) {
+        m_fileManager->loadBlackList(bl);
+        m_bloomFilter->setBlackList(bl);
+    }
+}    
 
 string inputManager:: convertLine(const string& line) {
     istringstream iss(line);
@@ -32,10 +48,10 @@ string inputManager:: convertLine(const string& line) {
     }
 }
 
-
 string inputManager::runAddToBlacklist(const string& url) {
     m_bloomFilter->add(url);
-    m_fileManager->saveBloomFilter(*m_bloomFilter);
+    m_fileManager->saveBitArray(m_bloomFilter->getBitArray());
+    m_fileManager->saveBlackList(m_bloomFilter->getBlackList());
     return "";
 }
 
@@ -44,33 +60,32 @@ string inputManager::runCheckBlacklist(const string& url) {
         return "False";
     }
     else if (m_bloomFilter->containsAbsolutely(url)) {
-        return "True true";
-
+        return "True True";
     }else {
-        return "True false";
+        return "True False";
     }
 }
 
 
-unique_ptr <inputManager> inputManager::initfirstLine(const string& line) {
+unique_ptr <inputManager> inputManager::initFirstLine(const string& line) {
     stringstream iss(line);
     size_t bitArraySize;
     if (!(iss >> bitArraySize)) {
         return nullptr; // Invalid size
     }
     vector <size_t> hashInfos;
-    size_t hashfuncinfo;
-    while (iss >> hashfuncinfo) {
-        hashInfos.push_back(hashfuncinfo);
+    size_t hashId;
+    while (iss >> hashId) {
+        hashInfos.push_back(hashId);
     }
     if (hashInfos.empty()) {
         return nullptr; // Invalid hash function info
     }
     vector<shared_ptr<hashable>> hashFunctions = hashFactory::createHashFunctions(hashInfos);
-    unique_ptr<bloomFilter> bloomFilter = make_unique<bloomFilter>(bitArraySize, hashFunctions);
-    unique_ptr<fileManager> fileManager = make_unique<fileManager>("data/bloom.txt", "data/bitArray.txt");
+    unique_ptr<bloomFilter> filter = make_unique<bloomFilter>(bitArraySize, hashFunctions);
+    unique_ptr<fileManager> manager = make_unique<fileManager>("data/blackList.txt", "data/bitArray.txt");
 
-    return make_unique<inputManager>(move(bloomFilter), move(fileManager));
+    return make_unique<inputManager>(move(filter), move(manager));
 }
     
 
