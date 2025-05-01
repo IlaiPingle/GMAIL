@@ -1,5 +1,6 @@
 #include "bloomFilter.h"
 #include <algorithm>
+#include <filesystem>
 using namespace std;
 
 
@@ -40,3 +41,9 @@ const unordered_set < string >& bloomFilter::getBlackList() const {
 void bloomFilter::setBlackList(const unordered_set <string>& blackList) {
     m_blackList = blackList;
 }
+
+bool bloomFilter::fileExists(const string& filename) const {
+    return filesystem::exists(filename);
+}
+// Destructor
+bloomFilter::~bloomFilter() {}

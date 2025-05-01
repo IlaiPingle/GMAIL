@@ -5,9 +5,9 @@
 #include <vector>
 #include <memory>
 using namespace std;
-class HashFactory {
+class hashFactory {
 public:
- static vector < shared_ptr < hashable >> HashFactory :: createHashFunctions ( const vector <size_t> & hashInfo);
+ static vector < shared_ptr < hashable >> hashFactory :: createHashFunctions ( const vector <size_t> & hashInfo);
 };
 
 #endif 

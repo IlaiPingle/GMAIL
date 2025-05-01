@@ -14,10 +14,12 @@ private:
 
 public:
     bloomFilter(size_t size, const vector<shared_ptr<hashable>>& hashFunctions);
+    bloomFilter(const bloomFilter& other) = default; // Copy constructor
     void add(const std::string& url);
     bool contains(const std::string& url) const;
     bool containsAbsolutely(const std::string& url) const;
     const unordered_set < string >& bloomFilter::getBlackList() const;
     bool fileExists(const std::string& filename) const;
     void setBlackList(const unordered_set <string>& blackList);
+    ~bloomFilter();
 };

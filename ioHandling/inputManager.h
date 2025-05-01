@@ -10,17 +10,15 @@
 using namespace std; 
 class inputManager {
     private:
-        unique_ptr<BloomFilter> bloomFilter;
-        unique_ptr<FileManager> fileManager;
-
+        unique_ptr<bloomFilter> m_bloomFilter;
+        unique_ptr<fileManager> m_fileManager;
+        string runAddToBlacklist(const string& url);
+        string runCheckBlacklist(const std::string& url);
         
     public:
-        inputManager(unique_ptr<BloomFilter> bloomFilter,unique_ptr<FileManager> fileManager);
-        convertLine(const string& line);
+        inputManager(unique_ptr<bloomFilter> bloomFilter,unique_ptr<fileManager> fileManager);
+        string convertLine(const string& line);
         static unique_ptr<inputManager> initfirstLine(const string& Line);
-
-    private:
-        string runAddToBlacklist(const string& url);
-
-        string runCheckBlacklist(const std::string& url);
-}
+        ~inputManager();     
+};
+#endif // INPUTMANAGER_H
