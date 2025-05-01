@@ -12,13 +12,16 @@ class inputManager {
     private:
         unique_ptr<bloomFilter> m_bloomFilter;
         unique_ptr<fileManager> m_fileManager;
-        string runAddToBlacklist(const string& url);
-        string runCheckBlacklist(const std::string& url);
+        string standardizeURL(const string& url);
         
     public:
+        inputManager();
+        inputManager(const inputManager&) = default; // Copy constructor
         inputManager(unique_ptr<bloomFilter> bloomFilter,unique_ptr<fileManager> fileManager);
         string convertLine(const string& line);
-        static unique_ptr<inputManager> initfirstLine(const string& Line);
+        static unique_ptr<inputManager> initFirstLine(const string& Line);
+        string runAddToBlacklist(const string& url);
+        string runCheckBlacklist(const std::string& url);
         ~inputManager();     
 };
 #endif // INPUTMANAGER_H

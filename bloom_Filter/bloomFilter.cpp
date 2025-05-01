@@ -3,7 +3,8 @@
 #include <filesystem>
 using namespace std;
 
-
+// Default constructor
+bloomFilter::bloomFilter() : m_arraySize(0) {}
 // Constructor
 bloomFilter::bloomFilter(size_t size, const vector<shared_ptr<hashable>>& hashFunctions)
 : m_bitArray(size, false), m_arraySize(size), m_hashFunctions(hashFunctions) {}
@@ -20,6 +21,9 @@ void bloomFilter::add(const string& url) {
 
 
 bool bloomFilter::contains(const string& url) const {
+    if (m_hashFunctions.empty()) {
+        return false; // No hash functions, cannot check for existence
+    }
     for (const auto& func : m_hashFunctions) {
         size_t index = (*func)(url) % m_arraySize;
         if (!m_bitArray[index]){

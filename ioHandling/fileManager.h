@@ -12,15 +12,19 @@ class fileManager {
         string m_bitArrayFilePath;
 
     public:
+        fileManager();
+
         fileManager(const string& filterFilePath, const string& bitArrayFilePath);
+
+        fileManager(const fileManager&) = default; // Copy constructor
 
         bool saveBloomFilter(const bloomFilter& filter) const;
 
-        bool loadBloomFilter(bloomFilter& filter, string m_filterFilePath) const;
+        bool loadBloomFilter(bloomFilter& filter) const;
 
         bool saveBitArray(const vector<bool>& bitArray) const;
 
-        bool loadBitArray(vector<bool>& bitArray, string m_bitArrayFilePath) const;
+        bool loadBitArray(vector<bool>& bitArray, const string& filepath) const;
 
         bool fileExistsAndNotEmpty(const string& filename) const;
 
