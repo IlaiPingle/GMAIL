@@ -10,8 +10,11 @@ include_directories(${CMAKE_SOURCE_DIR})
 
 # Add source files for the library
 add_library(bloom_filter
-    bloomFilter.cpp
-    repeatedHash.cpp
+    ${CMAKE_SOURCE_DIR}/bloom_Filter/bloomFilter.cpp
+    ${CMAKE_SOURCE_DIR}/bloom_Filter/repeatedHash.cpp
+    ${CMAKE_SOURCE_DIR}/bloom_Filter/hashFactory.cpp
+    ${CMAKE_SOURCE_DIR}/ioHandling/inputManager.cpp
+    ${CMAKE_SOURCE_DIR}/ioHandling/fileManager.cpp
 )
 
 # Find Google Test
@@ -25,7 +28,7 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 # Add test executable
-add_executable(runTests bloom_filter_test.cpp)
+add_executable(runTests ${CMAKE_SOURCE_DIR}/Tests/test_inputManager.cpp)
 target_link_libraries(runTests gtest_main bloom_filter)
 
 # Add Google Test
