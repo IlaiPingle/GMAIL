@@ -8,24 +8,25 @@ using namespace std;
 
 class fileManager {
     private:
-        string m_filterFilePath;
+        string m_blackListFilePath;
         string m_bitArrayFilePath;
 
     public:
-        fileManager();
+        // Constructor
+        fileManager(const string& blackListFilePath, const string& bitArrayFilePath);
 
-        fileManager(const string& filterFilePath, const string& bitArrayFilePath);
-
-        fileManager(const fileManager&) = default; // Copy constructor
-
+        // save and load
         bool saveBloomFilter(const bloomFilter& filter) const;
-
         bool loadBloomFilter(bloomFilter& filter) const;
+        
+        bool saveBlackList(const unordered_set<string>& blackList) const;
+        bool loadBlackList(unordered_set<string>& blackList) const;
 
+        // save and load bit array
         bool saveBitArray(const vector<bool>& bitArray) const;
+        bool loadBitArray(vector<bool>& bitArray) const;
 
-        bool loadBitArray(vector<bool>& bitArray, const string& filepath) const;
-
+        // file utility function
         bool fileExistsAndNotEmpty(const string& filename) const;
 
         ~fileManager();

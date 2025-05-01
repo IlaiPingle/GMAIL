@@ -45,6 +45,13 @@ const unordered_set < string >& bloomFilter::getBlackList() const {
 void bloomFilter::setBlackList(const unordered_set <string>& blackList) {
     m_blackList = blackList;
 }
+const vector<bool>& bloomFilter::getBitArray() const {
+    return m_bitArray;
+}
+
+void bloomFilter::setBitArray(const vector<bool>& bitArray) {
+    m_bitArray = bitArray;
+}
 
 bool bloomFilter::fileExists(const string& filename) const {
     return filesystem::exists(filename);

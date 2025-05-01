@@ -57,13 +57,20 @@
         "xtr1common": "cpp",
         "xutility": "cpp",
         "unordered_set": "cpp",
+        "array": "cpp",
+        "*.tcc": "cpp",
+        "codecvt": "cpp",
+        "cstdarg": "cpp",
+        "cwctype": "cpp",
+        "deque": "cpp",
         "algorithm": "cpp",
-        "chrono": "cpp",
-        "filesystem": "cpp",
-        "forward_list": "cpp",
-        "iomanip": "cpp",
+        "memory_resource": "cpp",
+        "numeric": "cpp",
         "optional": "cpp",
         "random": "cpp",
-        "ratio": "cpp"
+        "ratio": "cpp",
+        "string_view": "cpp",
+        "iomanip": "cpp",
+        "numbers": "cpp"
     }
 }
