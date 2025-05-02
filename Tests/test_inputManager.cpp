@@ -1,8 +1,8 @@
 #include "gtest/gtest.h"
-#include "../ioHandling/inputManager.h"
-#include "../bloom_Filter/bloomFilter.h"
-#include "../ioHandling/fileManager.h"
-#include "../bloom_Filter/hashFactory.h"
+#include "../src/ioHandling/inputManager.h"
+#include "../src/bloom_Filter/bloomFilter.h"
+#include "../src/ioHandling/fileManager.h"
+#include "../src/bloom_Filter/hashFactory.h"
 #include <memory>
 #include <string>
 #include <vector>
@@ -24,7 +24,7 @@ protected:
 };
 
 TEST_F(InputManagerTest, ConvertLine_AddToBlacklist_ValidURL) {
-    string result = manager->convertLine("1 example.com");
+    string result = manager->convertLine("1 www.example.com");
     EXPECT_EQ(result, "");
 }
 
@@ -34,14 +34,14 @@ TEST_F(InputManagerTest, ConvertLine_AddToBlacklist_MissingURL) {
 }
 
 TEST_F(InputManagerTest, ConvertLine_CheckBlacklist_ValidURL) {
-    manager->convertLine("1 example.com"); // Add to blacklist first
-    string result = manager->convertLine("2 example.com");
-    EXPECT_EQ(result, "True True");
+    manager->convertLine("1 www.example.com"); // Add to blacklist first
+    string result = manager->convertLine("2 www.example.com");
+    EXPECT_EQ(result, "true true");
 }
 
 TEST_F(InputManagerTest, ConvertLine_CheckBlacklist_NotInBlacklist) {
     string result = manager->convertLine("2 notblacklisted.com");
-    EXPECT_EQ(result, "False");
+    EXPECT_EQ(result, "false");
 }
 
 TEST_F(InputManagerTest, ConvertLine_InvalidCommand) {
@@ -54,27 +54,27 @@ TEST_F(InputManagerTest, ConvertLine_EmptyCommand) {
     EXPECT_EQ(result, "");
 }
 
-// REPLACED: Avoid calling private standardizeURL method
+
 TEST_F(InputManagerTest, URL_Standardization_ThroughPublicAPI) {
     // Test URL standardization indirectly through convertLine
-    manager->convertLine("1   EXAMPLE.com  "); // Should standardize URL internally
-    string result = manager->convertLine("2 example.com"); // Lowercase and trimmed version
-    EXPECT_EQ(result, "True True");
+    manager->convertLine("1   www.EXAMPLE.com  "); // Should standardize URL internally
+    string result = manager->convertLine("2 www.example.com"); // Lowercase and trimmed version
+    EXPECT_EQ(result, "true true");
 }
 
-// REPLACED: Avoid calling private runAddToBlacklist method
+
 TEST_F(InputManagerTest, AddToBlacklist_ThroughPublicAPI) {
     // Use public convertLine method instead
-    string result = manager->convertLine("1 example.com");
+    string result = manager->convertLine("1 www.example.com");
     EXPECT_EQ(result, "");
     // Verify it was added by checking it
-    EXPECT_TRUE(manager->convertLine("2 example.com").find("True") != string::npos);
+    EXPECT_TRUE(manager->convertLine("2 www.example.com").find("true") != string::npos);
 }
 
 // REPLACED: Avoid calling private runCheckBlacklist method
 TEST_F(InputManagerTest, CheckBlacklist_EmptyURL_ThroughPublicAPI) {
     string result = manager->convertLine("2 ");
-    EXPECT_EQ(result, "False");
+    EXPECT_EQ(result, "false");
 }
 
 TEST_F(InputManagerTest, InitFirstLine_ValidInput) {
@@ -97,21 +97,21 @@ TEST_F(InputManagerTest, InitFirstLine_InvalidHashFunctions) {
 
 // Additional edge cases using public API
 TEST_F(InputManagerTest, ConvertLine_TrimAndNormalization) {
-    manager->convertLine("1 EXAMPLE.COM");
-    string result = manager->convertLine("2 example.com");
-    EXPECT_EQ(result, "True True"); // Case-insensitive matching
+    manager->convertLine("1 www.EXAMPLE.COM");
+    string result = manager->convertLine("2 www.example.com");
+    EXPECT_EQ(result, "true true"); // Case-insensitive matching
     
-    manager->convertLine("1   trailing.spaces   ");
-    result = manager->convertLine("2 trailing.spaces");
-    EXPECT_EQ(result, "True True"); // Whitespace trimming
+    manager->convertLine("1    www.trailing.spaces   ");
+    result = manager->convertLine("2 www.trailing.spaces");
+    EXPECT_EQ(result, "true true"); // Whitespace trimming
 }
 
 TEST_F(InputManagerTest, ConvertLine_SpecialCharacters) {
     // Test with special characters in URL
-    string specialURL = "special-chars_123.example.com";
+    string specialURL = "www.special-chars_123.example.com";
     manager->convertLine("1 " + specialURL);
     string result = manager->convertLine("2 " + specialURL);
-    EXPECT_EQ(result, "True True");
+    EXPECT_EQ(result, "true true");
 }
 
 TEST_F(InputManagerTest, ConvertLine_EmptyURL) {
@@ -120,7 +120,7 @@ TEST_F(InputManagerTest, ConvertLine_EmptyURL) {
     EXPECT_EQ(result, ""); // No error message expected
     
     result = manager->convertLine("2 ");
-    EXPECT_EQ(result, "False"); // Not in blacklist
+    EXPECT_EQ(result, "false"); // Not in blacklist
 }
 
 TEST_F(InputManagerTest, ConvertLine_MalformedCommand) {

@@ -10,11 +10,11 @@ include_directories(${CMAKE_SOURCE_DIR})
 
 # Add source files for the library
 add_library(bloom_filter
-    ${CMAKE_SOURCE_DIR}/bloom_Filter/bloomFilter.cpp
-    ${CMAKE_SOURCE_DIR}/bloom_Filter/repeatedHash.cpp
-    ${CMAKE_SOURCE_DIR}/bloom_Filter/hashFactory.cpp
-    ${CMAKE_SOURCE_DIR}/ioHandling/inputManager.cpp
-    ${CMAKE_SOURCE_DIR}/ioHandling/fileManager.cpp
+    ${CMAKE_SOURCE_DIR}/src/bloom_Filter/bloomFilter.cpp
+    ${CMAKE_SOURCE_DIR}/src/bloom_Filter/repeatedHash.cpp
+    ${CMAKE_SOURCE_DIR}/src/bloom_Filter/hashFactory.cpp
+    ${CMAKE_SOURCE_DIR}/src/ioHandling/inputManager.cpp
+    ${CMAKE_SOURCE_DIR}/src/ioHandling/fileManager.cpp
 )
 
 # Find Google Test

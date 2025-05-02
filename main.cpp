@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <memory>
-#include "ioHandling/inputManager.h"
+#include "src/ioHandling/inputManager.h"
 
 using namespace std;
 

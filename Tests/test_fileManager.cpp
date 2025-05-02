@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "../bloom_Filter/bloomFilter.h"
+#include "../src/bloom_Filter/bloomFilter.h"
 #include <memory>
 #include <functional>
 

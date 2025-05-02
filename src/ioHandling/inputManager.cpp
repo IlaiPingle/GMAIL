@@ -84,11 +84,23 @@ string inputManager::standardizeURL(const string& url) {
     transform(standardUrl.begin(), standardUrl.end(), standardUrl.begin(),
      [](unsigned char c) {return tolower(c);});
     
+    if (standardUrl.find("https://") == 0) {
+        standardUrl = standardUrl.substr(8);  // Remove "https://"
+    } else if (standardUrl.find("http://") == 0) {
+        standardUrl = standardUrl.substr(7);  // Remove "http://"
+    }
+    if (standardUrl.find("www.") != 0) {
+        return ""; // Invalid URL format (not starting with "www.")
+    }
+    
     return standardUrl;
 }
 
 string inputManager::runAddToBlacklist(const string& url) {
     string standardURL = standardizeURL(url);
+    if (standardURL.empty()) {
+        return ""; // Invalid URL format
+    }
     m_bloomFilter->add(standardURL);
     m_fileManager->saveBitArray(m_bloomFilter->getBitArray());
     m_fileManager->saveBlackList(m_bloomFilter->getBlackList());
@@ -100,6 +112,9 @@ string inputManager::runCheckBlacklist(const string& url) {
         return "false"; // Empty URL check
     }
     string standardURL = standardizeURL(url);
+    if (standardURL.empty()) {
+        return "false"; // Invalid URL format
+    }
     if (!m_bloomFilter->contains(standardURL)) {
         return "false";
     }
