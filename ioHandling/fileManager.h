@@ -16,8 +16,8 @@ class fileManager {
         fileManager(const string& blackListFilePath, const string& bitArrayFilePath);
 
         // save and load
-        bool saveBloomFilter(const bloomFilter& filter) const;
-        bool loadBloomFilter(bloomFilter& filter) const;
+        //bool saveBloomFilter(const bloomFilter& filter) const;
+        //bool loadBloomFilter(bloomFilter& filter) const;
         
         bool saveBlackList(const unordered_set<string>& blackList) const;
         bool loadBlackList(unordered_set<string>& blackList) const;
@@ -29,6 +29,6 @@ class fileManager {
         // file utility function
         bool fileExistsAndNotEmpty(const string& filename) const;
 
-        ~fileManager();
+        ~fileManager(); // Destructor
 };
 #endif // FILE_MANAGER_H

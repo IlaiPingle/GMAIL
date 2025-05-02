@@ -28,8 +28,14 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 # Add test executable
-add_executable(runTests ${CMAKE_SOURCE_DIR}/Tests/test_inputManager.cpp)
+add_executable(runTests 
+${CMAKE_SOURCE_DIR}/Tests/test_fileManager.cpp
+${CMAKE_SOURCE_DIR}/Tests/test_inputManager.cpp
+${CMAKE_SOURCE_DIR}/Tests/test_main.cpp)
 target_link_libraries(runTests gtest_main bloom_filter)
+
+add_executable(bloom_filter_app ${CMAKE_SOURCE_DIR}/main.cpp)
+target_link_libraries(bloom_filter_app bloom_filter)
 
 # Add Google Test
 include(GoogleTest)

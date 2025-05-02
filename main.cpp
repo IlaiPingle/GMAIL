@@ -19,7 +19,7 @@ int main() {
         return 1;
     }
     string line;
-    while (getline(std::cin, line)) {
+    while (getline(cin, line)) {
         string result = manager->convertLine(line);
         if (!result.empty()) {
             cout << result << endl;

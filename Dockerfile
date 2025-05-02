@@ -5,4 +5,4 @@ WORKDIR /usr/src
 RUN mkdir build
 WORKDIR /usr/src/build
 RUN cmake .. && make
-CMD ["./runTests"]
+CMD ["./bloom_filter_app"]

@@ -4,14 +4,15 @@
 #include "../bloom_Filter/hashFactory.h"
 #include <sstream>
 #include <algorithm>
-#include <iostream>
 #include <string>
+
+inputManager::inputManager() : m_bloomFilter(nullptr), m_fileManager(nullptr) {}
 
 inputManager::inputManager(unique_ptr<bloomFilter> bloomFilter,unique_ptr<fileManager> fileManager)
     : m_bloomFilter(move(bloomFilter)), m_fileManager(move(fileManager)) {
         tryLoadFile();
     }
-
+inputManager::~inputManager() {} 
 
 
 void inputManager::tryLoadFile() {
@@ -52,7 +53,7 @@ void inputManager::tryLoadFile() {
         
         // Check if there's at least a space after the command
         if (remaining[0] != ' ') {
-            return "Error: Missing URL";
+            return "Error: Invalid command";
         }
         
         // Extract URL and trim leading whitespace
@@ -87,7 +88,8 @@ string inputManager::standardizeURL(const string& url) {
 }
 
 string inputManager::runAddToBlacklist(const string& url) {
-    m_bloomFilter->add(url);
+    string standardURL = standardizeURL(url);
+    m_bloomFilter->add(standardURL);
     m_fileManager->saveBitArray(m_bloomFilter->getBitArray());
     m_fileManager->saveBlackList(m_bloomFilter->getBlackList());
     return "";
@@ -95,41 +97,45 @@ string inputManager::runAddToBlacklist(const string& url) {
 
 string inputManager::runCheckBlacklist(const string& url) {
     if (url.empty()) {
-        return "False"; // Empty URL check
+        return "false"; // Empty URL check
     }
     string standardURL = standardizeURL(url);
     if (!m_bloomFilter->contains(standardURL)) {
-        return "False";
+        return "false";
     }
-    else if (m_bloomFilter->containsAbsolutely(url)) {
-        return "True True";
+    else if (m_bloomFilter->containsAbsolutely(standardURL)) {
+        return "true true";
     }else {
-        return "True False";
+        return "true false";
     }
 }
 
 
 unique_ptr <inputManager> inputManager::initFirstLine(const string& line) {
-    stringstream iss(line);
+    istringstream iss(line);
     size_t bitArraySize;
+    vector <size_t> hashInfos;
     if (!(iss >> bitArraySize)) {
-        cerr << "Invalid bit array size" << endl;
         return nullptr; // Invalid size
     }
-    vector <size_t> hashInfos;
     size_t hashId;
     while (iss >> hashId) {
         hashInfos.push_back(hashId);
     }
     if (hashInfos.empty()) {
-        cerr << "Invalid hash function parameters provided" << endl;
         return nullptr; // Invalid hash function info
     }
-    vector<shared_ptr<hashable>> hashFunctions = hashFactory::createHashFunctions(hashInfos);
-    unique_ptr<bloomFilter> filter = make_unique<bloomFilter>(bitArraySize, hashFunctions);
-    unique_ptr<fileManager> manager = make_unique<fileManager>("data/blackList.txt", "data/bitArray.txt");
+    try{
+        auto hashFunctions = hashFactory::createHashFunctions(hashInfos);
+        auto filter = make_unique<bloomFilter>(bitArraySize, hashFunctions);
+        auto fileMgr = make_unique<fileManager>("data/blacklist.txt", "data/bit_array.dat");
+        return make_unique<inputManager>(move(filter), move(fileMgr));
+    }
+    catch (const std::exception& e) {
+        return nullptr; // Initialization failed
+    }
 
-    return make_unique<inputManager>(move(filter), move(manager));
-}.
+    
+}
     
 

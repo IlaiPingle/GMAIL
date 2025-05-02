@@ -81,7 +81,7 @@ bool fileManager::fileExistsAndNotEmpty(const string& filename) const {
     return filesystem::exists(filename) && filesystem::file_size(filename) > 0;
 }
 
-fileManager::~fileManager() {}
+
 
 
 
