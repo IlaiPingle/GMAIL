@@ -14,7 +14,10 @@ add_library(bloom_filter
     ${CMAKE_SOURCE_DIR}/src/bloom_Filter/repeatedHash.cpp
     ${CMAKE_SOURCE_DIR}/src/bloom_Filter/hashFactory.cpp
     ${CMAKE_SOURCE_DIR}/src/ioHandling/inputManager.cpp
-    ${CMAKE_SOURCE_DIR}/src/ioHandling/fileManager.cpp
+    ${CMAKE_SOURCE_DIR}/src/utils/URLValidator.cpp
+    ${CMAKE_SOURCE_DIR}/src/commands/CommandFactory.cpp
+    ${CMAKE_SOURCE_DIR}/src/services/BloomFilterService.cpp
+    ${CMAKE_SOURCE_DIR}/src/services/FileStorageService.cpp
 )
 
 # Find Google Test

@@ -52,9 +52,5 @@ const vector<bool>& bloomFilter::getBitArray() const {
 void bloomFilter::setBitArray(const vector<bool>& bitArray) {
     m_bitArray = bitArray;
 }
-
-bool bloomFilter::fileExists(const string& filename) const {
-    return filesystem::exists(filename);
-}
 // Destructor
 bloomFilter::~bloomFilter() {}

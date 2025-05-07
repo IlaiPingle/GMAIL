@@ -6,8 +6,9 @@
 #include <memory>  
 #include <unordered_set>
 #include "hashable.h"
+#include "../interfaces/IBloomFilter.h"
 using namespace std;
-class bloomFilter {
+class bloomFilter : public IBloomFilter {
 private:
     vector < bool > m_bitArray;
     size_t m_arraySize;
@@ -25,7 +26,6 @@ public:
     void setBlackList(const unordered_set <string>& blackList);
     const vector<bool>& getBitArray() const;
     void setBitArray(const vector<bool>& bitArray);
-    bool fileExists(const std::string& filename) const;
     
     ~bloomFilter();
 };
