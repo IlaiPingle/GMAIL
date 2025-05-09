@@ -1,6 +1,9 @@
 #include "BloomFilterService.h"
 using namespace std;
 
+BloomFilterService::BloomFilterService(std::shared_ptr<IBloomFilter> filter, std::shared_ptr<IStorageService> storage)
+    : m_bloomFilter(std::move(filter)), m_storageService(std::move(storage)) {}
+    
 bool BloomFilterService::initialize(){
     vector<bool> bits = m_bloomFilter->getBitArray();
     bool bitArrayLoaded = m_storageService->loadBitArray(bits);
@@ -25,16 +28,3 @@ bool BloomFilterService::containsAbsolutely(const std::string &url) {
     return m_bloomFilter->containsAbsolutely(url);
 }
 
-/*bool BloomFilterService::remove(const std::string &url) {
-    if (!m_storageService->isInBlacklist(url)) {
-        return false;
-    }
-    bool success = m_storageService->removeFromBlacklist(url);
-    if (success) {
-        // Reload blacklist to reflect changes
-        std::unordered_set<std::string> bl;
-        m_storageService->loadBlacklist(bl);
-        m_bloomFilter->setBlackList(bl);
-    }
-    return success;
-}*/

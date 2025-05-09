@@ -1,7 +1,7 @@
 #include "CommandFactory.h"
 #include "AddCommand.h"
 #include "CheckCommand.h"
-//#include "DeleteCommand.h"
+#include "DeleteCommand.h"
 using namespace std;
 
 CommandFactory::CommandFactory(shared_ptr<IFilterService> filterService, shared_ptr<IStorageService> storageService, 
@@ -14,7 +14,7 @@ CommandFactory::CommandFactory(shared_ptr<IFilterService> filterService, shared_
 void CommandFactory::registerDefaultCommands() {
     registerCommand("add", make_shared<AddCommand>(m_filterService, m_urlValidator));
     registerCommand("check", make_shared<CheckCommand>(m_filterService, m_urlValidator));
-    //registerCommand("delete", make_shared<DeleteCommand>(m_filterService, m_urlValidator));
+    registerCommand("delete", make_shared<DeleteCommand>(m_filterService, m_urlValidator));
 }
 
 void CommandFactory::registerCommand(const string &name, shared_ptr<ICommand> command) {

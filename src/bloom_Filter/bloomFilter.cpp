@@ -10,13 +10,20 @@ bloomFilter::bloomFilter(size_t size, const vector<shared_ptr<hashable>>& hashFu
 : m_bitArray(size, false), m_arraySize(size), m_hashFunctions(hashFunctions) {}
 
 
-void bloomFilter::add(const string& url) {
+bool bloomFilter::add(const string& url) {
     for (const auto& func : m_hashFunctions) {
         size_t index = (*func)(url) % m_arraySize;
         m_bitArray[index] = true;
     }
     m_blackList.insert(url); // Store the real URL in the blacklist
+    return true; // Return true to indicate that the URL was added
     
+}
+
+bool bloomFilter::remove(const string& url) {
+    // Check if the URL is in the blacklist
+    auto result = m_blackList.erase(url);
+    return result > 0; // Return true if the URL was removed, false otherwise
 }
 
 

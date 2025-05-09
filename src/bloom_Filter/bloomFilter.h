@@ -19,14 +19,14 @@ public:
     bloomFilter();
     bloomFilter(size_t size, const vector<shared_ptr<hashable>>& hashFunctions);
     bloomFilter(const bloomFilter& other) = default; // Copy constructor
-    void add(const std::string& url);
-    bool contains(const std::string& url) const;
+    bool add(const std::string& url) override;
+    bool contains(const std::string& url) const override;
     bool containsAbsolutely(const std::string& url) const;
     const unordered_set < string >& getBlackList() const;
     void setBlackList(const unordered_set <string>& blackList);
     const vector<bool>& getBitArray() const;
     void setBitArray(const vector<bool>& bitArray);
-    
+    bool remove(const std::string& url) override;
     ~bloomFilter();
 };
 #endif // BLOOMFILTER_H

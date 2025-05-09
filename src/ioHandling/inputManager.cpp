@@ -4,9 +4,9 @@
 #include "../bloom_Filter/hashFactory.h"
 #include <sstream>
 enum class Command {
-    Add = 1,
-    Check = 2,
-    Delete = 3
+    POST = 1,
+    GET = 2,
+    DELETE = 3
 };
 InputManager::InputManager() : m_commandProcessor(nullptr){}
 
@@ -18,11 +18,11 @@ string InputManager::processCommand(const string& line) {
     int command;
     
     if (line.empty()) {
-        return ""; // Invalid command format
+        return "400 Bad Request"; // Empty command
     }
         
     if (!(iss >> command)) {
-       return "Error: Invalid command"; // Invalid command
+       return "400 Bad Request"; // Invalid command
     }
 
     // Extract URL and trim leading whitespace
@@ -30,17 +30,17 @@ string InputManager::processCommand(const string& line) {
     getline(iss >> ws, url);
         
     switch (command){
-        case static_cast<int>(Command::Add): {
+        case static_cast<int>(Command::POST): {
             return m_commandProcessor->addToBlacklist(url);
         }
-        case static_cast<int>(Command::Check): {
+        case static_cast<int>(Command::GET): {
             return m_commandProcessor->checkBlacklist(url);
         }
-        /*case static_cast<int>(Command::Delete): {
+        case static_cast<int>(Command::DELETE): {
             return m_commandProcessor->deleteFromBlacklist(url);
-        }*/
+        }
         default:
-            return "Error: Unknown command"; // Unknown command
+            return "400 Bad Request"; // Invalid command
     }
 }
 

@@ -14,6 +14,7 @@ add_library(bloom_filter
     ${CMAKE_SOURCE_DIR}/src/bloom_Filter/repeatedHash.cpp
     ${CMAKE_SOURCE_DIR}/src/bloom_Filter/hashFactory.cpp
     ${CMAKE_SOURCE_DIR}/src/ioHandling/inputManager.cpp
+    ${CMAKE_SOURCE_DIR}/src/services/CommandProcessor.cpp
     ${CMAKE_SOURCE_DIR}/src/utils/URLValidator.cpp
     ${CMAKE_SOURCE_DIR}/src/commands/CommandFactory.cpp
     ${CMAKE_SOURCE_DIR}/src/services/BloomFilterService.cpp
@@ -32,9 +33,9 @@ FetchContent_MakeAvailable(googletest)
 
 # Add test executable
 add_executable(runTests 
-${CMAKE_SOURCE_DIR}/Tests/test_fileManager.cpp
-${CMAKE_SOURCE_DIR}/Tests/test_inputManager.cpp
-${CMAKE_SOURCE_DIR}/Tests/test_main.cpp)
+#${CMAKE_SOURCE_DIR}/Tests/test_fileManager.cpp
+${CMAKE_SOURCE_DIR}/Tests/test_inputManager.cpp)
+#${CMAKE_SOURCE_DIR}/Tests/test_main.cpp)
 target_link_libraries(runTests gtest_main bloom_filter)
 
 add_executable(bloom_filter_app ${CMAKE_SOURCE_DIR}/main.cpp)

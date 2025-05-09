@@ -34,10 +34,10 @@ int main() {
             return 1; // Invalid hash function info
         }
         auto hashFunctions = hashFactory::createHashFunctions(hashIds);
-        auto filter = std::make_shared<bloomFilter>(bitArraySize, hashFunctions);
+        std::shared_ptr<IBloomFilter> filter = std::make_shared<bloomFilter>(bitArraySize, hashFunctions);
         std::shared_ptr<IFilterService> filterService = std::make_shared<BloomFilterService>(
-        std::move(filter),
-        storageService
+            filter,
+            storageService
         );
         std::shared_ptr<IApplicationService> appService = std::make_shared<ApplicationService>(
         filterService,
