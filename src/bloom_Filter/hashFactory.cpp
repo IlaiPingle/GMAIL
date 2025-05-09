@@ -1,7 +1,6 @@
 #include "hashFactory.h"
 
 
-using namespace std;
 
 // function which creates the hash functions for now it creates only repeatedHash
 // it takes an array of the repeats each hash function should do.

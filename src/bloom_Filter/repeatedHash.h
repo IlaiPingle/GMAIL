@@ -4,7 +4,7 @@
 #include <functional>
 #include <string>
 #include "hashable.h"
-
+using namespace std;
 class repeatedHash : public hashable {
     
     private:
@@ -20,7 +20,7 @@ class repeatedHash : public hashable {
     ~repeatedHash() override = default;
 
     // implemented the pure virtual function from hashable
-    size_t operator()(const std::string& str) const override ;
+    size_t operator()(const string& str) const override ;
 };
 
 #endif // REPEATEDHASH_H

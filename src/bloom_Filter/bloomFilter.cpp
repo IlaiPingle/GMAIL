@@ -1,7 +1,7 @@
 #include "bloomFilter.h"
 #include <algorithm>
 #include <filesystem>
-using namespace std;
+
 
 // Default constructor
 bloomFilter::bloomFilter() : m_arraySize(0) {}
@@ -10,13 +10,19 @@ bloomFilter::bloomFilter(size_t size, const vector<shared_ptr<hashable>>& hashFu
 : m_bitArray(size, false), m_arraySize(size), m_hashFunctions(hashFunctions) {}
 
 
-void bloomFilter::add(const string& url) {
+bool bloomFilter::add(const string& url) {
     for (const auto& func : m_hashFunctions) {
         size_t index = (*func)(url) % m_arraySize;
         m_bitArray[index] = true;
     }
     m_blackList.insert(url); // Store the real URL in the blacklist
-    
+    return true; // Return true to indicate that the URL was added
+}
+
+bool bloomFilter::remove(const string& url) {
+    // Check if the URL is in the blacklist
+    auto result = m_blackList.erase(url);
+    return result > 0; // Return true if the URL was removed, false otherwise
 }
 
 
@@ -34,7 +40,11 @@ bool bloomFilter::contains(const string& url) const {
 }
 
 bool bloomFilter::containsAbsolutely(const string& url) const {
-    return m_blackList.find(url) != m_blackList.end();
+    if (contains(url)) {
+        // Check if the URL is in the blacklist
+        return m_blackList.find(url) != m_blackList.end();
+    }
+    return false;
 }
 
 
@@ -51,10 +61,6 @@ const vector<bool>& bloomFilter::getBitArray() const {
 
 void bloomFilter::setBitArray(const vector<bool>& bitArray) {
     m_bitArray = bitArray;
-}
-
-bool bloomFilter::fileExists(const string& filename) const {
-    return filesystem::exists(filename);
 }
 // Destructor
 bloomFilter::~bloomFilter() {}

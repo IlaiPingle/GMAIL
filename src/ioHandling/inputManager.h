@@ -2,29 +2,18 @@
 # define INPUTMANAGER_H
 
 #include <string>
-#include <vector>
 #include <memory>
-#include "../bloom_Filter/bloomFilter.h"
-#include "../bloom_Filter/hashable.h"
-#include "../ioHandling/fileManager.h"
+#include "../services/CommandProcessor.h"
 using namespace std; 
-class inputManager {
+class InputManager {
     private:
-        unique_ptr<bloomFilter> m_bloomFilter;
-        unique_ptr<fileManager> m_fileManager;
-
-        string runAddToBlacklist(const string& url);
-        string runCheckBlacklist(const std::string& url);
-        void tryLoadFile();
-
-        string standardizeURL(const string& url);
+        unique_ptr<CommandProcessor> m_commandProcessor; // Command processor for handling commands
         
     public:
-        inputManager();
-        inputManager(const inputManager&) = default; // Copy constructor
-        inputManager(unique_ptr<bloomFilter> bloomFilter,unique_ptr<fileManager> fileManager);
-        string convertLine(const string& line);
-        static unique_ptr<inputManager> initFirstLine(const string& Line);
-        ~inputManager();     
+        InputManager();
+        InputManager(unique_ptr<CommandProcessor> commandProcessor);
+        ~InputManager() = default; // Destructor 
+        string processCommand(const string& line);
+        static unique_ptr<InputManager> createFromConfig(const string& configLine);
 };
 #endif // INPUTMANAGER_H

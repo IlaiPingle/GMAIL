@@ -1,5 +1,7 @@
 #include "gtest/gtest.h"
 #include "../src/bloom_Filter/bloomFilter.h"
+#include "../src/bloom_Filter/hashFactory.h"
+#include "../src/services/FileStorageService.h"
 #include <memory>
 #include <functional>
 
@@ -24,13 +26,13 @@ protected:
     vector<shared_ptr<hashable>> hashFunctions;
     unique_ptr<bloomFilter> bloomFilterInstance;
 };
-
+// test for adding a URL and checking if bloom filter contains it.
 TEST_F(BloomFilterTest, AddAndContains) {
     string url = "https://example.com";
     bloomFilterInstance->add(url);
     EXPECT_TRUE(bloomFilterInstance->contains(url));
 }
-
+// test for checking if url is inside the real blacklist.
 TEST_F(BloomFilterTest, ContainsAbsolutely) {
     string url = "https://example.com";
     bloomFilterInstance->add(url);
@@ -41,13 +43,6 @@ TEST_F(BloomFilterTest, ContainsAbsolutely) {
 TEST_F(BloomFilterTest, DoesNotContain) {
     string url = "https://example.com";
     EXPECT_FALSE(bloomFilterInstance->contains(url));
-}
-
-TEST_F(BloomFilterTest, FileExists) {
-    string existingFile = __FILE__; // Current test file
-    string nonExistingFile = "non_existing_file.txt";
-    EXPECT_TRUE(bloomFilterInstance->fileExists(existingFile));
-    EXPECT_FALSE(bloomFilterInstance->fileExists(nonExistingFile));
 }
 
 TEST_F(BloomFilterTest, GetAndSetBlackList) {
