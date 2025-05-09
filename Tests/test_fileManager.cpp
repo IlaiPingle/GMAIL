@@ -1,5 +1,7 @@
 #include "gtest/gtest.h"
 #include "../src/bloom_Filter/bloomFilter.h"
+#include "../src/bloom_Filter/hashFactory.h"
+#include "../src/services/FileStorageService.h"
 #include <memory>
 #include <functional>
 
@@ -41,13 +43,6 @@ TEST_F(BloomFilterTest, ContainsAbsolutely) {
 TEST_F(BloomFilterTest, DoesNotContain) {
     string url = "https://example.com";
     EXPECT_FALSE(bloomFilterInstance->contains(url));
-}
-
-TEST_F(BloomFilterTest, FileExists) {
-    string existingFile = __FILE__; // Current test file
-    string nonExistingFile = "non_existing_file.txt";
-    EXPECT_TRUE(bloomFilterInstance->fileExists(existingFile));
-    EXPECT_FALSE(bloomFilterInstance->fileExists(nonExistingFile));
 }
 
 TEST_F(BloomFilterTest, GetAndSetBlackList) {
