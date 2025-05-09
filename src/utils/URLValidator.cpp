@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <string>
 #include "URLValidator.h"
-using namespace std;
+
 
 string URLValidator::standardize(const string &url) {
     string standardUrl = url;

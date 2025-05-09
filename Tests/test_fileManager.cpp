@@ -26,13 +26,13 @@ protected:
     vector<shared_ptr<hashable>> hashFunctions;
     unique_ptr<bloomFilter> bloomFilterInstance;
 };
-
+// test for adding a URL and checking if bloom filter contains it.
 TEST_F(BloomFilterTest, AddAndContains) {
     string url = "https://example.com";
     bloomFilterInstance->add(url);
     EXPECT_TRUE(bloomFilterInstance->contains(url));
 }
-
+// test for checking if url is inside the real blacklist.
 TEST_F(BloomFilterTest, ContainsAbsolutely) {
     string url = "https://example.com";
     bloomFilterInstance->add(url);

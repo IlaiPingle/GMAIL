@@ -1,9 +1,9 @@
 #include "BloomFilterService.h"
-using namespace std;
 
-BloomFilterService::BloomFilterService(std::shared_ptr<IBloomFilter> filter, std::shared_ptr<IStorageService> storage)
-    : m_bloomFilter(std::move(filter)), m_storageService(std::move(storage)) {}
-    
+
+BloomFilterService::BloomFilterService(shared_ptr<IBloomFilter> filter, shared_ptr<IStorageService> storage)
+: m_bloomFilter(move(filter)), m_storageService(move(storage)) {}
+
 bool BloomFilterService::initialize(){
     vector<bool> bits = m_bloomFilter->getBitArray();
     bool bitArrayLoaded = m_storageService->loadBitArray(bits);
@@ -14,17 +14,27 @@ bool BloomFilterService::initialize(){
     return bitArrayLoaded || blacklistLoaded;
 }
 bool BloomFilterService::add(const string& url) {
-    m_bloomFilter->add(url);
-    bool bitsSaved = m_storageService->saveBitArray(m_bloomFilter->getBitArray());
-    bool blacklistSaved = m_storageService->saveBlacklist(m_bloomFilter->getBlackList());
-    return bitsSaved && blacklistSaved;
+    if (!m_bloomFilter->containsAbsolutely(url)) {
+        m_bloomFilter->add(url);
+        bool bitsSaved = m_storageService->saveBitArray(m_bloomFilter->getBitArray());
+        bool blacklistSaved = m_storageService->saveBlacklist(m_bloomFilter->getBlackList());
+        return bitsSaved && blacklistSaved;
+    }
+    return false; // URL already exists in the filter
 }
 
-bool BloomFilterService::contains(const std::string &url) {
+bool BloomFilterService::contains(const string &url) {
     return m_bloomFilter->contains(url);
 }
 
-bool BloomFilterService::containsAbsolutely(const std::string &url) {
+bool BloomFilterService::containsAbsolutely(const string &url) {
     return m_bloomFilter->containsAbsolutely(url);
+}
+bool BloomFilterService::remove(const string &url) {
+    if (!m_bloomFilter->containsAbsolutely(url)) {
+        return true; // URL not found in the filter
+    }
+    return m_bloomFilter->remove(url) && m_storageService->removeFromBlacklist(url);
+    
 }
 

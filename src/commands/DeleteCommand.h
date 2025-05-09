@@ -3,7 +3,7 @@
 #include "../interfaces/ICommand.h"
 #include "../interfaces/IFilterService.h"
 #include "../interfaces/IURLValidator.h"
-
+using namespace std;
 class DeleteCommand : public ICommand {
     private:
         std::shared_ptr<IFilterService> m_filterService;

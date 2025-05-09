@@ -2,7 +2,7 @@
 #include "AddCommand.h"
 #include "CheckCommand.h"
 #include "DeleteCommand.h"
-using namespace std;
+
 
 CommandFactory::CommandFactory(shared_ptr<IFilterService> filterService, shared_ptr<IStorageService> storageService, 
                                 shared_ptr<IURLValidator> urlValidator) 

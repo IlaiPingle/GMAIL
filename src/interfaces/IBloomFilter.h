@@ -3,19 +3,19 @@
 #include <string>
 #include <vector>
 #include <unordered_set>
-
+using namespace std;
 class IBloomFilter {
 public:
     IBloomFilter() = default;
     virtual ~IBloomFilter() = default;
-    virtual bool add(const std::string& url) = 0;
-    virtual bool contains(const std::string& url) const = 0;
-    virtual bool remove(const std::string& url) = 0;
-    virtual bool containsAbsolutely(const std::string& url) const = 0;
-    virtual const std::unordered_set<std::string>& getBlackList() const = 0;
-    virtual void setBlackList(const std::unordered_set<std::string>& blackList) = 0;
-    virtual const std::vector<bool>& getBitArray() const = 0;
-    virtual void setBitArray(const std::vector<bool>& bitArray) = 0;
+    virtual bool add(const string& url) = 0;
+    virtual bool contains(const string& url) const = 0;
+    virtual bool remove(const string& url) = 0;
+    virtual bool containsAbsolutely(const string& url) const = 0;
+    virtual const unordered_set<string>& getBlackList() const = 0;
+    virtual void setBlackList(const unordered_set<string>& blackList) = 0;
+    virtual const vector<bool>& getBitArray() const = 0;
+    virtual void setBitArray(const vector<bool>& bitArray) = 0;
 };
 
 #endif // IBLOOMFILTER_H

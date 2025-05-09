@@ -8,20 +8,20 @@
 #include "../interfaces/IStorageService.h"
 #include "../interfaces/IURLValidator.h"
 #include "../commands/CommandFactory.h"
-
+using namespace std;
 class ApplicationService : public IApplicationService {
 private:
-    std::shared_ptr<IFilterService> m_filterService;
-    std::shared_ptr<IStorageService> m_storageService;
-    std::shared_ptr<IURLValidator> m_urlValidator;
-    std::shared_ptr<CommandFactory> m_commandFactory;
+    shared_ptr<IFilterService> m_filterService;
+    shared_ptr<IStorageService> m_storageService;
+    shared_ptr<IURLValidator> m_urlValidator;
+    shared_ptr<CommandFactory> m_commandFactory;
 
 public:
     ApplicationService(
-        std::shared_ptr<IFilterService> filterService,
-        std::shared_ptr<IStorageService> storageService,
-        std::shared_ptr<IURLValidator> urlValidator);
-    bool initialize(const std::string& configLine) override;
-    std::string processCommand(const std::string& commandLine) override;
+        shared_ptr<IFilterService> filterService,
+        shared_ptr<IStorageService> storageService,
+        shared_ptr<IURLValidator> urlValidator);
+    bool initialize(const string& configLine) override;
+    string processCommand(const string& commandLine) override;
 };
 #endif // APPLICATIONSERVICE_H

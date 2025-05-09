@@ -1,7 +1,7 @@
 #include "ApplicationService.h"
 #include "../commands/CommandFactory.h"
 #include <sstream>
-using namespace std;
+
 ApplicationService::ApplicationService(
     shared_ptr<IFilterService> filterService,
     shared_ptr<IStorageService> storageService,

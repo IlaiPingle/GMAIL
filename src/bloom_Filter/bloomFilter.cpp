@@ -1,7 +1,7 @@
 #include "bloomFilter.h"
 #include <algorithm>
 #include <filesystem>
-using namespace std;
+
 
 // Default constructor
 bloomFilter::bloomFilter() : m_arraySize(0) {}
@@ -17,7 +17,6 @@ bool bloomFilter::add(const string& url) {
     }
     m_blackList.insert(url); // Store the real URL in the blacklist
     return true; // Return true to indicate that the URL was added
-    
 }
 
 bool bloomFilter::remove(const string& url) {
@@ -41,7 +40,11 @@ bool bloomFilter::contains(const string& url) const {
 }
 
 bool bloomFilter::containsAbsolutely(const string& url) const {
-    return m_blackList.find(url) != m_blackList.end();
+    if (contains(url)) {
+        // Check if the URL is in the blacklist
+        return m_blackList.find(url) != m_blackList.end();
+    }
+    return false;
 }
 
 

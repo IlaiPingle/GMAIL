@@ -1,4 +1,4 @@
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 #include "../src/ioHandling/inputManager.h"
 #include "../src/services/CommandProcessor.h"
 

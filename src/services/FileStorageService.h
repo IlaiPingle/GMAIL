@@ -5,23 +5,23 @@
 #include <string>
 #include <unordered_set>
 #include <vector>
-
+using namespace std;
 class FileStorageService : public IStorageService {
 private:
-    std::string m_bitArrayFile;
-    std::string m_blacklistFile;
+    string m_bitArrayFile;
+    string m_blacklistFile;
 
 public:
-    FileStorageService(const std::string& bitArrayPath = "data/bit_array.dat",
-                       const std::string& blacklistPath = "data/blacklist.txt")
+    FileStorageService(const string& bitArrayPath = "data/bit_array.dat",
+                       const string& blacklistPath = "data/blacklist.txt")
         : m_bitArrayFile(bitArrayPath), m_blacklistFile(blacklistPath) {}
-    bool saveBlacklist(const std::unordered_set<std::string>& blacklist) override;
-    bool loadBlacklist(std::unordered_set<std::string>& blacklist) override;
-    bool saveBitArray(const std::vector<bool>& bitArray) override;
-    bool loadBitArray(std::vector<bool>& bitArray) override;
-    bool removeFromBlacklist(const std::string& url) override;
-    bool isInBlacklist(const std::string& url) override;
-    bool fileExistsAndNotEmpty(const std::string& filename) override;
-    bool initializeFilter(std::vector<bool>& bitArray, std::unordered_set<std::string>& blacklist);
+    bool saveBlacklist(const unordered_set<string>& blacklist) override;
+    bool loadBlacklist(unordered_set<string>& blacklist) override;
+    bool saveBitArray(const vector<bool>& bitArray) override;
+    bool loadBitArray(vector<bool>& bitArray) override;
+    bool removeFromBlacklist(const string& url) override;
+    bool isInBlacklist(const string& url) override;
+    bool fileExistsAndNotEmpty(const string& filename) override;
+    bool initializeFilter(vector<bool>& bitArray, unordered_set<string>& blacklist);
 };
 #endif // FILESTORAGESERVICE_H

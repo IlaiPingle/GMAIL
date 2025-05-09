@@ -1,5 +1,5 @@
 #include "DeleteCommand.h"
-using namespace std;
+
 
 DeleteCommand::DeleteCommand(shared_ptr<IFilterService> filterService, 
                              shared_ptr<IURLValidator> urlValidator)

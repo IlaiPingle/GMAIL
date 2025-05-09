@@ -6,16 +6,16 @@
 #include <iostream>
 
 CommandProcessor::CommandProcessor()
-    : m_bloomFilter(std::make_unique<bloomFilter>()),
-      m_storageService(std::make_unique<FileStorageService>()) {}
+    : m_bloomFilter(make_unique<bloomFilter>()),
+      m_storageService(make_unique<FileStorageService>()) {}
 
-CommandProcessor::CommandProcessor(std::unique_ptr<IBloomFilter> bloomFilter,
-                                 std::unique_ptr<IStorageService> storageService)
-    : m_bloomFilter(std::move(bloomFilter)), m_storageService(std::move(storageService)) {}
+CommandProcessor::CommandProcessor(unique_ptr<IBloomFilter> bloomFilter,
+                                 unique_ptr<IStorageService> storageService)
+    : m_bloomFilter(move(bloomFilter)), m_storageService(move(storageService)) {}
 
-std::string CommandProcessor::addToBlacklist(const std::string& url) {
+string CommandProcessor::addToBlacklist(const string& url) {
     URLValidator urlValidator;
-    std::string standardURL = urlValidator.standardize(url);
+    string standardURL = urlValidator.standardize(url);
     if (standardURL.empty()) {
         return "400 Bad Request"; // Invalid URL format
     }
@@ -25,44 +25,44 @@ std::string CommandProcessor::addToBlacklist(const std::string& url) {
     return "201 Created"; // Successfully added to blacklist
 }
 
-std::string CommandProcessor::checkBlacklist(const std::string& url) {
+string CommandProcessor::checkBlacklist(const string& url) {
     URLValidator urlValidator;
-    std::string standardURL = urlValidator.standardize(url);
+    string standardURL = urlValidator.standardize(url);
     if (url.empty()) {
-        std::cout << "200 Ok\n" << std::endl;
+        cout << "200 Ok\n" << endl;
         return "false"; // Empty URL check
     }
     if (standardURL.empty()) {
         return "400 Bad Request"; // Invalid URL format
     }
     if (!m_bloomFilter->contains(standardURL)) {
-        std::cout << "200 Ok\n" << std::endl;
+        cout << "200 Ok\n" << endl;
         return "false";
     }
     else if (m_bloomFilter->containsAbsolutely(standardURL)) {
-        std::cout << "200 Ok\n" << std::endl;
+        cout << "200 Ok\n" << endl;
         return "true true";
     } else {
-        std::cout << "200 Ok\n" << std::endl;
+        cout << "200 Ok\n" << endl;
         return "true false";
     }
 }
 
-std::string CommandProcessor::deleteFromBlacklist(const std::string& url) {
+string CommandProcessor::deleteFromBlacklist(const string& url) {
     if (url.empty()) {
         return "404 Not Found"; // Empty URL check
     }
     if (!(m_storageService->isInBlacklist(url))) {
         return "404 Not Found"; // URL not in blacklist
     }
-    std::string standardURL = URLValidator().standardize(url);
+    string standardURL = URLValidator().standardize(url);
     if (standardURL.empty() || !m_storageService->isInBlacklist(standardURL)) {
         return "404 Not Found"; // Invalid URL format or not in blacklist
     }
     
     if (m_storageService->removeFromBlacklist(standardURL)) {
         // Reload the blacklist to reflect changes
-        std::unordered_set<std::string> updatedBlacklist;
+        unordered_set<string> updatedBlacklist;
         m_storageService->loadBlacklist(updatedBlacklist);
         m_bloomFilter->setBlackList(updatedBlacklist);
         return "204 No Content"; // Successfully deleted from blacklist

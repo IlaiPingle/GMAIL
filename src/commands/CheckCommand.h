@@ -7,8 +7,8 @@
 using namespace std;
 class CheckCommand : public ICommand {
     private:
-        std::shared_ptr<IFilterService> m_filterService;
-        std::shared_ptr<IURLValidator> m_urlValidator;
+        shared_ptr<IFilterService> m_filterService;
+        shared_ptr<IURLValidator> m_urlValidator;
     
     public:
         CheckCommand(shared_ptr<IFilterService> filterService, shared_ptr<IURLValidator> urlValidator);

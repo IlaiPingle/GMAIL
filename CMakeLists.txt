@@ -17,8 +17,13 @@ add_library(bloom_filter
     ${CMAKE_SOURCE_DIR}/src/services/CommandProcessor.cpp
     ${CMAKE_SOURCE_DIR}/src/utils/URLValidator.cpp
     ${CMAKE_SOURCE_DIR}/src/commands/CommandFactory.cpp
+    ${CMAKE_SOURCE_DIR}/src/commands/AddCommand.cpp
+    ${CMAKE_SOURCE_DIR}/src/commands/CheckCommand.cpp
+    ${CMAKE_SOURCE_DIR}/src/commands/DeleteCommand.cpp
     ${CMAKE_SOURCE_DIR}/src/services/BloomFilterService.cpp
     ${CMAKE_SOURCE_DIR}/src/services/FileStorageService.cpp
+    ${CMAKE_SOURCE_DIR}/src/ioHandling/InputProcessor.cpp
+    ${CMAKE_SOURCE_DIR}/src/services/ApplicationService.cpp
 )
 
 # Find Google Test
