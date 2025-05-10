@@ -71,6 +71,10 @@
         "ratio": "cpp",
         "string_view": "cpp",
         "iomanip": "cpp",
-        "numbers": "cpp"
-    }
+        "numbers": "cpp",
+        "chrono": "cpp",
+        "filesystem": "cpp",
+        "forward_list": "cpp"
+    },
+    "C_Cpp.dimInactiveRegions": false
 }
