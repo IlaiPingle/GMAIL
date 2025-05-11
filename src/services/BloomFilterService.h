@@ -12,7 +12,7 @@ private:
 
 public:
     BloomFilterService(shared_ptr<IBloomFilter> filter, shared_ptr<IStorageService> storage);
-    bool initialize();
+    bool initialize() override;
     bool add(const string& url) override;
     bool contains(const string& url) override;
     bool containsAbsolutely(const string& url) override;

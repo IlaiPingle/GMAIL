@@ -19,9 +19,8 @@ ApplicationService::ApplicationService(
 }
 
 bool ApplicationService::initialize(const string& configLine) {
-    // Implementation depends on your specific configuration format
-    // This would create the bloom filter with appropriate parameters
-    return true;
+    // Initialize the filter service
+    return m_filterService->initialize();
 }
 
 string ApplicationService::processCommand(const string& commandLine) {
@@ -29,7 +28,7 @@ string ApplicationService::processCommand(const string& commandLine) {
     string commandName;
     
     if (commandLine.empty()) {
-        return "";
+        return "Error: Empty command";
     }
     
     if (!(iss >> commandName)) {
@@ -39,7 +38,7 @@ string ApplicationService::processCommand(const string& commandLine) {
     // Get the command object
     auto command = m_commandFactory->getCommand(commandName);
     if (!command) {
-        return "Error: Invalid command";
+        return "Error: Invalid command" + commandName + "'";
     }
     
     // Extract arguments and trim leading whitespace
