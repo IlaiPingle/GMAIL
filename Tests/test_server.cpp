@@ -1,19 +1,15 @@
 #include <gtest/gtest.h>
+#include "../src/networking/Server.h"
+=======
 #include "../networking/server.h"
 
-// Test for server initialization
-TEST(ServerTest, Initialization) {
-    Server server(8080);
-    EXPECT_EQ(server.getPort(), 8080);
-    EXPECT_TRUE(server.isInitialized());
-}
-// Test for server initialization
-TEST(ServerTest, Initialization) {
-    Server server(8080);
-    EXPECT_EQ(server.getPort(), 8080);
-    EXPECT_TRUE(server.isInitialized());
-}
 
+// Test for server initialization
+TEST(ServerTest, Initialization) {
+    Server server(8080);
+    EXPECT_EQ(server.getPort(), 8080);
+    EXPECT_TRUE(server.isInitialized());
+}
 // Test for server shutdown
 TEST(ServerTest, Shutdown) {
     Server server(8080);
@@ -92,3 +88,4 @@ TEST(ServerTest, InvalidClient) {
     server.stop();
     EXPECT_FALSE(server.isRunning());
 }
+

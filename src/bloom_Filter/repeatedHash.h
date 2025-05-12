@@ -1,6 +1,6 @@
 #ifndef REPEATEDHASH_H
 #define REPEATEDHASH_H
-
+#include <cstddef>
 #include <functional>
 #include <string>
 #include "hashable.h"

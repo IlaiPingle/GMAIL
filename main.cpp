@@ -1,69 +1,60 @@
 #include <iostream>
 #include <memory>
-#include <sstream>
-#include "src/services/ApplicationService.h"
-#include "src/services/BloomFilterService.h"
-#include "src/services/FileStorageService.h"
-#include "src/utils/URLValidator.h"
-#include "src/ioHandling/InputProcessor.h"
-#include "src/bloom_Filter/bloomFilter.h"
-#include "src/bloom_Filter/hashFactory.h"
-#include "src/interfaces/IApplicationService.h"
+#include <fstream>
+#include "src/services/ApplicationConfig.h"
+#include "src/networking/TCPSocketListener.h"
+#include "src/networking/Server.h"
 
-int main() {
+int main(int argc, char* argv[]) {
     try {
-        // Create dependencies
-        std::shared_ptr<IURLValidator> urlValidator = std::make_shared<URLValidator>();
-        std::shared_ptr<IStorageService> storageService = std::make_shared<FileStorageService>();
+        // Check command line arguments
+        if (argc < 2) {
+            std::cerr << "Usage: " << argv[0] << " <port> [config_file]" << std::endl;
+            std::cerr << "If config_file is not provided, configuration is read from stdin" << std::endl;
+            return 1;
+        }
+
+        // Parse port number
+        int port = std::stoi(argv[1]);
+        
         // Read initial configuration
         std::string configLine;
-        std::getline(std::cin, configLine);
-        std::istringstream iss(configLine);
-        size_t bitArraySize;
-        std::vector<size_t> hashIds;
-        if (!(iss >> bitArraySize)) {
-            std::cerr << "Invalid size" << std::endl;
-            return 1; // Invalid size
-        }
-        size_t hashId;
-        while (iss >> hashId) {
-            hashIds.push_back(hashId);
-        }
-        if (hashIds.empty()) {
-            std::cerr << "No hash functions specified" << std::endl;
-            return 1; // Invalid hash function info
-        }
-        auto hashFunctions = hashFactory::createHashFunctions(hashIds);
-        std::shared_ptr<IBloomFilter> filter = std::make_shared<bloomFilter>(bitArraySize, hashFunctions);
-        std::shared_ptr<IFilterService> filterService = std::make_shared<BloomFilterService>(
-            filter,
-            storageService
-        );
-        std::shared_ptr<IApplicationService> appService = std::make_shared<ApplicationService>(
-        filterService,
-        storageService,
-        urlValidator
-    );
-    if (!appService->initialize(configLine)) {
-        std::cerr << "Failed to initialize application service" << std::endl;
-        return 1; // Initialization failed
-    }
-    // Create input processor
-    InputProcessor processor(appService);
-    // Process commands
-    std::string line;
-    while (std::getline(std::cin, line)) {
-        if (line.empty()) continue;
         
-        std::string result = processor.processCommandLine(line);
-        if (!result.empty()) {
-            std::cout << result << std::endl;
+        if (argc >= 3) {
+            // Read configuration from file
+            std::ifstream configFile(argv[2]);
+            if (!configFile) {
+                std::cerr << "Failed to open config file: " << argv[2] << std::endl;
+                return 1;
+            }
+            std::getline(configFile, configLine);
+        } else {
+            // Read configuration from stdin
+            std::getline(std::cin, configLine);
         }
+        
+        // Configure application
+        auto appService = ApplicationConfig::configure(configLine);
+        if (!appService) {
+            std::cerr << "Failed to configure application" << std::endl;
+            return 1;
+        }
+        
+        // Create and start server
+        std::shared_ptr<ISocketListener> listener = std::make_shared<TCPSocketListener>();
+        Server server(listener, appService);
+        
+        if (!server.start()) {
+            return 1;
+        }
+        
+        // Run server (blocks until server is stopped)
+        server.run();
+        
+        return 0;
     }
-    return 0;
-}
-catch (const std::exception& e) {
+    catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
-        return 1; // Exception occurred
+        return 1;
     }
 }

@@ -10,5 +10,6 @@ public:
     virtual bool contains(const string& url) = 0;
     virtual bool containsAbsolutely(const string& url) = 0;
     virtual bool remove(const string& url) = 0;
+    virtual bool initialize() = 0;
 };
 #endif // IFILTERSERVICE_H

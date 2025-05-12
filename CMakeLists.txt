@@ -10,6 +10,7 @@ include_directories(${CMAKE_SOURCE_DIR})
 
 # Add source files for the library
 add_library(bloom_filter
+    # Original files
     ${CMAKE_SOURCE_DIR}/src/bloom_Filter/bloomFilter.cpp
     ${CMAKE_SOURCE_DIR}/src/bloom_Filter/repeatedHash.cpp
     ${CMAKE_SOURCE_DIR}/src/bloom_Filter/hashFactory.cpp
@@ -24,6 +25,19 @@ add_library(bloom_filter
     ${CMAKE_SOURCE_DIR}/src/services/FileStorageService.cpp
     ${CMAKE_SOURCE_DIR}/src/ioHandling/InputProcessor.cpp
     ${CMAKE_SOURCE_DIR}/src/services/ApplicationService.cpp
+    ${CMAKE_SOURCE_DIR}/src/networking/Server.cpp
+
+    # New SOLID implementation files
+    ${CMAKE_SOURCE_DIR}/src/utils/DefaultURLFormatter.cpp
+    ${CMAKE_SOURCE_DIR}/src/utils/DefaultURLNormalizer.cpp
+    ${CMAKE_SOURCE_DIR}/src/utils/DefaultBitVector.cpp
+    ${CMAKE_SOURCE_DIR}/src/commands/AddCommandCreator.cpp
+    ${CMAKE_SOURCE_DIR}/src/commands/CheckCommandCreator.cpp
+    ${CMAKE_SOURCE_DIR}/src/commands/DeleteCommandCreator.cpp
+    ${CMAKE_SOURCE_DIR}/src/services/ApplicationConfig.cpp
+    ${CMAKE_SOURCE_DIR}/src/networking/ConnectionHandler.cpp
+    ${CMAKE_SOURCE_DIR}/src/networking/TCPSocketConnection.cpp
+    ${CMAKE_SOURCE_DIR}/src/networking/TCPSocketListener.cpp
 )
 
 # Find Google Test
@@ -36,17 +50,21 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-# Add test executable
+# Add test executable with all test files
 add_executable(runTests 
-#${CMAKE_SOURCE_DIR}/Tests/test_fileManager.cpp
-${CMAKE_SOURCE_DIR}/Tests/test_inputManager.cpp)
-#${CMAKE_SOURCE_DIR}/Tests/test_main.cpp)
+    # Original test files
+    #${CMAKE_SOURCE_DIR}/Tests/test_inputManager.cpp
+    
+    # New test files
+    ${CMAKE_SOURCE_DIR}/Tests/test_server.cpp
+)
 target_link_libraries(runTests gtest_main bloom_filter)
 
+# Add executables
 add_executable(bloom_filter_app ${CMAKE_SOURCE_DIR}/main.cpp)
 target_link_libraries(bloom_filter_app bloom_filter)
 
-# Add Google Test
+# Google Test integration
 include(GoogleTest)
 gtest_discover_tests(runTests)
 

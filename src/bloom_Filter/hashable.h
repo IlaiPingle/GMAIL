@@ -1,6 +1,7 @@
 #ifndef HASHABLE_H
 #define HASHABLE_H
 #include <string>
+#include <cstddef>
 using namespace std;
 class hashable {
     public:
