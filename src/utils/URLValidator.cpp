@@ -1,10 +1,20 @@
-#include <algorithm>
-#include <string>
+#include "DefaultURLFormatter.h"
+#include "DefaultURLNormalizer.h"
 #include "URLValidator.h"
+#include <memory>
 
+URLValidator::URLValidator()
+    : m_formatter(make_shared<DefaultURLFormatter>()), m_normalizer(make_shared<DefaultURLNormalizer>()) {}
+
+URLValidator::URLValidator(shared_ptr<IURLFormatter> formatter, shared_ptr<IURLNormalizer> normalizer)
+    : m_formatter(formatter ? formatter : make_shared<DefaultURLFormatter>()),
+     m_normalizer(normalizer ? normalizer : make_shared<DefaultURLNormalizer>()) {}
 
 string URLValidator::standardize(const string &url) {
-    string standardUrl = url;
+    string formattedURL =m_formatter->formatURL(url);
+    return m_normalizer->normalize(formattedURL);
+}
+    /*string standardUrl = url;
     size_t start = standardUrl.find_first_not_of(" \t\n\r");
     if (start != string::npos) {
         standardUrl = standardUrl.substr(start); // Remove leading whitespace
@@ -29,7 +39,7 @@ string URLValidator::standardize(const string &url) {
     }
     
     return standardUrl;
-}
+}*/
 
 bool URLValidator::isValid(const string& url) {
     return !standardize(url).empty();

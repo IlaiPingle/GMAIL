@@ -1,5 +1,5 @@
-#ifndef ISocketListener_H
-#define ISocketListener_H
+#ifndef TCPSOCKETCONNECTION_H
+#define TCPSOCKETCONNECTION_H
 #include "ISocketConnection.h"
 
 class TCPSocketConnection : public ISocketConnection {
@@ -14,6 +14,8 @@ class TCPSocketConnection : public ISocketConnection {
         bool isConnected() const override;
         bool sendData(const std::string& data) override;
         bool receiveData(std::string& data) override;
+        bool sendLine(const std::string& line);
+        bool receiveLine(std::string& line);
         void close() override;
 };
-#endif // ISocketListener_H
+#endif // TCPSOCKETCONNECTION_H
