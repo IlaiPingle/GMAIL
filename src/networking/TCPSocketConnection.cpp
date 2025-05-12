@@ -60,7 +60,6 @@ bool TCPSocketConnection::receiveData(std::string& data) {
         return false;
     } else{
         m_isConnected = false; // Error occurred
-        std::cerr << "Error receiving data: " << errno << std::endl;
         return false;
     }
 }

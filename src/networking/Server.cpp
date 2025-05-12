@@ -33,7 +33,7 @@ bool Server::isInitialized() const {
     return m_initialized;
 }
 
-bool Server::start() {
+bool Server::start(int port, const std::string& ipAddress) {
     if (!m_initialized) {
         return false;
     }
@@ -42,9 +42,11 @@ bool Server::start() {
         return true; // Already running
     }
 
+    m_port = port;
+
     bool started = false;
     if (m_socketListener) {
-        started = m_socketListener->start(m_port);
+        started = m_socketListener->start(port, ipAddress);
     }
 
     if (started) {
@@ -52,6 +54,10 @@ bool Server::start() {
     }
 
     return m_running;
+}
+
+bool Server::start() {
+    return start(m_port, "0.0.0.0"); // Default to all interfaces
 }
 
 bool Server::isRunning() const {
@@ -67,11 +73,9 @@ void Server::stop() {
 
 void Server::run() {
     if (!m_running) {
-        std::cerr << "Server is not running." << std::endl;
         return;
     }
     
-    std::cout << "Server is listening on port " << m_port << std::endl;
     
     while (m_running) {
         try {
