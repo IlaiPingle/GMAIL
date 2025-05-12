@@ -8,23 +8,24 @@
 int main(int argc, char* argv[]) {
     try {
         // Check command line arguments
-        if (argc < 2) {
-            std::cerr << "Usage: " << argv[0] << " <port> [config_file]" << std::endl;
+        if (argc < 3) {
+            std::cerr << "Usage: " << argv[0] << "<ip_address> <port> [config_file]" << std::endl;
             std::cerr << "If config_file is not provided, configuration is read from stdin" << std::endl;
             return 1;
         }
 
         // Parse port number
-        int port = std::stoi(argv[1]);
+        std::string ipAddress = argv[1];
+        int port = std::stoi(argv[2]);
         
         // Read initial configuration
         std::string configLine;
         
-        if (argc >= 3) {
+        if (argc >= 4) {
             // Read configuration from file
-            std::ifstream configFile(argv[2]);
+            std::ifstream configFile(argv[3]);
             if (!configFile) {
-                std::cerr << "Failed to open config file: " << argv[2] << std::endl;
+                std::cerr << "Failed to open config file: " << argv[3] << std::endl;
                 return 1;
             }
             std::getline(configFile, configLine);
@@ -44,7 +45,7 @@ int main(int argc, char* argv[]) {
         std::shared_ptr<ISocketListener> listener = std::make_shared<TCPSocketListener>();
         Server server(listener, appService);
         
-        if (!server.start()) {
+        if (!server.start(port, ipAddress)) {
             return 1;
         }
         
@@ -54,7 +55,6 @@ int main(int argc, char* argv[]) {
         return 0;
     }
     catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
         return 1;
     }
 }
