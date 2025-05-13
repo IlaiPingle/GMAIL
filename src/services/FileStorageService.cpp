@@ -64,6 +64,19 @@ bool FileStorageService::loadBitArray(vector<bool>& bitArray) {
     }
     return true;
 }
+bool FileStorageService::configFromFile(string& configLine) {
+    ifstream inFile(m_configFile);
+    if(!inFile) {
+        return false;
+    }
+    string line="";
+    getline(inFile, configLine);
+    inFile.close();      
+    if (line ==""){
+        return false;
+    }
+    return true;  
+}
 
 bool FileStorageService::removeFromBlacklist(const string& url) {
     // Read all URLs except the one to delete
