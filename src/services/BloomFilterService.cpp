@@ -13,6 +13,7 @@ bool BloomFilterService::initialize(){
     m_bloomFilter->setBlackList(blackList);
     return bitArrayLoaded || blacklistLoaded;
 }
+
 bool BloomFilterService::add(const string& url) {
     if (!m_bloomFilter->containsAbsolutely(url)) {
         m_bloomFilter->add(url);

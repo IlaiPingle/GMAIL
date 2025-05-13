@@ -2,7 +2,12 @@
 #define IBLACKLISTSTORAGE_H
 #include <string>
 #include <unordered_set>
-using namespace std;    
+using namespace std;   
+/**
+ * @brief Interface for a blacklist storage.
+ * This interface defines the basic operations for managing a blacklist of URLs,
+ * including saving, loading, removing, and checking URLs in the blacklist.
+ */ 
 class IBlacklistStorage {
 public:
     virtual ~IBlacklistStorage() = default;

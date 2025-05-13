@@ -4,6 +4,12 @@
 #include <memory>
 using namespace std;
 
+/**
+ * @brief Interface for command execution.
+ * This interface defines the basic operations for executing commands with parameters.
+ * It serves as a contract for any command implementation, ensuring that the necessary
+ * methods are provided.
+ */
 class ICommand {
 public:
     virtual ~ICommand() = default;

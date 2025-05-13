@@ -3,6 +3,11 @@
 #include <string>
 using namespace std;
 
+/**
+ * @brief Interface for a filter service.
+ * This interface defines the basic operations for managing a filter service,
+ * including adding, checking, and removing URLs from the filter.
+ */
 class IFilterService {
 public:
     virtual ~IFilterService() = default;

@@ -3,6 +3,11 @@
 #include <string>
 using namespace std;
 
+/**
+ * @brief Interface for URL normalization.
+ * This interface defines the basic operations for normalizing URLs,
+ * including standardizing and validating URL formats.
+ */
 class IURLNormalizer {
 public:
     virtual ~IURLNormalizer() = default;

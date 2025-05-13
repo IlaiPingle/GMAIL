@@ -28,17 +28,17 @@ string ApplicationService::processCommand(const string& commandLine) {
     string commandName;
     
     if (commandLine.empty()) {
-        return "Error: Empty command";
+        return "400 Bad Request:\n";
     }
     
     if (!(iss >> commandName)) {
-        return "Error: Invalid command";
+        return "400 Bad Request:\n";
     }
     
     // Get the command object
     auto command = m_commandFactory->getCommand(commandName);
     if (!command) {
-        return "Error: Invalid command" + commandName + "'";
+        return "400 Bad Request:\n";
     }
     
     // Extract arguments and trim leading whitespace

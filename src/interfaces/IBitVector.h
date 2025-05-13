@@ -3,6 +3,11 @@
 #include <vector>
 #include <cstddef>
 
+/**
+ * @brief Interface for a Bit Vector.
+ * This interface defines the basic operations for a bit vector, including setting,
+ * getting, and managing bits in the vector.
+ */
 class IBitVector {
 public:
     virtual ~IBitVector() = default;

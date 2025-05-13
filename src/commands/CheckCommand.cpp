@@ -7,20 +7,18 @@ CheckCommand::CheckCommand(shared_ptr<IFilterService> filterService,
 
 string CheckCommand::execute(const string& url) {
     if (url.empty()) {
-        return "false"; // Empty URL check
+        return "400 Bad Request\n"; // Empty URL check
     }
-    
     string standardURL = m_urlValidator->standardize(url);
     if (standardURL.empty()) {
-        return "false"; // Invalid URL format
+        return "400 Bad Request\n"; // Invalid URL format
     }
-    
     if (!m_filterService->contains(standardURL)) {
-        return "false";
+        return "200 Ok\n\nFalse\n";
     }
     else if (m_filterService->containsAbsolutely(standardURL)) {
-        return "true true";
+        return "200 Ok\n\nTrue True\n";
     } else {
-        return "true false";
+        return "200 Ok\n\nTrue False\n";
     }
 }

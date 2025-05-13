@@ -5,7 +5,7 @@
 #include "ISocketListener.h"
 #include "ConnectionHandler.h"
 #include "../interfaces/IApplicationService.h"
-
+using namespace std;
 class Server {
     private:
         int m_port;

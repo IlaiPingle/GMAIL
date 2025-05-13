@@ -4,49 +4,58 @@
 #include "src/services/ApplicationConfig.h"
 #include "src/networking/TCPSocketListener.h"
 #include "src/networking/Server.h"
+using namespace std;
 
 int main(int argc, char* argv[]) {
     try {
         // Check command line arguments
         if (argc < 3) {
-            std::cerr << "Usage: " << argv[0] << "<ip_address> <port> [config_file]" << std::endl;
-            std::cerr << "If config_file is not provided, configuration is read from stdin" << std::endl;
-            return 1;
+            return -1;
         }
-
-        // Parse port number
-        std::string ipAddress = argv[1];
-        int port = std::stoi(argv[2]);
+        
+        // Parse input number
+        string ipAddress = argv[1];
+        int port = stoi(argv[2]);
         
         // Read initial configuration
-        std::string configLine;
-        
-        if (argc >= 4) {
-            // Read configuration from file
-            std::ifstream configFile(argv[3]);
-            if (!configFile) {
-                std::cerr << "Failed to open config file: " << argv[3] << std::endl;
-                return 1;
+        string configLine;
+        if (argc >3) {
+            for (int i = 3; i < argc; i++) {
+                if (i >3) {
+                    configLine += " ";
+                }
+                configLine += argv[i];
             }
-            std::getline(configFile, configLine);
-        } else {
-            // Read configuration from stdin
-            std::getline(std::cin, configLine);
         }
+        
+        /* ?מאיפה קוראים את הקובץ
+        if (argc >= 4) {
+        // Read configuration from file
+        ifstream configFile(argv[3]);
+        if (!configFile) {
+        cerr << "Failed to open config file: " << argv[3] << endl;
+        return 1;
+        }
+        getline(configFile, configLine);
+        } else {
+        // Read configuration from stdin
+        getline(cin, configLine);
+        }
+        */
+        
         
         // Configure application
         auto appService = ApplicationConfig::configure(configLine);
         if (!appService) {
-            std::cerr << "Failed to configure application" << std::endl;
-            return 1;
+            return -1;
         }
         
         // Create and start server
-        std::shared_ptr<ISocketListener> listener = std::make_shared<TCPSocketListener>();
+        shared_ptr<ISocketListener> listener = make_shared<TCPSocketListener>();
         Server server(listener, appService);
         
         if (!server.start(port, ipAddress)) {
-            return 1;
+            return -1;
         }
         
         // Run server (blocks until server is stopped)
@@ -54,7 +63,8 @@ int main(int argc, char* argv[]) {
         
         return 0;
     }
-    catch (const std::exception& e) {
-        return 1;
+    catch (const exception& e) {
+        return -1;
     }
 }
+./main <ip> <port> 256 1 2 8 4 5 6

@@ -3,6 +3,11 @@
 #include <string>
 using namespace std;
 
+/**
+ * @brief Interface for URL formatting.
+ * This interface defines the basic operations for formatting URLs,
+ * including standardizing and validating URL formats.
+ */
 class IURLFormatter {
 public:
     virtual ~IURLFormatter() = default;

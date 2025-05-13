@@ -4,6 +4,11 @@
 #include <vector>
 #include <unordered_set>
 using namespace std;
+/**
+ * @brief Interface for a Bloom Filter.
+ * This interface defines the basic operations for a Bloom Filter, including adding,
+ * checking, and removing URLs, as well as managing the internal state of the filter.
+ */
 class IBloomFilter {
 public:
     IBloomFilter() = default;
