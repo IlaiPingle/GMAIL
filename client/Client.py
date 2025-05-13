@@ -1,4 +1,4 @@
-
+import sys
 import socket
 
 def main(argv):
@@ -34,7 +34,5 @@ def main(argv):
         print(f"connection error: {e}")
     
 if __name__ == "__main__":
-    import sys
-    main(sys.argv)        
-    
-    
+    main(sys.argv)    
+        

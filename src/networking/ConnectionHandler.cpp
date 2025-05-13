@@ -49,7 +49,7 @@ void ConnectionHandler::handleConnection(std::shared_ptr<ISocketConnection> conn
         }
     }
 }
-
+/**
 void ConnectionHandler::sendWelcomeMessage(std::shared_ptr<ISocketConnection> connection) {
     if (!connection) return;
     
@@ -64,7 +64,7 @@ void ConnectionHandler::sendWelcomeMessage(std::shared_ptr<ISocketConnection> co
         connection->sendData("Enter commands: add/check/delete <url>\r\n");
         connection->sendData("Type 'exit' or 'quit' to disconnect\r\n\r\n");
     }
-}
+}**/
 
 bool ConnectionHandler::processCommand(std::shared_ptr<ISocketConnection> connection, const std::string& command) {
     if (!connection || !m_appService) return false;

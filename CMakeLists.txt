@@ -53,10 +53,16 @@ FetchContent_MakeAvailable(googletest)
 # Add test executable with all test files
 add_executable(runTests 
     # Original test files
-    #${CMAKE_SOURCE_DIR}/Tests/test_inputManager.cpp
+    ${CMAKE_SOURCE_DIR}/Tests/test_inputManager.cpp
     
-    # New test files
+    # test server
     ${CMAKE_SOURCE_DIR}/Tests/test_server.cpp
+
+    # test main
+    ${CMAKE_SOURCE_DIR}/Tests/test_main.cpp
+    
+    # test fileManager
+    ${CMAKE_SOURCE_DIR}/Tests/test_fileManager.cpp
 )
 target_link_libraries(runTests gtest_main bloom_filter)
 
