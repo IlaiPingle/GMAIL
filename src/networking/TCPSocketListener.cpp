@@ -40,7 +40,7 @@ TCPSocketListener::~TCPSocketListener() {
     #endif
 }
 
-bool TCPSocketListener::start(int port) {
+bool TCPSocketListener::start(int port, const std::string& ipAddress) {
     m_hasAcceptedConnection = false;
     if (m_isListening) {
         return false; // Already listening
@@ -48,28 +48,28 @@ bool TCPSocketListener::start(int port) {
 
     m_socketServer = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (m_socketServer == INVALID_SOCKET) {
-        std::cerr << "Socket creation failed." << std::endl;
         return false;
     }
     int opt = 1;
     if (setsockopt(m_socketServer, SOL_SOCKET, SO_REUSEADDR, (const char*)&opt, sizeof(opt)) < 0) {
-        std::cerr << "Set socket options failed." << std::endl;
         SOCKET_CLOSE(m_socketServer);
         return false;
     }
     sockaddr_in serverAddr;
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_addr.s_addr = INADDR_ANY;
+    if (ipAddress == "0.0.0.0") {
+        serverAddr.sin_addr.s_addr = INADDR_ANY; // Listen on all interfaces
+    } else {
+        serverAddr.sin_addr.s_addr = inet_addr(ipAddress.c_str());
+    }
     serverAddr.sin_port = htons(port);
 
     if (bind(m_socketServer, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
-        std::cerr << "Bind failed." << std::endl;
         SOCKET_CLOSE(m_socketServer);
         return false;
     }
 
     if (listen(m_socketServer, 1) == SOCKET_ERROR) {
-        std::cerr << "Listen failed." << std::endl;
         SOCKET_CLOSE(m_socketServer);
         return false;
     }

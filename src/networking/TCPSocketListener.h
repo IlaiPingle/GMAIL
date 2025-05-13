@@ -11,7 +11,7 @@ class TCPSocketListener : public ISocketListener {
     public:
         TCPSocketListener(); // Constructor
         ~TCPSocketListener(); // Destructor
-        bool start(int port) override; 
+        bool start(int port, const std::string& ipAddress = "0.0.0.0") override;
         void stop() override; 
         std::shared_ptr<ISocketConnection> acceptConnection() override;
         bool isListening() const override;

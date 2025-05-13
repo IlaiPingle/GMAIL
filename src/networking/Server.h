@@ -26,6 +26,7 @@ class Server {
         bool isInitialized() const;
         bool handleClient(int clientId);
         bool start();
+        bool start(int port, const std::string& ipAddress);
         void stop();
         void run();
 };
