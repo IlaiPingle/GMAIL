@@ -11,6 +11,7 @@ class TCPSocketListener : public ISocketListener {
     public:
         TCPSocketListener(); // Constructor
         ~TCPSocketListener(); // Destructor
+        bool start(int port) override; // Method to start listening for incoming connections
         bool start(int port, const string& ipAddress = "0.0.0.0") override;
         void stop() override; 
         shared_ptr<ISocketConnection> acceptConnection() override;

@@ -72,35 +72,34 @@ void Server::stop() {
 }
 
 void Server::run() {
-    if (!m_running) {
-        return;
+    if (!m_initialized || !m_socketListener) {
+        return; // Not initialized or no socket listener
     }
-    
-    
+    m_running = true;
     while (m_running) {
         try {
             auto connection = m_socketListener->acceptConnection();
-            if (connection && connection->isConnected()) {
-                // Handle the connection here or delegate to a connection handler
-                // In this implementation, we're just showing it's running
+            if (!connection || !connection->isConnected()) {
+                continue; // No valid connection
+            }
+            bool clientConnected = true;
+            while (clientConnected && m_running) {
                 string data;
                 if (connection->receiveData(data)) {
+                    // Process the received data
                     if (m_appService) {
                         string response = m_appService->processCommand(data);
-                        connection->sendData(response);
-                    } else {
-                        connection->sendData("");
+                        connection->sendData(response + "\n");
                     }
+                } else {
+                    clientConnected = false; // Connection closed or error
                 }
             }
         }
         catch (const exception& e) {
-            cerr << "Error in server loop: " << e.what() << endl;
-            // Continue running
         }
     }
 }
-
 // Test helper method
 bool Server::handleClient(int clientId) {
     if (!m_running) {
