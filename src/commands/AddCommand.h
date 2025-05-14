@@ -8,12 +8,10 @@ using namespace std;
 class AddCommand : public ICommand {
     private:
         shared_ptr<IFilterService> m_filterService;
-        shared_ptr<IURLValidator> m_urlValidator;
+        
 
     public:
-        AddCommand(shared_ptr<IFilterService> filterService,
-               shared_ptr<IURLValidator> urlValidator);
-    
+        AddCommand(shared_ptr<IFilterService> filterService);
         string execute(const string& url) override;
 };
 #endif // ADDCOMMAND_H

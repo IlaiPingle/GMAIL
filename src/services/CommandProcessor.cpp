@@ -5,69 +5,66 @@
 #include "../interfaces/IStorageService.h"
 #include <iostream>
 
-CommandProcessor::CommandProcessor()
-    : m_bloomFilter(make_unique<bloomFilter>()),
-      m_storageService(make_unique<FileStorageService>()) {}
 
-CommandProcessor::CommandProcessor(unique_ptr<IBloomFilter> bloomFilter,
-                                 unique_ptr<IStorageService> storageService)
-    : m_bloomFilter(move(bloomFilter)), m_storageService(move(storageService)) {}
 
-string CommandProcessor::addToBlacklist(const string& url) {
-    if (url.empty()) {
-        return "400 Bad Request"; // Empty URL check
-    }
-    URLValidator urlValidator;
-    string standardURL = urlValidator.standardize(url);
-    if (standardURL.empty()) {
-        return "400 Bad Request"; // Invalid URL format
-    }
-    m_bloomFilter->add(standardURL);
-    m_storageService->saveBitArray(m_bloomFilter->getBitArray());
-    m_storageService->saveBlacklist(m_bloomFilter->getBlackList());
-    return "201 Created"; // Successfully added to blacklist
-}
 
-string CommandProcessor::checkBlacklist(const string& url) {
-    URLValidator urlValidator;
-    string standardURL = urlValidator.standardize(url);
-    if (url.empty()) {
-        return "400 Bad Request"; // Empty URL check
-    }
-    if (standardURL.empty()) {
-        return "400 Bad Request"; // Invalid URL format
-    }
-    return "200 OK"; // URL is valid
-}
 
+
+/** מתן תעבור על החלק הזה ותגיד אם יש משהו שצריך לשמור פה ולהעביר למקומות הנכונים 
 string CommandProcessor::deleteFromBlacklist(const string& url) {
-    if (url.empty()) {
-        return "400 Bad Request"; // Empty URL check
+if (url.empty()) {
+return "400 Bad Request"; // Empty URL check
+}
+// Standardize the URL first
+URLValidator urlValidator;
+string standardURL = urlValidator.standardize(url);
+if (standardURL.empty()) {
+return "400 Bad Request"; // Invalid URL format
+}
+// Rest of your existing implementation
+bool isRemoved = m_storageService->removeFromBlacklist(standardURL);
+m_bloomFilter->remove(standardURL);
+string rawURL = url;
+if (rawURL.find("http://") == 0) {
+rawURL = rawURL.substr(7); // Remove "http://"
+m_bloomFilter->remove(rawURL);
+m_storageService->removeFromBlacklist(rawURL);
+}
+unordered_set<string> blackList = m_bloomFilter->getBlackList();
+bool wasInList = (blackList.find(standardURL) != blackList.end() || 
+blackList.find(rawURL) != blackList.end());
+unordered_set<string> updatedBlacklist;
+m_storageService->loadBlacklist(updatedBlacklist);
+m_bloomFilter->setBlackList(updatedBlacklist);
+if (isRemoved || wasInList){
+return "204 No Content"; // Successfully deleted from blacklist
+} else {
+return "404 Not Found"; // URL not found in blacklist
+}
+
+}*/
+string CommandProcessor::ProssessCommand(const string& request) {
+    string command = request;
+    string url;
+    bool isSplited = InputManager::splitRequest(command, url);
+    if (!isSplited) {
+        return "400 Bad Request"; // Invalid command format
     }
-    // Standardize the URL first
-    URLValidator urlValidator;
-    string standardURL = urlValidator.standardize(url);
-    if (standardURL.empty()) {
-        return "400 Bad Request"; // Invalid URL format
+    string response;
+    if (command == "POST") {
+        response = m_commandFactory.getCommand("add")->execute(url);
     }
-    // Rest of your existing implementation
-    bool isRemoved = m_storageService->removeFromBlacklist(standardURL);
-    m_bloomFilter->remove(standardURL);
-    string rawURL = url;
-    if (rawURL.find("http://") == 0) {
-        rawURL = rawURL.substr(7); // Remove "http://"
-        m_bloomFilter->remove(rawURL);
-        m_storageService->removeFromBlacklist(rawURL);
+    else if (command == "GET") {
+        response = m_commandFactory.getCommand("check")->execute(url);
     }
-    unordered_set<string> blackList = m_bloomFilter->getBlackList();
-    bool wasInList = (blackList.find(standardURL) != blackList.end() || 
-                      blackList.find(rawURL) != blackList.end());
-    unordered_set<string> updatedBlacklist;
-    m_storageService->loadBlacklist(updatedBlacklist);
-    m_bloomFilter->setBlackList(updatedBlacklist);
-    if (isRemoved || wasInList){
-        return "204 No Content"; // Successfully deleted from blacklist
-    } else {
-        return "404 Not Found"; // URL not found in blacklist
+    else if (command == "DELETE") {
+        response = m_commandFactory.getCommand("delete")->execute(url);
     }
+    else {
+        return "400 Bad Request\n";
+    }
+    if (response ==""){
+        return "404 Not Found\n";
+    }
+    return response;
 }

@@ -5,7 +5,7 @@
 #include "src/networking/TCPSocketListener.h"
 #include "src/networking/Server.h"
 #include "src/services/FileStorageService.h"
- 
+
 using namespace std;
 
 int main(int argc, char* argv[]) {
@@ -18,24 +18,20 @@ int main(int argc, char* argv[]) {
         // Parse input number
         string ipAddress = argv[1];
         int port = stoi(argv[2]);
-
+        
         string configLine;
-        FileStorageService fileStorageService = FileStorageService();
-        bool fileExist = fileStorageService.configFromFile(configLine);
-        // try to read config from file if it exists
-        if (!fileExist) {
-            // read config from command line
-            if (argc >3) {
-                for (int i = 3; i < argc; i++) {
-                    if (i >3) {
-                        configLine += " ";
-                    }
-                    configLine += argv[i];
+        // try to read configuration if added to command line
+        if (argc >3) {
+            for (int i = 3; i < argc; i++) {
+                if (i >3) {
+                    configLine += " ";
                 }
-            }else {
-                return -1;
+                configLine += argv[i];
             }
+        }else {
+            return -1;
         }
+        
         // Configure application
         auto appService = ApplicationConfig::configure(configLine);
         if (!appService) {

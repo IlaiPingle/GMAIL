@@ -83,3 +83,6 @@ void bloomFilter::setBitArray(const vector<bool>& bitArray) {
     m_bitArray = bitArray;
     m_arraySize = bitArray.size();
 }
+void bloomFilter::setHashFunctions(const vector<shared_ptr<hashable>>& hashFunctions) {
+    m_hashFunctions = hashFunctions;
+}

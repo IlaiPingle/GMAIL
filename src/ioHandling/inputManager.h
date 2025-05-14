@@ -3,17 +3,16 @@
 
 #include <string>
 #include <memory>
-#include "../services/CommandProcessor.h"
+#include "../utils/URLValidator.h"
 using namespace std; 
 class InputManager {
     private:
-        unique_ptr<CommandProcessor> m_commandProcessor; // Command processor for handling commands
         
     public:
         InputManager();
-        InputManager(unique_ptr<CommandProcessor> commandProcessor);
         ~InputManager() = default; // Destructor 
-        string processCommand(const string& line);
-        static unique_ptr<InputManager> createFromConfig(const string& configLine);
+        static bool InputManager::splitRequest(string& command, string& url);
+        
+
 };
 #endif // INPUTMANAGER_H

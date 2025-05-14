@@ -39,5 +39,6 @@ public:
     void setBlackList(const unordered_set<string>& blackList) override;
     const vector<bool>& getBitArray() const override;
     void setBitArray(const vector<bool>& bitArray) override;
+    void setHashFunctions(const vector<shared_ptr<hashable>>& hashFunctions) override;
 };
 #endif // BLOOMFILTER_H

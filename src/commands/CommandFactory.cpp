@@ -21,9 +21,9 @@ void CommandFactory::registerDefaultCommands() {
 }
 
 shared_ptr<ICommand> CommandFactory::getCommand(const string& commandName) {
-    auto it = m_commandCreators.find(commandName);
-    if (it != m_commandCreators.end()) {
-        return it->second->createCommand();
+    auto command = m_commandCreators.find(commandName);
+    if (command != m_commandCreators.end()) {
+        return command->second->createCommand();
     }
     return nullptr;
 }
