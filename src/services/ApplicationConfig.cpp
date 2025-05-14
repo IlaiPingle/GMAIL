@@ -7,8 +7,8 @@
 #include "../utils/DefaultURLFormatter.h"
 #include "../utils/DefaultURLNormalizer.h"
 #include "../utils/DefaultBitVector.h"
-#include "../bloom_Filter/bloomFilter.h"
-#include "../bloom_Filter/hashFactory.h"
+#include "../bloom_filter/bloomFilter.h"
+#include "../bloom_filter/hashFactory.h"
 
 
 shared_ptr<IApplicationService> ApplicationConfig::configure(const string& configLine) {

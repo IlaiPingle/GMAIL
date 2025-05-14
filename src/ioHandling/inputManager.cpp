@@ -1,49 +1,47 @@
 #include "../ioHandling/inputManager.h"
-#include "../bloom_Filter/bloomFilter.h"
+#include "../bloom_filter/bloomFilter.h"
 #include "../services/FileStorageService.h"
-#include "../bloom_Filter/hashFactory.h"
+#include "../bloom_filter/hashFactory.h"
 #include <sstream>
-enum class Command {
-    POST = 1,
-    GET = 2,
-    DELETE = 3
-};
 InputManager::InputManager() : m_commandProcessor(nullptr){}
 
-InputManager::InputManager(unique_ptr<CommandProcessor> commandProcessor) 
-    : m_commandProcessor(move(commandProcessor)) {}
-
-string InputManager::processCommand(const string& line) {
-    istringstream iss(line);
-    int command;
-    
-    if (line.empty()) {
-        return "400 Bad Request"; // Empty command
-    }
-        
-    if (!(iss >> command)) {
-       return "400 Bad Request"; // Invalid command
-    }
-
-    // Extract URL and trim leading whitespace
-    string url;
-    getline(iss >> ws, url);
-        
-    switch (command){
-        case static_cast<int>(Command::POST): {
-            return m_commandProcessor->addToBlacklist(url);
-        }
-        case static_cast<int>(Command::GET): {
-            return m_commandProcessor->checkBlacklist(url);
-        }
-        case static_cast<int>(Command::DELETE): {
-            return m_commandProcessor->deleteFromBlacklist(url);
-        }
-        default:
-            return "400 Bad Request"; // Invalid command
+InputManager::InputManager(unique_ptr<CommandProcessor> commandProcessor) {
+    if (commandProcessor) {
+        m_commandProcessor = move(commandProcessor);
+    } else {
+        m_commandProcessor = make_unique<CommandProcessor>();
     }
 }
+    
 
+string InputManager::processCommand(const string& command) {
+    // Validate command format
+    if (command.empty()) {
+        return "400 Bad Request";
+    }
+
+    istringstream iss(command);
+    string commandType;
+    iss >> commandType;
+
+    // Extract URL if present
+    string url;
+    getline(iss >> ws, url);
+
+    // Process command
+    if (commandType == "POST") {
+        return m_commandProcessor->addToBlacklist(url);
+    }
+    else if (commandType == "GET") {
+        return m_commandProcessor->checkBlacklist(url);
+    }
+    else if (commandType == "DELETE") {
+        return m_commandProcessor->deleteFromBlacklist(url);
+    }
+    else {
+        return "400 Bad Request";
+    }
+}
 unique_ptr <InputManager> InputManager::createFromConfig(const string& configLine) {
     istringstream iss(configLine);
     size_t bitArraySize;

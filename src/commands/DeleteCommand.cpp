@@ -7,11 +7,11 @@ DeleteCommand::DeleteCommand(shared_ptr<IFilterService> filterService,
 
 string DeleteCommand::execute(const string& url) {
     if (url.empty()) {
-        return "Bad Request\n"; // Empty URL check
+        return "400 Bad Request\n"; // Empty URL check
     }
     string standardURL = m_urlValidator->standardize(url);
     if (standardURL.empty()) {
-        return "Bad Request\n"; // Invalid URL format
+        return "400 Bad Request\n"; // Invalid URL format
     }
     if (!m_filterService->contains(url)) {
         return "404 Not Found"; // URL not found in the filter service

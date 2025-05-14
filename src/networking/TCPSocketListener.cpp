@@ -40,6 +40,10 @@ TCPSocketListener::~TCPSocketListener() {
     #endif
 }
 
+bool TCPSocketListener::start(int port) {
+    return start(port, "0.0.0.0"); // Default to all interfaces
+}
+
 bool TCPSocketListener::start(int port, const std::string& ipAddress) {
     m_hasAcceptedConnection = false;
     if (m_isListening) {

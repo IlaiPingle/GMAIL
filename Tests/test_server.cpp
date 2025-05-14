@@ -1,7 +1,5 @@
 #include <gtest/gtest.h>
 #include "../src/networking/Server.h"
-=======
-#include "../networking/server.h"
 
 
 // Test for server initialization

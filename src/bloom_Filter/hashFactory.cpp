@@ -1,7 +1,4 @@
 #include "hashFactory.h"
-
-
-
 // function which creates the hash functions for now it creates only repeatedHash
 // it takes an array of the repeats each hash function should do.
 // returns a vector of hashable functions.

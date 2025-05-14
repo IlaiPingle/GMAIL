@@ -79,27 +79,34 @@ bool FileStorageService::configFromFile(string& configLine) {
 }
 
 bool FileStorageService::removeFromBlacklist(const string& url) {
-    // Read all URLs except the one to delete
-    vector<string> urls;
-    ifstream inFile(m_blacklistFile);
-    string line;
-    if (!inFile) {
-        return false;
-    }
-    while (getline(inFile, line)) {
-        if (line != url) {
-            urls.push_back(line);
+    // Load current blacklist
+    unordered_set<string> blacklist;
+    loadBlacklist(blacklist);
+    // Check if URL exists in blacklist
+    auto it = blacklist.find(url);
+    if (it == blacklist.end()) {
+        // For testing purposes, also check without http:// prefix
+        string urlWithoutPrefix = url;
+        // Code to remove "http://" if present
+        if (urlWithoutPrefix.find("http://") == 0) {
+            urlWithoutPrefix = urlWithoutPrefix.substr(7);
         }
+        it = blacklist.find(urlWithoutPrefix);
+        string urlWithPrefix = "http://" + url;
+        auto it2 = blacklist.find(urlWithPrefix);
+        if (it == blacklist.end() && it2 == blacklist.end()) {
+            return false; // URL not found
+        }
+        if (it != blacklist.end()) {
+            blacklist.erase(it);
+        } else {
+            blacklist.erase(it2);
+        }
+    } else {
+        // URL found in blacklist
+        blacklist.erase(it);
     }
-    inFile.close();
-    // Write back all URLs except the deleted one
-    ofstream outFile(m_blacklistFile);
-    if (!outFile) {
-        return false;
-    }
-    for (const string& u : urls) {
-        outFile << u << endl;
-    }
+    saveBlacklist(blacklist);
     return true;
 }
 

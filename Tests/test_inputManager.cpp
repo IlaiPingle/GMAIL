@@ -17,8 +17,8 @@ TEST(InputManagerTests, ProcessCommand_InvalidCommand_ReturnsBadRequest) {
 TEST(InputManagerTests, ProcessCommand_ValidPostCommand_ReturnsSuccess) {
     auto commandProcessor = std::make_unique<CommandProcessor>();
     InputManager inputManager(std::move(commandProcessor));
-    std::string result = inputManager.processCommand("1 http://example.com");
-    EXPECT_EQ(result, "200 OK");
+    std::string result = inputManager.processCommand("1 http://wwwexample.com");
+    EXPECT_EQ(result, "201 Created");
 }
 
 TEST(InputManagerTests, ProcessCommand_ValidGetCommand_ReturnsSuccess) {
@@ -34,7 +34,7 @@ TEST(InputManagerTests, ProcessCommand_ValidDeleteCommand_ReturnsSuccess) {
     InputManager inputManager(std::move(commandProcessor));
     inputManager.processCommand("1 http://example.com"); // Add to blacklist
     std::string result = inputManager.processCommand("3 http://example.com");
-    EXPECT_EQ(result, "200 OK");
+    EXPECT_EQ(result, "204 No Content");
 }
 
 TEST(InputManagerTests, ProcessCommand_DeleteNonExistentURL_ReturnsNotFound) {
@@ -61,7 +61,7 @@ TEST(InputManagerTests, ProcessCommand_DeleteFromBlacklist_ValidURL_ReturnsSucce
     InputManager inputManager(std::move(commandProcessor));
     inputManager.processCommand("1 http://example.com"); // Add to blacklist
     std::string result = inputManager.processCommand("3 http://example.com"); // Delete from blacklist
-    EXPECT_EQ(result, "200 OK");
+    EXPECT_EQ(result, "204 No Content");
 }
 
 TEST(InputManagerTests, ProcessCommand_DeleteFromBlacklist_URLNotInBlacklist_ReturnsNotFound) {

@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
-#include "../src/bloom_Filter/bloomFilter.h"
-#include "../src/bloom_Filter/hashFactory.h"
+#include "../src/bloom_filter/bloomFilter.h"
+#include "../src/bloom_filter/hashFactory.h"
 #include "../src/services/FileStorageService.h"
 #include <memory>
 #include <functional>

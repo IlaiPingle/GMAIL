@@ -18,10 +18,5 @@ string DefaultURLNormalizer::normalize(const string& url) {
         normalizedUrl = normalizedUrl.substr(0, end + 1);
     }
     
-    // Validate www prefix
-    if (normalizedUrl.find("www.") != 0) {
-        return ""; // Invalid URL format (not starting with "www.")
-    }
-    
     return normalizedUrl;
 }
