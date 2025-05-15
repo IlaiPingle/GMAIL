@@ -20,7 +20,6 @@ private:
 
 public:
     CommandProcessor();
-    string deleteFromBlacklist(const string& url);
     string CommandProcessor::ProssessCommand(const string& request);
 };
 

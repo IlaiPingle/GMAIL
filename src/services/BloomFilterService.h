@@ -25,5 +25,7 @@ public:
     bool initialize() override;
     bool add(const string& url) override;
     bool remove(const string& url) override;
+    bool contains(const string& url) override;
+    bool containsAbsolutely(const string& url) override;
 };
 #endif // BLOOMFILTERSERVICE_H

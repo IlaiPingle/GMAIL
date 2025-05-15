@@ -19,10 +19,10 @@ size_t DefaultBitVector::size() const {
     return m_bits.size();
 }
 
-std::vector<bool> DefaultBitVector::getVector() const {
+vector<bool> DefaultBitVector::getVector() const {
     return m_bits;
 }
 
-void DefaultBitVector::setVector(const std::vector<bool>& bits) {
+void DefaultBitVector::setVector(const vector<bool>& bits) {
     m_bits = bits;
 }

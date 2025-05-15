@@ -4,8 +4,8 @@
 #include <string>
 using namespace std;
 
-class DefaultURLFormatter : public IURLFormatter {
+class DefaultURLFormatter {
 public:
-    string formatURL(const string& url) override;
+    static string formatURL(const string& url);
 };
 #endif // DEFAULTURLFORMATTER_H

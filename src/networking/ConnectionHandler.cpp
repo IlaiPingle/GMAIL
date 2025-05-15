@@ -3,7 +3,7 @@
 #include <iostream>
 
 ConnectionHandler::ConnectionHandler(shared_ptr<IApplicationService> appService)
-    : m_appService(appService) {}
+: m_appService(appService) {}
 
 void ConnectionHandler::handleConnection(shared_ptr<ISocketConnection> connection) {
     if (!connection || !connection->isConnected()) {
@@ -20,17 +20,17 @@ void ConnectionHandler::handleConnection(shared_ptr<ISocketConnection> connectio
         } else {
             gotCommand = connection->receiveData(command);
         }
-
+        
         if (!gotCommand) {
             break; // Connection closed
         }
-
+        
         if (command.empty()) continue;
-
+        
         try {
             processCommand(connection, command);
         } catch (...) {
-       
+            
         }
     }
 }

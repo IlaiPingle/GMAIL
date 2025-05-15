@@ -1,11 +1,12 @@
 #ifndef DEFAULTURLNORMALIZER_H
 #define DEFAULTURLNORMALIZER_H
 #include "../interfaces/IURLNormalizer.h"
+#include "../utils/DefaultURLFormatter.h"
 #include <string>
 using namespace std;
 
-class DefaultURLNormalizer : public IURLNormalizer {
-public:
-    string normalize(const string& url) override;
+class DefaultURLNormalizer  {
+    public:
+    static string normalize(const string& url) ;
 };
 #endif // DEFAULTURLNORMALIZER_H

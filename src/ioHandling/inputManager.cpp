@@ -21,8 +21,7 @@ bool InputManager::splitRequest(string& command, string& url) {
     string url;
     getline(iss >> ws, url);
 
-    URLValidator urlValidator;
-    string standardURL = urlValidator.standardize(url);
+    string standardURL = URLValidator::standardize(url);
     if (standardURL.empty()) {
         return false;
     }

@@ -16,7 +16,6 @@ class FileStorageService : public IStorageService {
 private:
     string m_bitArrayFile;
     string m_blacklistFile;
-    string m_configFile;
 
 public:
     FileStorageService(const string& bitArrayPath = "data/bit_array.dat",

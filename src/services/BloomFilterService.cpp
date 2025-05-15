@@ -31,3 +31,9 @@ bool BloomFilterService::remove(const string &url) {
     return m_bloomFilter->remove(url) && m_storageService->removeFromBlacklist(url);
 }
 
+bool BloomFilterService::contains(const string& url) {
+    return m_bloomFilter->contains(url);
+}
+bool BloomFilterService::containsAbsolutely(const string& url) {
+    return m_bloomFilter->containsAbsolutely(url);
+}
