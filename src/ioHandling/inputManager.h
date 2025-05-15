@@ -1,9 +1,9 @@
 # ifndef INPUTMANAGER_H
 # define INPUTMANAGER_H
-
+#include "../utils/URLValidator.h"
 #include <string>
 #include <memory>
-#include "../utils/URLValidator.h"
+#include <sstream>
 using namespace std; 
 class InputManager {
     private:
@@ -11,7 +11,7 @@ class InputManager {
     public:
         InputManager();
         ~InputManager() = default; // Destructor 
-        static bool InputManager::splitRequest(string& command, string& url);
+        static bool splitRequest(string& command, string& url);
         
 
 };

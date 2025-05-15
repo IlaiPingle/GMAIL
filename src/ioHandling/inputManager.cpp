@@ -1,9 +1,7 @@
 #include "../ioHandling/inputManager.h"
-#include "../bloom_filter/bloomFilter.h"
-#include "../services/FileStorageService.h"
-#include "../bloom_filter/hashFactory.h"
 
-#include <sstream>
+
+
 
 
 
@@ -18,7 +16,6 @@ bool InputManager::splitRequest(string& command, string& url) {
     string commandType;
     iss >> commandType;
     
-    string url;
     getline(iss >> ws, url);
 
     string standardURL = URLValidator::standardize(url);

@@ -2,7 +2,6 @@
 #define CHECKCOMMAND_H
 #include "../interfaces/ICommand.h"
 #include "../interfaces/IFilterService.h"
-#include "../interfaces/IURLValidator.h"
 #include <memory>
 using namespace std;
 class CheckCommand : public ICommand {

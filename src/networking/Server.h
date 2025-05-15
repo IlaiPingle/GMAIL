@@ -26,18 +26,19 @@ class Server {
         
         
 
-    public:
-
-        Server(shared_ptr<ISocketListener> socketListener,
-               shared_ptr<IApplicationService> appService);
-        ~Server();
-        int getPort() const;
-        bool isRunning() const;
-        bool isInitialized() const;
-        // bool handleClient(int clientId);
-        bool start();
-        bool start(int port);
-        void stop();
-        void run();
+    // public:
+// // 
+//         Server(shared_ptr<ISocketListener> socketListener,
+//                shared_ptr<IApplicationService> appService);
+//         ~Server();
+//         int getPort() const;
+//         bool isRunning() const;
+//         bool isInitialized() const;
+//         // bool handleClient(int clientId);
+//         bool start();
+//         bool start(int port);
+//         void stop();
+//         void run();
+// 
 };
 #endif // SERVER_H

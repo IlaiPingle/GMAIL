@@ -2,9 +2,7 @@
 #define URLVALIDATOR_H
 #include <string>
 #include <memory>
-#include "../interfaces/IURLValidator.h"
-#include "../interfaces/IURLFormatter.h"
-#include "../interfaces/IURLNormalizer.h"
+# include "DefaultURLNormalizer.h"
 using namespace std;
 class URLValidator  {
     private:

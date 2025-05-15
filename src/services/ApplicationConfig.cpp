@@ -7,9 +7,9 @@
 #include "../utils/URLValidator.h"
 #include "../utils/DefaultURLFormatter.h"
 #include "../utils/DefaultURLNormalizer.h"
-#include "../utils/DefaultBitVector.h"
-#include "../bloom_filter/bloomFilter.h"
-#include "../bloom_filter/hashFactory.h"
+# include "../utils/DefaultBitVector.h"
+#include "../bloom_Filter/bloomFilter.h"
+#include "../bloom_Filter/hashFactory.h"
 
 const string ApplicationConfig::m_configFilePath = "data/config.txt";
 /**
@@ -64,7 +64,7 @@ shared_ptr<IApplicationService> ApplicationConfig::createApplicationService(
         auto filterService = make_shared<BloomFilterService>(filter, storageService);
         
         // create command processor
-        auto commandProcessor = make_shared<CommandProcessor>();
+        auto commandProcessor = make_shared<CommandProcessor>(filterService);
 
         // Create and initialize application service
         auto appService = make_shared<ApplicationService>(filterService, storageService,commandProcessor);

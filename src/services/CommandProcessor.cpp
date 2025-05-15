@@ -1,10 +1,8 @@
 #include "CommandProcessor.h"
-#include "../utils/URLValidator.h"
-#include "../bloom_filter/bloomFilter.h"
-#include "../services/FileStorageService.h"
-#include "../interfaces/IStorageService.h"
-#include <iostream>
 
+CommandProcessor::CommandProcessor(shared_ptr<IFilterService> filterService)
+    : m_commandFactory(filterService) {}
+    
 string CommandProcessor::ProssessCommand(const string& request) {
     string command = request;
     string url;

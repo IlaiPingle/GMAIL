@@ -2,7 +2,9 @@
 #define IBLOOMFILTER_H
 #include <string>
 #include <vector>
+# include <memory>
 #include <unordered_set>
+# include "../bloom_Filter/hashable.h"
 using namespace std;
 /**
 * @brief Interface for a Bloom Filter.

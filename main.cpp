@@ -37,15 +37,12 @@ int main(int argc, char* argv[]) {
             return -1;
         }
         // Create and start server
-        shared_ptr<ISocketListener> listener = make_shared<TCPSocketListener>();
         Server server(port, appService);
 
         if (!server.start()) {
             return -1;
         }
         
-        // Run server (blocks until server is stopped)
-        server.run();
         return 0;
     }
     catch (const exception& e) {

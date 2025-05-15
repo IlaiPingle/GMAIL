@@ -6,11 +6,11 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: bloom_server
-    ports:
-      - "12345:12345"
-    command: ["0.0.0.0", "12345", "m=10000 k=7"]
     stdin_open: true
     tty: true
+    command: ["./bloom_filter_app", "1234", "256", "3", "2", "1"]  # args לשרת
+    networks:
+      - appnet
 
   client:
     build:
@@ -19,12 +19,11 @@ services:
     container_name: bloom_client
     depends_on:
       - server
-    command: ["server", "12345"]
     stdin_open: true
     tty: true
+    command: ["python", "Client.py", "bloom_server", "1234"]  # args לקליינט
+    networks:
+      - appnet
 
-  tests:
-    build:
-      context: .
-      dockerfile: tests/Dockerfile
-    container_name: bloom_tests
+networks:
+  appnet:    

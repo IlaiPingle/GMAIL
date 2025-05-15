@@ -6,8 +6,6 @@
 #include "../interfaces/IApplicationService.h"
 #include "../interfaces/IFilterService.h"
 #include "../interfaces/IStorageService.h"
-#include "../interfaces/IURLValidator.h"
-#include "../commands/CommandFactory.h"
 #include "CommandProcessor.h"
 using namespace std;
 /** 
@@ -33,6 +31,9 @@ public:
 
     // initializes the the Bloomfilterservice with configuration line.   
     bool initialize(const string& configLine) override;
+
+    // processes the command line and returns the result
+    string processCommand(const string& commandLine) override;
 
 };
 #endif // APPLICATIONSERVICE_H

@@ -22,10 +22,3 @@ shared_ptr<ICommand> CommandFactory::getCommand(const string& commandName) {
     }
     return nullptr;
 }
-
-shared_ptr<CommandFactory> CommandFactory::createDefault(
-    shared_ptr<IFilterService> filterService,
-    shared_ptr<IStorageService> storageService){
-    
-    return make_shared<CommandFactory>(filterService, storageService);
-}

@@ -14,7 +14,6 @@ public:
     virtual bool saveBlacklist(const unordered_set<string>& blacklist) = 0;
     virtual bool loadBlacklist(unordered_set<string>& blacklist) = 0;
     virtual bool removeFromBlacklist(const string& url) = 0;
-    virtual bool configFromFile(string& configLine) = 0;
     virtual bool isInBlacklist(const string& url) = 0;
 };
 #endif // IBLACKLISTSTORAGE_H

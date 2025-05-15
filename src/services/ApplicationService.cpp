@@ -14,5 +14,8 @@ ApplicationService::ApplicationService(
         // Initialize the filter service
         return m_filterService->initialize();
     }
+    string ApplicationService::processCommand(const string& commandLine) {
+        return m_commandProcessor->ProssessCommand(commandLine);
+    }
     
     

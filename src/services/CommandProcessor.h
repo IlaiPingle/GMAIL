@@ -19,8 +19,8 @@ private:
     CommandFactory m_commandFactory;
 
 public:
-    CommandProcessor();
-    string CommandProcessor::ProssessCommand(const string& request);
+    CommandProcessor(shared_ptr<IFilterService> filterService);
+    string ProssessCommand(const string& request);
 };
 
 #endif // COMMAND_PROCESSOR_H
