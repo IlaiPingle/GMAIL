@@ -1,12 +1,5 @@
 #include "../ioHandling/inputManager.h"
 
-
-
-
-
-
-    
-
 bool InputManager::splitRequest(string& command, string& url) {
     // Validate command format
     if (command.empty()) {

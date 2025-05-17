@@ -1,7 +1,7 @@
 #ifndef HASHFACTORY_H
 #define HASHFACTORY_H
 #include "repeatedHash.h"
-#include "hashable.h"
+#include "../interfaces/hashable.h"
 #include <vector>
 #include <memory>
 using namespace std;

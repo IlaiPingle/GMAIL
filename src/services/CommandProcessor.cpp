@@ -1,6 +1,6 @@
 #include "CommandProcessor.h"
 
-CommandProcessor::CommandProcessor(shared_ptr<IFilterService> filterService)
+CommandProcessor::CommandProcessor(const shared_ptr<IFilterService>& filterService)
     : m_commandFactory(filterService) {}
     
 string CommandProcessor::ProssessCommand(const string& request) {
@@ -10,19 +10,14 @@ string CommandProcessor::ProssessCommand(const string& request) {
     if (!isSplited) {
         return "400 Bad Request"; // Invalid command format
     }
-    string response;
-    if (command == "POST") {
-        response = m_commandFactory.getCommand("add")->execute(url);
+    shared_ptr<ICommand> commandObject = m_commandFactory.getCommand(command);
+    if (!commandObject) {
+        return "400 Bad Request"; // Command not found
     }
-    else if (command == "GET") {
-        response = m_commandFactory.getCommand("check")->execute(url);
-    }
-    else if (command == "DELETE") {
-        response = m_commandFactory.getCommand("delete")->execute(url);
-    }
-    else {
-        return "400 Bad Request\n";
-    }
+    
+    // Execute the command and get the response
+    string response = commandObject->execute(url);
+
     if (response ==""){
         return "404 Not Found\n";
     }

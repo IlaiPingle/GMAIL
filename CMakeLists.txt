@@ -9,11 +9,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(${CMAKE_SOURCE_DIR})
 
 # Add source files for the library
-add_library(bloom_filter
+add_library(bloom_filter_lib
     # Original files
-    ${CMAKE_SOURCE_DIR}/src/bloom_Filter/bloomFilter.cpp
-    ${CMAKE_SOURCE_DIR}/src/bloom_Filter/repeatedHash.cpp
+    ${CMAKE_SOURCE_DIR}/src/bloom_Filter/bloomFilter.cpp 
     ${CMAKE_SOURCE_DIR}/src/bloom_Filter/hashFactory.cpp
+    ${CMAKE_SOURCE_DIR}/src/bloom_Filter/repeatedHash.cpp
+
 
     ${CMAKE_SOURCE_DIR}/src/commands/CommandFactory.cpp
     ${CMAKE_SOURCE_DIR}/src/commands/AddCommand.cpp
@@ -33,8 +34,6 @@ add_library(bloom_filter
     ${CMAKE_SOURCE_DIR}/src/utils/URLValidator.cpp
     ${CMAKE_SOURCE_DIR}/src/utils/DefaultURLFormatter.cpp
     ${CMAKE_SOURCE_DIR}/src/utils/DefaultURLNormalizer.cpp
-    ${CMAKE_SOURCE_DIR}/src/utils/DefaultBitVector.cpp
-
 
 
 
@@ -48,7 +47,7 @@ add_library(bloom_filter
 )
 # main application target
 add_executable(bloom_filter_app ${CMAKE_SOURCE_DIR}/main.cpp)
-target_link_libraries(bloom_filter_app bloom_filter)
+target_link_libraries(bloom_filter_app bloom_filter_lib)
 
 # # Find Google Test
 # include(FetchContent)

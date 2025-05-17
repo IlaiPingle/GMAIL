@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <functional>
 #include <string>
-#include "hashable.h"
+#include "../interfaces/hashable.h"
 using namespace std;
 class repeatedHash : public hashable {
     

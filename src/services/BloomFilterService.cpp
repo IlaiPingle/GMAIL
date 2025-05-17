@@ -1,12 +1,12 @@
 #include "BloomFilterService.h"
 
 
-BloomFilterService::BloomFilterService(shared_ptr<IBloomFilter> filter, shared_ptr<IStorageService> storage)
+BloomFilterService::BloomFilterService(shared_ptr<bloomFilter> filter, shared_ptr<FileStorageService> storage)
 : m_bloomFilter(move(filter)), m_storageService(move(storage)) {}
 
 bool BloomFilterService::initialize() {
     vector<bool> bitArray = m_bloomFilter->getBitArray();
-    bool isBitArrayLoaded = m_storageService->loadBitArray(bitArray);
+    bool isBitArrayLoaded = m_storageService->loadBitArray(m_bloomFilter);
     m_bloomFilter->setBitArray(bitArray);
     unordered_set<string> blackList;
     bool isBlacklistLoaded = m_storageService->loadBlacklist(blackList);
@@ -15,11 +15,14 @@ bool BloomFilterService::initialize() {
 }
 
 bool BloomFilterService::add(const string& url) {
-    if (!m_bloomFilter->containsAbsolutely(url)) {
+    if (!contains(url)) {
         m_bloomFilter->add(url);
-        bool isBitsSaved = m_storageService->saveBitArray(m_bloomFilter->getBitArray());
-        bool isBlacklistSaved = m_storageService->saveBlacklist(m_bloomFilter->getBlackList());
-        return isBitsSaved && isBlacklistSaved;
+        bool isBlacklistSaved = m_storageService->addToBlacklist(url);
+        return isBlacklistSaved;
+    } else if (!m_bloomFilter->containsAbsolutely(url)) {
+        m_bloomFilter->add(url);
+        bool isBlacklistSaved = m_storageService->addToBlacklist(url);
+        return isBlacklistSaved;
     }
     return false; // URL already exists in the filter
 }

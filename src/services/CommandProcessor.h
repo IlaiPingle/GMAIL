@@ -3,8 +3,6 @@
 
 #include <string>
 #include <memory>
-#include "../interfaces/IBloomFilter.h"
-#include "../interfaces/IStorageService.h"
 #include "../ioHandling/inputManager.h"
 #include "../commands/CommandFactory.h"
 using namespace std;
@@ -19,7 +17,7 @@ private:
     CommandFactory m_commandFactory;
 
 public:
-    CommandProcessor(shared_ptr<IFilterService> filterService);
+    CommandProcessor(const shared_ptr<IFilterService>& filterService);
     string ProssessCommand(const string& request);
 };
 

@@ -2,7 +2,6 @@
 #include <memory>
 #include <fstream>
 #include "src/services/ApplicationConfig.h"
-#include "src/networking/TCPSocketListener.h"
 #include "src/networking/Server.h"
 #include "src/services/FileStorageService.h"
 
@@ -14,7 +13,6 @@ int main(int argc, char* argv[]) {
         if (argc < 2) {
             return -1;
         }
-        
         // Parse input number
         int port = stoi(argv[1]);
         
@@ -36,13 +34,16 @@ int main(int argc, char* argv[]) {
         if (!appService) {
             return -1;
         }
+        // check port bounds
+        if (port < 1024 || port > 49151) {
+            return -1;
+        }
         // Create and start server
         Server server(port, appService);
 
         if (!server.start()) {
             return -1;
         }
-        
         return 0;
     }
     catch (const exception& e) {
