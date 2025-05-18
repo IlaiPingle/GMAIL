@@ -35,14 +35,13 @@ vector<size_t> ApplicationConfig::parseHashIds(const string& configLine, size_t&
     if (!(iss >> bitArraySize)) {
         return hashIds; // Empty vector indicates error
     }
-    
     size_t hashId;
     while (iss >> hashId) {
         hashIds.push_back(hashId);
     }
-    
     return hashIds;
 }
+
 /** 
 * @brief Creates the application service with the specified parameters.
 * @param bitArraySize The size of the bit array.

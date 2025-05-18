@@ -1,22 +1,18 @@
 #include "DefaultURLNormalizer.h"
 #include <string>
 
-string DefaultURLNormalizer::normalize(const string& url){
-    string formatedURL =  DefaultURLFormatter::formatURL(url);
-    
+bool DefaultURLNormalizer::normalize(string& url){
     // Remove leading whitespace
-    size_t start = formatedURL.find_first_not_of(" \t\n\r");
+    size_t start = url.find_first_not_of(" \t\n\r");
     if (start != string::npos) {
-        formatedURL = formatedURL.substr(start);
+        url = url.substr(start);
     } else {
-        return ""; // Empty URL after trimming
+        return false; // Empty URL after trimming
     }
-    
     // Remove trailing whitespace
-    size_t end = formatedURL.find_last_not_of(" \t\n\r");
+    size_t end = url.find_last_not_of(" \t\n\r");
     if (end != string::npos) {
-        formatedURL = formatedURL.substr(0, end + 1);
+        url = url.substr(0, end + 1);
     }
-    
-    return formatedURL;
+    return true;
 }

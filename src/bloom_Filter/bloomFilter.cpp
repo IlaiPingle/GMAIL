@@ -24,9 +24,9 @@ bool bloomFilter::add(const string& url) {
         }
         size_t index = (*func)(url) % m_arraySize;
         m_bitArray[index] = true;
-        cout << "Hash function index: " << m_bitArray[index] << " "; // Debug message *****
+        cout << "Hash function index: " << m_bitArray[index] << "\n"; // Debug message *****
     }
-    cout << "/n"; // Debug message *****
+    
     
     m_blackList.insert(url); // Store the real URL in the blacklist
     return true; // Return true to indicate that the URL was added
@@ -49,11 +49,10 @@ bool bloomFilter::contains(const string& url) const {
             continue; // Skip null hash functions
         }
         size_t index = (*func)(url) % m_arraySize;
-        cout << "Hash function index: " << m_bitArray[index] << " ";  // **** Debug message *****
+        cout << "Hash function index: " << m_bitArray[index] << "\n";  // **** Debug message *****
         if (!m_bitArray[index]){
             return false;
         }
-        cout << "/n"; // **** Debug message *****
     }
     return true;
 }

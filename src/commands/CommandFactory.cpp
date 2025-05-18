@@ -11,7 +11,7 @@ void CommandFactory::registerCommand(const string& name,const shared_ptr<IComman
 
 void CommandFactory::registerDefaultCommands(const shared_ptr<IFilterService>& filterService) {
     registerCommand("POST", make_shared<AddCommand>(filterService));
-    registerCommand("CHECK", make_shared<CheckCommand>(filterService));
+    registerCommand("GET", make_shared<CheckCommand>(filterService));
     registerCommand("DELETE", make_shared<DeleteCommand>(filterService));
 }
 

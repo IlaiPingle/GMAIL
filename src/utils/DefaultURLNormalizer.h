@@ -6,6 +6,6 @@ using namespace std;
 
 class DefaultURLNormalizer  {
     public:
-    static string normalize(const string& url) ;
+    static bool normalize(string& url) ;
 };
 #endif // DEFAULTURLNORMALIZER_H

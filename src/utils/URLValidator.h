@@ -9,7 +9,7 @@ class URLValidator  {
     URLValidator() = delete;
     
     public:
-    static string standardize(const string& url) ;
     static bool isValid(const string& url);
+    static bool isValidURL(string& url);
 };
 #endif // URLVALIDATOR_H

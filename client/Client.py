@@ -11,8 +11,9 @@ def main(argv):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client:
             client.connect((dest_ip, dest_port))
             while True:
-                UserInput = input()
-                client.sendall((UserInput+ "\n").encode())
+                UserInput = input().strip()
+                print(f"User entered: {UserInput}")
+                client.sendall((UserInput + "\n").encode())
                 response = b''
                 while True:
 

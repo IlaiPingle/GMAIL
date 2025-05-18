@@ -52,8 +52,8 @@ void Server::handleClient(int clientId) {
         if(request.back() == '\n') {
             string response = m_appService->processCommand(request);
             send(clientId, response.c_str(), response.size(), 0);
+            request.clear(); 
         }
-        
     }
     memset(buffer, 0, sizeof(buffer)); // Clear the buffer
     close(clientId); // Close the client socket
