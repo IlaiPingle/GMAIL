@@ -9,7 +9,7 @@ repeatedHash::repeatedHash(size_t repeats)
 size_t repeatedHash::operator()(const string& input) const {
     hash<string> hasher;
     size_t hash = hasher(input);
-    for (size_t i = 1; i < m_repeats; ++i) {
+    for (size_t i = 1; i < m_repeats; i++) {
         hash = hasher(to_string(hash));
     }
     return hash;

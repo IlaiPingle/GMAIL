@@ -3,22 +3,22 @@
 
 #include <string>
 #include <memory>
-#include "../interfaces/IBloomFilter.h"
-#include "../interfaces/IStorageService.h"
+#include "../ioHandling/inputManager.h"
+#include "../commands/CommandFactory.h"
 using namespace std;
+/**
+ * @class CommandProcessor
+ * @brief A class that processes commands related to URL filtering.
+ *
+ * This class responsible for taking user request and executes the corresponding command. 
+ * */
 class CommandProcessor {
 private:
-    unique_ptr<IBloomFilter> m_bloomFilter;
-    unique_ptr<IStorageService> m_storageService;
+    CommandFactory m_commandFactory;
 
 public:
-    CommandProcessor();
-    CommandProcessor(std::unique_ptr<IBloomFilter> bloomFilter,
-                    unique_ptr<IStorageService> storageService);
-    
-    string addToBlacklist(const string& url);
-    string checkBlacklist(const string& url);
-    string deleteFromBlacklist(const string& url);
+    CommandProcessor(const shared_ptr<IFilterService>& filterService);
+    string ProssessCommand(const string& request);
 };
 
 #endif // COMMAND_PROCESSOR_H

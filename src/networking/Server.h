@@ -2,32 +2,22 @@
 #define SERVER_H
 #include <memory>
 #include <string>
-#include "ISocketListener.h"
-#include "ConnectionHandler.h"
-#include "../interfaces/IApplicationService.h"
+#include <string.h>
+#include <iostream>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <unistd.h>
+# include "../services/ApplicationService.h"
+
+
 using namespace std;
 class Server {
     private:
         int m_port;
-        bool m_running;
-        bool m_initialized;
-        std::shared_ptr<ISocketListener> m_socketListener;
-        //std::shared_ptr<ConnectionHandler> m_connectionHandler;
-        std::shared_ptr<IApplicationService> m_appService;
-        
-
-    public:
-        Server(int port);
-        Server(std::shared_ptr<ISocketListener> socketListener,
-               std::shared_ptr<IApplicationService> appService);
-        ~Server();
-        int getPort() const;
-        bool isRunning() const;
-        bool isInitialized() const;
-        bool handleClient(int clientId);
+        shared_ptr<ApplicationService> m_appService;
+    public: 
+        Server(int port,shared_ptr<ApplicationService> appService);
         bool start();
-        bool start(int port, const std::string& ipAddress);
-        void stop();
-        void run();
+        void handleClient(int clientId);
 };
 #endif // SERVER_H

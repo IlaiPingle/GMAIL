@@ -2,24 +2,12 @@
 #include <algorithm>
 #include <filesystem>
 
-
 // Default constructor
 bloomFilter::bloomFilter() : m_arraySize(0) {}
+
 // Constructor
 bloomFilter::bloomFilter(size_t size, const vector<shared_ptr<hashable>>& hashFunctions)
 : m_bitArray(size, false), m_arraySize(size), m_hashFunctions(hashFunctions) {}
-
-bloomFilter::bloomFilter(size_t size, const vector<shared_ptr<hashable>>& hashFunctions, shared_ptr<IBitVector> bitVector)
-: m_bitArray(size, false), m_arraySize(size), m_hashFunctions(hashFunctions), m_bitVector(bitVector) {
-    if (m_bitVector && size > 0) {
-        // Initialize the bit vector if needed
-        for (size_t i = 0; i < size; ++i) {
-            if (m_bitArray[i]) {
-                m_bitVector->set(i);
-            }
-        }
-    }
-}
 
 bool bloomFilter::add(const string& url) {
     if (m_arraySize == 0 || m_hashFunctions.empty()) {
@@ -42,7 +30,6 @@ bool bloomFilter::remove(const string& url) {
     return result > 0; // Return true if the URL was removed, false otherwise
 }
 
-
 bool bloomFilter::contains(const string& url) const {
     if (m_hashFunctions.empty() || m_arraySize == 0) {
         return false; // No hash functions, cannot check for existence
@@ -60,13 +47,8 @@ bool bloomFilter::contains(const string& url) const {
 }
 
 bool bloomFilter::containsAbsolutely(const string& url) const {
-    if (contains(url)) {
-        // Check if the URL is in the blacklist
-        return m_blackList.find(url) != m_blackList.end();
-    }
-    return false;
+    return m_blackList.find(url) != m_blackList.end();
 }
-
 
 const unordered_set < string >& bloomFilter::getBlackList() const {
     return m_blackList;
@@ -74,6 +56,7 @@ const unordered_set < string >& bloomFilter::getBlackList() const {
 
 void bloomFilter::setBlackList(const unordered_set <string>& blackList) {
     m_blackList = blackList;
+
 }
 const vector<bool>& bloomFilter::getBitArray() const {
     return m_bitArray;
@@ -82,4 +65,12 @@ const vector<bool>& bloomFilter::getBitArray() const {
 void bloomFilter::setBitArray(const vector<bool>& bitArray) {
     m_bitArray = bitArray;
     m_arraySize = bitArray.size();
+}
+
+void bloomFilter::setHashFunctions(const vector<shared_ptr<hashable>>& hashFunctions) {
+    m_hashFunctions = hashFunctions;
+}
+
+const vector<shared_ptr<hashable>>  bloomFilter::getHashFunctions() const {
+    return m_hashFunctions;
 }

@@ -2,18 +2,14 @@
 #define URLVALIDATOR_H
 #include <string>
 #include <memory>
-#include "../interfaces/IURLValidator.h"
-#include "../interfaces/IURLFormatter.h"
-#include "../interfaces/IURLNormalizer.h"
+# include "DefaultURLNormalizer.h"
 using namespace std;
-class URLValidator : public IURLValidator {
+class URLValidator  {
     private:
-    shared_ptr<IURLFormatter> m_formatter;
-    shared_ptr<IURLNormalizer> m_normalizer;
-public:
-    URLValidator();
-    URLValidator(shared_ptr<IURLFormatter> formatter, shared_ptr<IURLNormalizer> normalizer);
-    string standardize(const string& url) override;
-    bool isValid(const string& url) override;
+    URLValidator() = delete;
+    
+    public:
+    static bool isValid(const string& url);
+    static bool isValidURL(string& url);
 };
 #endif // URLVALIDATOR_H

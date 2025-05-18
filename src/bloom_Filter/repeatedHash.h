@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <functional>
 #include <string>
-#include "hashable.h"
+#include "../interfaces/hashable.h"
 using namespace std;
 class repeatedHash : public hashable {
     
@@ -15,10 +15,8 @@ class repeatedHash : public hashable {
     repeatedHash();
     repeatedHash(size_t repeats);
     repeatedHash(const repeatedHash& other) = default; // Copy constructor 
-
     // Destructor
     ~repeatedHash() override = default;
-
     // implemented the pure virtual function from hashable
     size_t operator()(const string& str) const override ;
 };

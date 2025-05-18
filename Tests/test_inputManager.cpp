@@ -1,86 +1,85 @@
 #include <gtest/gtest.h>
 #include "../src/ioHandling/inputManager.h"
-#include "../src/services/CommandProcessor.h"
+#include "../src/utils/URLValidator.h"
+#include <string>
+#include <sstream>
 
-TEST(InputManagerTests, ProcessCommand_EmptyCommand_ReturnsBadRequest) {
-    InputManager inputManager;
-    std::string result = inputManager.processCommand("");
-    EXPECT_EQ(result, "400 Bad Request");
+TEST(InputManagerTestsAlternate, SplitRequest_EmptyCommand_ReturnsFalse) {
+    std::string command = "";
+    std::string url;
+    bool result = InputManager::splitRequest(command, url);
+    EXPECT_FALSE(result);
 }
 
-TEST(InputManagerTests, ProcessCommand_InvalidCommand_ReturnsBadRequest) {
-    InputManager inputManager;
-    std::string result = inputManager.processCommand("INVALID_COMMAND");
-    EXPECT_EQ(result, "400 Bad Request");
+TEST(InputManagerTestsAlternate, SplitRequest_InvalidCommand_ReturnsFalse) {
+    std::string command = "INVALID"; // No URL part
+    std::string url;
+    bool result = InputManager::splitRequest(command, url);
+    EXPECT_FALSE(result);
 }
 
-TEST(InputManagerTests, ProcessCommand_ValidPostCommand_ReturnsSuccess) {
-    auto commandProcessor = std::make_unique<CommandProcessor>();
-    InputManager inputManager(std::move(commandProcessor));
-    std::string result = inputManager.processCommand("1 http://wwwexample.com");
-    EXPECT_EQ(result, "201 Created");
+TEST(InputManagerTestsAlternate, SplitRequest_InvalidURL_ReturnsFalse) {
+    std::string command = "POST invalid-url";
+    std::string url;
+    bool result = InputManager::splitRequest(command, url);
+    EXPECT_FALSE(result);
 }
 
-TEST(InputManagerTests, ProcessCommand_ValidGetCommand_ReturnsSuccess) {
-    auto commandProcessor = std::make_unique<CommandProcessor>();
-    InputManager inputManager(std::move(commandProcessor));
-    inputManager.processCommand("1 http://example.com"); // Add to blacklist
-    std::string result = inputManager.processCommand("2 http://example.com");
-    EXPECT_EQ(result, "200 OK");
+TEST(InputManagerTestsAlternate, SplitRequest_ValidCommand_ReturnsTrue) {
+    std::string command = "POST http://example.com";
+    std::string url;
+    bool result = InputManager::splitRequest(command, url);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(command, "POST");
+    EXPECT_EQ(url, "http://example.com");
 }
 
-TEST(InputManagerTests, ProcessCommand_ValidDeleteCommand_ReturnsSuccess) {
-    auto commandProcessor = std::make_unique<CommandProcessor>();
-    InputManager inputManager(std::move(commandProcessor));
-    inputManager.processCommand("1 http://example.com"); // Add to blacklist
-    std::string result = inputManager.processCommand("3 http://example.com");
-    EXPECT_EQ(result, "204 No Content");
+TEST(InputManagerTestsAlternate, SplitRequest_ValidCommandWithSpace_ReturnsTrue) {
+    std::string command = "GET   http://example.com";
+    std::string url;
+    bool result = InputManager::splitRequest(command, url);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(command, "GET");
+    EXPECT_EQ(url, "http://example.com");
 }
 
-TEST(InputManagerTests, ProcessCommand_DeleteNonExistentURL_ReturnsNotFound) {
-    auto commandProcessor = std::make_unique<CommandProcessor>();
-    InputManager inputManager(std::move(commandProcessor));
-    std::string result = inputManager.processCommand("3 http://nonexistent.com");
-    EXPECT_EQ(result, "404 Not Found");
+TEST(InputManagerTestsAlternate, SplitRequest_ValidDeleteCommand_ReturnsTrue) {
+    std::string command = "DELETE http://example.com";
+    std::string url;
+    bool result = InputManager::splitRequest(command, url);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(command, "DELETE");
+    EXPECT_EQ(url, "http://example.com");
 }
 
-TEST(InputManagerTests, CreateFromConfig_InvalidConfigLine_ReturnsNullptr) {
-    std::string invalidConfig = "INVALID_CONFIG";
-    auto inputManager = InputManager::createFromConfig(invalidConfig);
-    EXPECT_EQ(inputManager, nullptr);
+TEST(InputManagerTestsAlternate, SplitRequest_MissingURL_ReturnsFalse) {
+    std::string command = "DELETE ";
+    std::string url;
+    bool result = InputManager::splitRequest(command, url);
+    EXPECT_FALSE(result);
 }
 
-TEST(InputManagerTests, CreateFromConfig_ValidConfigLine_ReturnsInputManager) {
-    std::string validConfig = "1000 1 2 3";
-    auto inputManager = InputManager::createFromConfig(validConfig);
-    EXPECT_NE(inputManager, nullptr);
+TEST(InputManagerTestsAlternate, SplitRequest_NoSpaceBeforeURL_ReturnsFalse) {
+    std::string command = "DELETEhttp://example.com";
+    std::string url;
+    bool result = InputManager::splitRequest(command, url);
+    EXPECT_FALSE(result);
 }
 
-TEST(InputManagerTests, ProcessCommand_DeleteFromBlacklist_ValidURL_ReturnsSuccess) {
-    auto commandProcessor = std::make_unique<CommandProcessor>();
-    InputManager inputManager(std::move(commandProcessor));
-    inputManager.processCommand("1 http://example.com"); // Add to blacklist
-    std::string result = inputManager.processCommand("3 http://example.com"); // Delete from blacklist
-    EXPECT_EQ(result, "204 No Content");
+TEST(InputManagerTestsAlternate, SplitRequest_URLWithPath_ReturnsTrue) {
+    std::string command = "GET http://example.com/path/to/resource";
+    std::string url;
+    bool result = InputManager::splitRequest(command, url);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(command, "GET");
+    EXPECT_EQ(url, "http://example.com/path/to/resource");
 }
 
-TEST(InputManagerTests, ProcessCommand_DeleteFromBlacklist_URLNotInBlacklist_ReturnsNotFound) {
-    auto commandProcessor = std::make_unique<CommandProcessor>();
-    InputManager inputManager(std::move(commandProcessor));
-    std::string result = inputManager.processCommand("3 http://notinblacklist.com"); // Attempt to delete non-existent URL
-    EXPECT_EQ(result, "404 Not Found");
-}
-
-TEST(InputManagerTests, ProcessCommand_DeleteFromBlacklist_EmptyURL_ReturnsBadRequest) {
-    auto commandProcessor = std::make_unique<CommandProcessor>();
-    InputManager inputManager(std::move(commandProcessor));
-    std::string result = inputManager.processCommand("3 "); // Attempt to delete with empty URL
-    EXPECT_EQ(result, "400 Bad Request");
-}
-
-TEST(InputManagerTests, ProcessCommand_DeleteFromBlacklist_InvalidCommandFormat_ReturnsBadRequest) {
-    auto commandProcessor = std::make_unique<CommandProcessor>();
-    InputManager inputManager(std::move(commandProcessor));
-    std::string result = inputManager.processCommand("3http://example.com"); // Invalid format (missing space)
-    EXPECT_EQ(result, "400 Bad Request");
+TEST(InputManagerTestsAlternate, SplitRequest_URLWithPortNumber_ReturnsTrue) {
+    std::string command = "POST http://example.com:8080";
+    std::string url;
+    bool result = InputManager::splitRequest(command, url);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(command, "POST");
+    EXPECT_EQ(url, "http://example.com:8080");
 }

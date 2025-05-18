@@ -1,11 +1,10 @@
-# 
 FROM python:3.12-slim
 
-# Prevent Python from writing .pyc files to disc
-ENV PYTHONDONTWRITEBYTECODE=1
-
-# 
+# Define thebase image
 WORKDIR /app
+
+#copy client file
 COPY Client.py .
 
-ENTRYPOINT ["python", "Client.py"]
+# run the application
+CMD ["python", "Client.py"]

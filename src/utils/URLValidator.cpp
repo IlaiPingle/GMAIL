@@ -1,20 +1,25 @@
-#include "DefaultURLFormatter.h"
-#include "DefaultURLNormalizer.h"
+
 #include "URLValidator.h"
-#include <memory>
-
-URLValidator::URLValidator()
-    : m_formatter(make_shared<DefaultURLFormatter>()), m_normalizer(make_shared<DefaultURLNormalizer>()) {}
-
-URLValidator::URLValidator(shared_ptr<IURLFormatter> formatter, shared_ptr<IURLNormalizer> normalizer)
-    : m_formatter(formatter ? formatter : make_shared<DefaultURLFormatter>()),
-     m_normalizer(normalizer ? normalizer : make_shared<DefaultURLNormalizer>()) {}
-
-string URLValidator::standardize(const string &url) {
-    string formattedURL =m_formatter->formatURL(url);
-    return m_normalizer->normalize(formattedURL);
-}
-
+#include <regex>
+#include <string>
+/*
 bool URLValidator::isValid(const string& url) {
-    return !standardize(url).empty();
+return !standardize(url).empty();
+}*/
+
+bool URLValidator::isValidURL(string& url) {
+    if(!DefaultURLNormalizer::normalize(url)){
+        return false;
+    }
+    //  check for optional http/https prefix
+    //  check for domain name
+    //  domain suffix :more than 2 characters
+    //  optional port number
+    //  optional path/parameters
+    static const regex URLFrmat(
+        R"(^(https?://)?([A-Za-z0-9-]+\.)+[A-Za-z]{2,}(:\d{1,5})?(/\S*)?$)",
+        regex::icase
+        | regex::optimize
+    );
+    return regex_match(url, URLFrmat);
 }
