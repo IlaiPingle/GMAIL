@@ -14,8 +14,7 @@ class CommandFactory {
 private:
     unordered_map<string, shared_ptr<ICommand>> m_commands;
 public:
-    CommandFactory(const shared_ptr<IFilterService>& filterService);
-                  
+    CommandFactory(const shared_ptr<IFilterService>& filterService);    
     void registerCommand(const string& name, const shared_ptr<ICommand>& command);
     void registerDefaultCommands(const shared_ptr<IFilterService>& filterService);
     shared_ptr<ICommand> getCommand(const string& commandName);

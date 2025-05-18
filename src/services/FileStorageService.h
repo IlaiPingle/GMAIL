@@ -19,7 +19,7 @@ using namespace std;
 class FileStorageService {
     private:
     string m_blacklistFile;
-    
+    bool saveBlacklist(const unordered_set<string>& blacklist);
     
     public:
     FileStorageService(const string& blacklistPath = "data/blacklist.txt")
@@ -28,12 +28,6 @@ class FileStorageService {
     bool loadBlacklist(unordered_set<string>& blacklist) ;
     bool loadBitArray(const shared_ptr<bloomFilter>& bloomFilter);
     bool removeFromBlacklist(const string& url) ;
-    bool isInBlacklist(const string& url) ;
-    bool fileExistsAndNotEmpty(const string& filename) ;
-    bool initializeFilter(vector<bool>& bitArray, unordered_set<string>& blacklist);
-    
-    private:
-    bool saveBlacklist(const unordered_set<string>& blacklist);
-    
+    bool isInBlacklist(const string& url) ; 
 };
 #endif // FILESTORAGESERVICE_H

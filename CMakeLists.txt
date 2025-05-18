@@ -32,18 +32,7 @@ add_library(bloom_filter_lib
     ${CMAKE_SOURCE_DIR}/src/services/ApplicationConfig.cpp
 
     ${CMAKE_SOURCE_DIR}/src/utils/URLValidator.cpp
-    ${CMAKE_SOURCE_DIR}/src/utils/DefaultURLFormatter.cpp
     ${CMAKE_SOURCE_DIR}/src/utils/DefaultURLNormalizer.cpp
-
-
-
-    # # New SOLID implementation files
-    # 
-    # 
-
-    # ${CMAKE_SOURCE_DIR}/src/networking/ConnectionHandler.cpp
-    # ${CMAKE_SOURCE_DIR}/src/networking/TCPSocketConnection.cpp
-    # ${CMAKE_SOURCE_DIR}/src/networking/TCPSocketListener.cpp
 )
 # main application target
 add_executable(bloom_filter_app ${CMAKE_SOURCE_DIR}/main.cpp)

@@ -22,19 +22,16 @@ class bloomFilter {
     bloomFilter();
     ~bloomFilter() = default;
     bloomFilter(size_t size, const vector<shared_ptr<hashable>>& hashFunctions);
-        
-        bool add(const string& url) ;
-        bool contains(const string& url) const ;
-        bool containsAbsolutely(const string& url) const ;
-        bool remove(const string& url) ;
-        
-
-        const unordered_set<string>& getBlackList() const ;
-        const vector<shared_ptr<hashable>> getHashFunctions() const ;
-        const vector<bool>& getBitArray() const ;
-        void setBitArray(const vector<bool>& bitArray) ;
-        void setBlackList(const unordered_set<string>& blackList) ;
-        void setHashFunctions(const vector<shared_ptr<hashable>>& hashFunctions) ;
+    bool add(const string& url) ;
+    bool contains(const string& url) const ;
+    bool containsAbsolutely(const string& url) const ;
+    bool remove(const string& url) ;
+    const unordered_set<string>& getBlackList() const ;
+    const vector<shared_ptr<hashable>> getHashFunctions() const ;
+    const vector<bool>& getBitArray() const ;
+    void setBitArray(const vector<bool>& bitArray) ;
+    void setBlackList(const unordered_set<string>& blackList) ;
+    void setHashFunctions(const vector<shared_ptr<hashable>>& hashFunctions) ;
         
     };
     #endif // BLOOMFILTER_H

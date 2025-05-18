@@ -8,9 +8,11 @@ services:
     container_name: bloom_server
     stdin_open: true
     tty: true
-    command: ["./bloom_filter_app", "1234", "256", "3", "2", "1"]  # args לשרת
+    command: ["./bloom_filter_app", "1234", "256", "3", "2", "1"]
     networks:
       - appnet
+    ports:
+      - "1234:1234"  # Expose server port to host machine
 
   client:
     build:
@@ -21,9 +23,11 @@ services:
       - server
     stdin_open: true
     tty: true
-    command: ["python", "Client.py", "bloom_server", "1234"]  # args לקליינט
+    command: ["python", "Client.py", "bloom_server", "1234"]
     networks:
       - appnet
+    # Adding this makes the client container wait for manual attachment
+    entrypoint: ["tail", "-f", "/dev/null"]
 
 networks:
-  appnet:    
+  appnet:

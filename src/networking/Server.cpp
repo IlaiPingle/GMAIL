@@ -1,29 +1,21 @@
 #include "Server.h"
 
-
-
-
 Server :: Server( int port, shared_ptr<ApplicationService>  appService) :
 m_port(port), m_appService(appService){};
-
 
 bool Server::start() {
     int server_fd, client_socket;
     struct sockaddr_in address;
     int addrlen = sizeof(address);
-    
-    
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
         return false;
     }
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(m_port);
-    
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
         return false;
     }
-    
     if (listen(server_fd, 1024) < 0) {
         return false;
     }
@@ -37,7 +29,6 @@ bool Server::start() {
     close(server_fd);
     return true;
 }
-
 
 void Server::handleClient(int clientId) {
     char buffer[1024]={0};

@@ -1,6 +1,5 @@
 #include "DeleteCommand.h"
 
-
 DeleteCommand::DeleteCommand(shared_ptr<IFilterService> filterService)
     : m_filterService(filterService) {}
 

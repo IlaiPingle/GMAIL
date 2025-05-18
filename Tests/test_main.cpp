@@ -1,237 +1,85 @@
 #include <gtest/gtest.h>
-#include <sstream>
+#include "../src/ioHandling/inputManager.h"
+#include "../src/utils/URLValidator.h"
 #include <string>
-#include <iostream>
+#include <sstream>
 
-// Mock inputManager class for testing
-class MockInputManager {
-public:
-    static std::unique_ptr<MockInputManager> initFirstLine(const std::string& line) {
-        if (line == "valid") {
-            return std::make_unique<MockInputManager>();
-        }
-        return nullptr;
-    }
-
-    std::string convertLine(const std::string& line) {
-        if (line == "test") {
-            return "converted_test";
-        }
-        return "";
-    }
-};
-
-// Redirected main function for testing
-int testMain(std::istream& input, std::ostream& output) {
-    std::string initialLine;
-    std::unique_ptr<MockInputManager> manager = nullptr;
-
-    while (std::getline(input, initialLine)) {
-        manager = MockInputManager::initFirstLine(initialLine);
-        if (manager) {
-            break;
-        }
-    }
-    if (!manager) {
-        return 1;
-    }
-    std::string line;
-    while (std::getline(input, line)) {
-        std::string result = manager->convertLine(line);
-        if (!result.empty()) {
-            output << result << std::endl;
-        }
-    }
-    return 0;
+TEST(InputManagerTests, SplitRequest_EmptyCommand_ReturnsFalse) {
+    std::string command = "";
+    std::string url;
+    bool result = InputManager::splitRequest(command, url);
+    EXPECT_FALSE(result);
 }
 
-// Test cases
-TEST(MainTest, ValidInput) {
-    std::istringstream input("valid\ntest\n");
-    std::ostringstream output;
-
-    int result = testMain(input, output);
-
-    EXPECT_EQ(result, 0);
-    EXPECT_EQ(output.str(), "converted_test\n");
+TEST(InputManagerTests, SplitRequest_InvalidCommand_ReturnsFalse) {
+    std::string command = "INVALID"; // No URL part
+    std::string url;
+    bool result = InputManager::splitRequest(command, url);
+    EXPECT_FALSE(result);
 }
 
-TEST(MainTest, InvalidFirstLine) {
-    std::istringstream input("invalid\n");
-    std::ostringstream output;
-
-    int result = testMain(input, output);
-
-    EXPECT_EQ(result, 1);
-    EXPECT_EQ(output.str(), "");
+TEST(InputManagerTests, SplitRequest_InvalidURL_ReturnsFalse) {
+    std::string command = "POST invalid-url";
+    std::string url;
+    bool result = InputManager::splitRequest(command, url);
+    EXPECT_FALSE(result);
 }
 
-TEST(MainTest, NoConversionForEmptyLine) {
-    std::istringstream input("valid\n\n");
-    std::ostringstream output;
-
-    int result = testMain(input, output);
-
-    EXPECT_EQ(result, 0);
-    EXPECT_EQ(output.str(), "");
+TEST(InputManagerTests, SplitRequest_ValidCommand_ReturnsTrue) {
+    std::string command = "POST http://example.com";
+    std::string url;
+    bool result = InputManager::splitRequest(command, url);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(command, "POST");
+    EXPECT_EQ(url, "http://example.com");
 }
 
-TEST(MainTest, MultipleValidLines) {
-    std::istringstream input("valid\ntest\ntest\n");
-    std::ostringstream output;
-
-    int result = testMain(input, output);
-
-    EXPECT_EQ(result, 0);
-    EXPECT_EQ(output.str(), "converted_test\nconverted_test\n");
-}
-TEST(MainTest, IgnoreInvalidInputAndContinue) {
-    std::istringstream input("invalid\nvalid\ntest\n");
-    std::ostringstream output;
-
-    int result = testMain(input, output);
-
-    EXPECT_EQ(result, 0);
-    EXPECT_EQ(output.str(), "converted_test\n");
-}
-// ...existing code...
-
-TEST(MainTest, EmptyInputStream) {
-    std::istringstream input("");
-    std::ostringstream output;
-
-    int result = testMain(input, output);
-
-    EXPECT_EQ(result, 1);
-    EXPECT_EQ(output.str(), "");
+TEST(InputManagerTests, SplitRequest_ValidCommandWithSpace_ReturnsTrue) {
+    std::string command = "GET   http://example.com";
+    std::string url;
+    bool result = InputManager::splitRequest(command, url);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(command, "GET");
+    EXPECT_EQ(url, "http://example.com");
 }
 
-TEST(MainTest, WhitespaceOnlyLines) {
-    std::istringstream input("valid\n  \n\t\n");
-    std::ostringstream output;
-
-    int result = testMain(input, output);
-
-    EXPECT_EQ(result, 0);
-    EXPECT_EQ(output.str(), "");
+TEST(InputManagerTests, SplitRequest_ValidDeleteCommand_ReturnsTrue) {
+    std::string command = "DELETE http://example.com";
+    std::string url;
+    bool result = InputManager::splitRequest(command, url);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(command, "DELETE");
+    EXPECT_EQ(url, "http://example.com");
 }
 
-TEST(MainTest, MultipleInvalidInitializationsBeforeValid) {
-    std::istringstream input("invalid\ninvalid\ninvalid\nvalid\ntest\n");
-    std::ostringstream output;
-
-    int result = testMain(input, output);
-
-    EXPECT_EQ(result, 0);
-    EXPECT_EQ(output.str(), "converted_test\n");
+TEST(InputManagerTests, SplitRequest_MissingURL_ReturnsFalse) {
+    std::string command = "DELETE ";
+    std::string url;
+    bool result = InputManager::splitRequest(command, url);
+    EXPECT_FALSE(result);
 }
 
-TEST(MainTest, MixedValidAndInvalidLines) {
-    std::istringstream input("valid\ntest\ninvalid_line\ntest\nnot_convertible\n");
-    std::ostringstream output;
-
-    int result = testMain(input, output);
-
-    EXPECT_EQ(result, 0);
-    EXPECT_EQ(output.str(), "converted_test\nconverted_test\n");
+TEST(InputManagerTests, SplitRequest_NoSpaceBeforeURL_ReturnsFalse) {
+    std::string command = "DELETEhttp://example.com";
+    std::string url;
+    bool result = InputManager::splitRequest(command, url);
+    EXPECT_FALSE(result);
 }
 
-TEST(MainTest, VeryLongLine) {
-    std::string longInput = "valid\n";
-    std::string longLine = "test";
-    // Create a very long input line by repeating "test" 1000 times
-    for (int i = 0; i < 1000; i++) {
-        longLine += "test";
-    }
-    longInput += longLine + "\n";
-    
-    std::istringstream input(longInput);
-    std::ostringstream output;
-
-    int result = testMain(input, output);
-
-    EXPECT_EQ(result, 0);
-    EXPECT_EQ(output.str(), "");  // Assuming very long lines don't match "test" exactly
+TEST(InputManagerTests, SplitRequest_URLWithPath_ReturnsTrue) {
+    std::string command = "GET http://example.com/path/to/resource";
+    std::string url;
+    bool result = InputManager::splitRequest(command, url);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(command, "GET");
+    EXPECT_EQ(url, "http://example.com/path/to/resource");
 }
 
-TEST(MainTest, LargeNumberOfLines) {
-    std::string largeInput = "valid\n";
-    // Add 1000 "test" lines
-    for (int i = 0; i < 1000; i++) {
-        largeInput += "test\n";
-    }
-    
-    std::istringstream input(largeInput);
-    std::ostringstream output;
-
-    int result = testMain(input, output);
-
-    EXPECT_EQ(result, 0);
-    // Expect 1000 lines of output
-    std::string expectedOutput;
-    for (int i = 0; i < 1000; i++) {
-        expectedOutput += "converted_test\n";
-    }
-    EXPECT_EQ(output.str(), expectedOutput);
-}
-
-TEST(MainTest, InputWithSpecialCharacters) {
-    std::istringstream input("valid\ntest!@#$%^&*()\ntest\n");
-    std::ostringstream output;
-
-    int result = testMain(input, output);
-
-    EXPECT_EQ(result, 0);
-    EXPECT_EQ(output.str(), "converted_test\n");  // Only the exact "test" should convert
-}
-
-TEST(MainTest, InputWithEmbeddedNewlines) {
-    // This is a bit tricky to test since std::getline separates by newlines
-    // But we can test the behavior of input containing embedded carriage returns
-    std::istringstream input("valid\ntest\rcarriage\ntest\n");
-    std::ostringstream output;
-
-    int result = testMain(input, output);
-
-    EXPECT_EQ(result, 0);
-    // The carriage return is part of the string, so it won't match "test"
-    EXPECT_EQ(output.str(), "converted_test\n");
-}
-
-class ThrowingInputStream : public std::istringstream {
-public:
-    ThrowingInputStream(const std::string& s) : std::istringstream(s) {
-        exceptions(std::ios::failbit | std::ios::badbit);
-    }
-};
-
-TEST(MainTest, HandlesStreamExceptions) {
-    try {
-        // Set up a stream that will throw after reading "valid"
-        ThrowingInputStream input("valid\n");
-        input.seekg(6);  // Position after "valid\n"
-        std::ostringstream output;
-
-        testMain(input, output);
-        FAIL() << "Expected exception not thrown";
-    } catch (const std::ios_base::failure&) {
-        // Expected behavior
-        SUCCEED();
-    } catch (...) {
-        FAIL() << "Unexpected exception type";
-    }
-}
-
-TEST(MainTest, NoResultFromConvertLine) {
-    std::istringstream input("valid\nempty_result\n");  // Assuming "empty_result" returns empty string
-    std::ostringstream output;
-
-    int result = testMain(input, output);
-
-    EXPECT_EQ(result, 0);
-    EXPECT_EQ(output.str(), "");  // No output should be produced
-}
-int main(int argc, char **argv) {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+TEST(InputManagerTests, SplitRequest_URLWithPortNumber_ReturnsTrue) {
+    std::string command = "POST http://example.com:8080";
+    std::string url;
+    bool result = InputManager::splitRequest(command, url);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(command, "POST");
+    EXPECT_EQ(url, "http://example.com:8080");
 }

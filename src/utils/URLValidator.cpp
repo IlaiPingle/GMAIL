@@ -7,13 +7,10 @@ bool URLValidator::isValid(const string& url) {
 return !standardize(url).empty();
 }*/
 
-
-
 bool URLValidator::isValidURL(string& url) {
     if(!DefaultURLNormalizer::normalize(url)){
         return false;
     }
-    
     //  check for optional http/https prefix
     //  check for domain name
     //  domain suffix :more than 2 characters

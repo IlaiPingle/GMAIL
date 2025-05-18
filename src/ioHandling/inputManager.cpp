@@ -1,5 +1,4 @@
 #include "../ioHandling/inputManager.h"
-#include <iostream>
 bool InputManager::splitRequest(string& command, string& url) {
     // Validate command format
     if (command.empty()) {
@@ -11,7 +10,6 @@ bool InputManager::splitRequest(string& command, string& url) {
     
     getline(iss >> ws, url);
     if (!URLValidator::isValidURL(url)) {
-        cout << "Invalid URL: " << url << endl; // Debugging line ****
         return false; // Invalid URL
     }
     command = commandType;

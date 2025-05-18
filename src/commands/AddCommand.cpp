@@ -1,6 +1,5 @@
 #include "AddCommand.h"
 
-
 AddCommand::AddCommand(shared_ptr<IFilterService> filterService)
     : m_filterService(filterService){}
 

@@ -1,6 +1,5 @@
 #ifndef DEFAULTURLNORMALIZER_H
 #define DEFAULTURLNORMALIZER_H
-#include "../utils/DefaultURLFormatter.h"
 #include <string>
 using namespace std;
 

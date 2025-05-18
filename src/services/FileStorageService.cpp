@@ -1,6 +1,5 @@
 #include "FileStorageService.h"
 
-
 bool FileStorageService::saveBlacklist(const unordered_set<string>& blacklist) {
     ofstream file(m_blacklistFile);
     if (!file) {
@@ -11,6 +10,7 @@ bool FileStorageService::saveBlacklist(const unordered_set<string>& blacklist) {
     }
     return true;
 }
+
 bool FileStorageService::addToBlacklist(const string& url) {
     ofstream file(m_blacklistFile, ios::app); // append to the end of the file.
     if (!file) {
@@ -19,7 +19,6 @@ bool FileStorageService::addToBlacklist(const string& url) {
     file << url << endl;
     return true;
 }
-
 
 bool FileStorageService::loadBlacklist(unordered_set<string>& blacklist) {
     ifstream file(m_blacklistFile);
@@ -33,7 +32,6 @@ bool FileStorageService::loadBlacklist(unordered_set<string>& blacklist) {
     return true;
 }
 
-
 bool FileStorageService::loadBitArray(const shared_ptr<bloomFilter>& bloomFilter) {
     ifstream file(m_blacklistFile);
     if (!file) {
@@ -45,9 +43,6 @@ bool FileStorageService::loadBitArray(const shared_ptr<bloomFilter>& bloomFilter
     }
     return true;
 }
-       
-    
-
 
 bool FileStorageService::removeFromBlacklist(const string& url) {
     // Load current blacklist
@@ -76,9 +71,4 @@ bool FileStorageService::isInBlacklist(const string& url) {
         }
     }
     return false;
-}
-
-bool FileStorageService::fileExistsAndNotEmpty(const string& filename) {
-    ifstream file(filename);
-    return file.good() && file.peek() != ifstream::traits_type::eof();
 }

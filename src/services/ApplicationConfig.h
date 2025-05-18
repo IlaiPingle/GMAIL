@@ -8,10 +8,7 @@
 #include "ApplicationService.h"
 #include "BloomFilterService.h"
 #include "FileStorageService.h"
-
 #include "../bloom_Filter/bloomFilter.h"
-
-
 using namespace std;
 
 /**
@@ -25,7 +22,6 @@ class ApplicationConfig {
     static shared_ptr<ApplicationService> configure(const string& configLine);
     
     private: 
-    
     static const string m_configFilePath;
     // Helper methods for configuration steps
     static vector<size_t> parseHashIds(const string& configLine, size_t& bitArraySize);

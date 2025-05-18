@@ -1,7 +1,4 @@
 #include "ApplicationConfig.h"
-
-
-
 const string ApplicationConfig::m_configFilePath = "data/config.txt";
 /**
 * @brief Configures the application by parsing the configuration line.
@@ -25,8 +22,6 @@ shared_ptr<ApplicationService> ApplicationConfig::configure(const string& config
     }
     return createApplicationService(bitArraySize, hashIds,createdFromFile); // Create application service
 }
-
-
 
 vector<size_t> ApplicationConfig::parseHashIds(const string& configLine, size_t& bitArraySize) {
     istringstream iss(configLine);
@@ -69,11 +64,9 @@ shared_ptr<ApplicationService> ApplicationConfig::createApplicationService(
         auto appService = make_shared<ApplicationService>(commandProcessor);
     
         return appService;
-    }
+}
     
-    
-    
-    bool ApplicationConfig::configFromFile(string& configLine) {
+bool ApplicationConfig::configFromFile(string& configLine) {
         ifstream inFile(m_configFilePath);
         if (!inFile) {
             return false;
@@ -81,9 +74,9 @@ shared_ptr<ApplicationService> ApplicationConfig::createApplicationService(
         getline(inFile, configLine);
         inFile.close();
         return !configLine.empty();
-    }
+}
     
-    bool ApplicationConfig::saveConfigLine(const string& configLine) {
+bool ApplicationConfig::saveConfigLine(const string& configLine) {
         ofstream outFile(m_configFilePath);
         if (!outFile) {
             return false;
@@ -91,4 +84,4 @@ shared_ptr<ApplicationService> ApplicationConfig::createApplicationService(
         outFile << configLine;
         outFile.close();
         return true;
-    }
+}

@@ -5,7 +5,6 @@ CommandProcessor::CommandProcessor(const shared_ptr<IFilterService>& filterServi
     
 string CommandProcessor::ProssessCommand(const string& request) {
     string command = request;
-    cout << "CommandProcessor: Processing command: " << command << endl;    // Debugging line ******
     string url;
     bool isSplited = InputManager::splitRequest(command, url);
     if (!isSplited) {
