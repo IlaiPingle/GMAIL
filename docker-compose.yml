@@ -28,6 +28,14 @@ services:
       - appnet
     # Adding this makes the client container wait for manual attachment
     entrypoint: ["tail", "-f", "/dev/null"]
+    
+  tests:
+    build:
+      context: .
+      dockerfile: ./Tests/dockerfile
+    container_name: bloom_tests
+    networks:
+      - appnet
 
 networks:
   appnet:

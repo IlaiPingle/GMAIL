@@ -38,33 +38,30 @@ add_library(bloom_filter_lib
 add_executable(bloom_filter_app ${CMAKE_SOURCE_DIR}/main.cpp)
 target_link_libraries(bloom_filter_app bloom_filter_lib)
 
-# # Find Google Test
-# include(FetchContent)
-# FetchContent_Declare(
-#     googletest
-#     URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
-# )
-# FetchContent_MakeAvailable(googletest)
+# Find Google Test
+include(FetchContent)
+FetchContent_Declare(
+     googletest
+     URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+ )
+ FetchContent_MakeAvailable(googletest)
 
-# # Add test executable with all test files
-# add_executable(runTests 
-#     # Original test files
-#     ${CMAKE_SOURCE_DIR}/Tests/test_inputManager.cpp
+# Add test executable with all test files
+ add_executable(runTests 
+     # Original test files
+     ${CMAKE_SOURCE_DIR}/Tests/test_inputManager.cpp
     
-#     # test server
-#     ${CMAKE_SOURCE_DIR}/Tests/test_server.cpp
+     # test server
+     ${CMAKE_SOURCE_DIR}/Tests/test_server.cpp
 
-#     # test main
-#     ${CMAKE_SOURCE_DIR}/Tests/test_main.cpp
-    
-#     # test fileManager
-#     ${CMAKE_SOURCE_DIR}/Tests/test_fileManager.cpp
-# )
-# target_link_libraries(runTests gtest_main bloom_filter)
+     # test bloomFilter
+     ${CMAKE_SOURCE_DIR}/Tests/test_bloomFilter.cpp
+ )
+ target_link_libraries(runTests gtest_main bloom_filter_lib)
 
-# # Google Test integration
-# include(GoogleTest)
-# gtest_discover_tests(runTests)
+ # Google Test integration
+ include(GoogleTest)
+ gtest_discover_tests(runTests)
 
 # Create directory for test data
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data)

@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
-#include "../src/bloom_filter/bloomFilter.h"
-#include "../src/bloom_filter/hashFactory.h"
+#include "../src/bloom_Filter/bloomFilter.h"
+#include "../src/bloom_Filter/hashFactory.h"
 #include "../src/services/FileStorageService.h"
 #include <memory>
 #include <functional>
@@ -132,7 +132,7 @@ TEST_F(BloomFilterTest, SmallBloomFilter) {
     EXPECT_FALSE(smallFilter->containsAbsolutely("https://example3.com"));
 }
 
-TEST(BloomFilterTest, AddAndContains) {
+TEST(HashFactoryBloomFilterTest, AddAndContainsWithFactoryHashes) {
     auto hashFuncs = hashFactory::createHashFunctions({1, 2});
     bloomFilter filter(10, hashFuncs);
     EXPECT_FALSE(filter.contains("example.com"));
@@ -142,7 +142,7 @@ TEST(BloomFilterTest, AddAndContains) {
 
 }
 
-TEST(BloomFilterTest, Remove) {
+TEST(HashFactoryBloomFilterTest, Remove) {
     auto hashFuncs = hashFactory::createHashFunctions({1,3});
     bloomFilter filter(10, hashFuncs);
     filter.add("test.com");
