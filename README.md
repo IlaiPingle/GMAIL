@@ -64,4 +64,4 @@ Running tests on docker-compose:
 ![App Screenshot](images/5.png)
 
 ## UML diagram for ilustration:
-!UML EX2.png
+![UML EX2].png
