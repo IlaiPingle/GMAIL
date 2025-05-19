@@ -59,7 +59,7 @@ Deleting a URL:
 ![App Screenshot](images/3.png)  
 
 Running tests on docker-compose:  
-![App Screenshot](images/4.png)  
+![App Screenshot](images/4.png)
 
 ![App Screenshot](images/5.png)
 
