@@ -12,7 +12,6 @@ def main(argv):
             client.connect((dest_ip, dest_port))
             while True:
                 UserInput = input().strip()
-                #print(f"User entered: {UserInput}")
                 client.sendall((UserInput + "\n").encode())
                 response = b''
                 while True:
