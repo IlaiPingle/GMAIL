@@ -5,9 +5,8 @@ BloomFilterService::BloomFilterService(shared_ptr<bloomFilter> filter, shared_pt
 : m_bloomFilter(move(filter)), m_storageService(move(storage)) {}
 
 bool BloomFilterService::initialize() {
-    vector<bool> bitArray = m_bloomFilter->getBitArray();
     bool isBitArrayLoaded = m_storageService->loadBitArray(m_bloomFilter);
-    m_bloomFilter->setBitArray(bitArray);
+    m_bloomFilter->setBitArray(m_bloomFilter->getBitArray());
     unordered_set<string> blackList;
     bool isBlacklistLoaded = m_storageService->loadBlacklist(blackList);
     m_bloomFilter->setBlackList(blackList);

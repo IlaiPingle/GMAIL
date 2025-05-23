@@ -20,7 +20,6 @@ class BloomFilterService : public IFilterService {
 private:
     shared_ptr<bloomFilter> m_bloomFilter;
     shared_ptr<FileStorageService> m_storageService;
-    shared_ptr<hashFactory> m_hashFactory;
 
 public:
     BloomFilterService(shared_ptr<bloomFilter> filter, shared_ptr<FileStorageService> storage);
