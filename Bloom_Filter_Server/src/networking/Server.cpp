@@ -1,7 +1,7 @@
 #include "Server.h"
 
-Server :: Server( int port, shared_ptr<ApplicationService>  appService) :
-m_port(port), m_appService(appService){};
+Server :: Server( int port, shared_ptr<ApplicationService>  appService):
+m_port(port), m_appService(appService), m_threadPool(thread::hardware_concurrency()){};
 
 bool Server::start() {
     int server_fd, client_socket;
@@ -13,6 +13,7 @@ bool Server::start() {
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(m_port);
+    
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
         return false;
     }
@@ -24,7 +25,9 @@ bool Server::start() {
         if (client_socket < 0 ) {
             continue;
         }
-        handleClient(client_socket);
+        m_threadPool.addTask([this, client_socket]() {
+            handleClient(client_socket);
+        });
     }
     close(server_fd);
     return true;

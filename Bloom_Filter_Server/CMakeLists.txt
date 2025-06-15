@@ -24,6 +24,7 @@ add_library(bloom_filter_lib
     ${CMAKE_SOURCE_DIR}/src/ioHandling/inputManager.cpp
 
     ${CMAKE_SOURCE_DIR}/src/networking/Server.cpp
+    ${CMAKE_SOURCE_DIR}/src/networking/ThreadPool.cpp
 
     ${CMAKE_SOURCE_DIR}/src/services/FileStorageService.cpp
     ${CMAKE_SOURCE_DIR}/src/services/BloomFilterService.cpp

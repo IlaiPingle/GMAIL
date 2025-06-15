@@ -8,12 +8,13 @@
 #include <netinet/in.h>
 #include <unistd.h>
 # include "../services/ApplicationService.h"
-
+#include "ThreadPool.h"
 
 using namespace std;
 class Server {
     private:
         int m_port;
+        ThreadPool m_threadPool;
         shared_ptr<ApplicationService> m_appService;
     public: 
         Server(int port,shared_ptr<ApplicationService> appService);
