@@ -1,5 +1,5 @@
 const User = require('../Models/userModel')
-const users = []
+
 
 exports.registerUser = (req, res) => {
     
@@ -9,14 +9,54 @@ exports.registerUser = (req, res) => {
         return res.status(400).json({ message: 'Missing required feilds' })
     }
     
-    const existingUser = users.find(user => user.username === username)
+    const existingUser = User.findUserByUsername(username)
+
     if (existingUser) {
         return res.status(400).json({ message: 'Username already exists' })
     }
-    
-    const user = new User(username, password, first_name, sur_name, picture)
-    users.push(user)
-    res.status(201).json({id: user.id, username: user.username, first_name: user.first_name, sur_name: user.sur_name, picture: user.picture})
+    const newUser = User.createUser(username, password, first_name, sur_name, picture)
+
+    res.status(201).json({
+        id : newUser.id,
+        username: newUser.username,
+        first_name: newUser.first_name,
+        sur_name: newUser.sur_name,
+        picture: newUser.picture
+    })
 }
 
+exports.loginUser = (req, res) => {
+    const { username, password } = req.body
 
+    if (!username || !password) {
+        return res.status(400).json({ message: 'Username and password are required' })
+    }
+
+    const user = User.findUserByUsername(username)
+
+    if (!user || user.password !== password) {
+        return res.status(401).json({ message: 'Invalid username or password' })
+    }
+
+    res.status(200).json({
+        id: user.id,
+        username: user.username,
+        first_name: user.first_name,
+        sur_name: user.sur_name,
+        picture: user.picture
+    })
+}
+exports.getUser = (req, res) => {
+    const Id = parseInt(req.params.id, 10)
+    const user = User.findUserById(Id)
+    if (!user) {
+        return res.status(404).json({ message: 'User not found' })
+    }
+    res.status(200).json({
+        id: user.id,
+        username: user.username,
+        first_name: user.first_name,
+        sur_name: user.sur_name,
+        picture: user.picture
+    })
+}
