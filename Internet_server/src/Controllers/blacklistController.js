@@ -8,13 +8,12 @@ async function addURL(req, res) {
         }
         const response = await sendCommand('POST', url);
         if (response === "201 Created") {
-            return res.status(201).end();
+            return res.status(201).json({message : response});
         }
         else if (response === "404 Not Found") {
             return res.status(404).json({error: response});
         }
         return res.status(400).json({ error: response });
-        
     }
     catch (error) {
         return res.status(500).json();
@@ -28,10 +27,9 @@ async function removeURL(req, res) {
         }
         const response = await sendCommand('DELETE', url);
         if (response === "204 No Content") {
-            return res.status(204).json({ message : response });
-        }
-        else if (response === "404 Not Found") {
-            return res.status(404).json({error: response});
+            return res.status(204).json({ message: response });
+        } else if (response === "404 Not Found") {
+            return res.status(404).json({ error: response });
         }
         return res.status(400).json({ error: response });
     }

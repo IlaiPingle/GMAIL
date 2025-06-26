@@ -21,9 +21,9 @@ bool BloomFilterService::add(const string& url) {
     } else if (!m_bloomFilter->containsAbsolutely(url)) {
         m_bloomFilter->add(url);
         bool isBlacklistSaved = m_storageService->addToBlacklist(url);
-        return isBlacklistSaved;
+        return isBlacklistSaved; // if false thers an error in saving to blacklist
     }
-    return false; // URL already exists in the filter
+    return true; // URL already blacklisted , command is legal but no action needed
 }
 
 bool BloomFilterService::remove(const string &url) {
