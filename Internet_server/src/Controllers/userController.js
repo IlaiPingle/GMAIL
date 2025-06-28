@@ -40,10 +40,6 @@ exports.loginUser = (req, res) => {
 
     res.status(200).json({
         id: user.id,
-        username: user.username,
-        first_name: user.first_name,
-        sur_name: user.sur_name,
-        picture: user.picture
     })
 }
 exports.getUser = (req, res) => {

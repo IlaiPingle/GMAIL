@@ -14,4 +14,7 @@ router.get('/api/emails/verified', emailController.getVerifiedEmails)
 // Route to unsubscribe
 router.delete('/api/emails/unsubscribe/:id', emailController.unsubscribeEmail)
 
+router.get('/api/mails', emailController.getMails);
+
+
 module.exports = router

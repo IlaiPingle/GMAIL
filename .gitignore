@@ -180,4 +180,4 @@ cython_debug/
 /build
 
 # EXPRESS 
-/node_modules
+node_modules/

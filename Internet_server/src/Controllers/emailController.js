@@ -1,47 +1,21 @@
 const EmailModel = require('../Models/emailModel')
 const { isValidEmail } = require('../utils/emailValidator')
+const Users = require('../Models/userModel');
+
+
+async function sendNewMail(req, res) {
+    const userId = req.headers.userId;
+    const { sender, receiver, subject, body, link } = req.body;
+    if (!userId || !sender || !receiver ) {
+        return  res.status(400).json({ message: 'missing required fields' });
+    }
+    try {
+        const await 
+    }
 
 /**
- * Handle email subscription requests
- */
-exports.subscribeEmail = (req, res) => {
-    const { email, name, marketingConsent } = req.body
-    
-    // Check if required fields are present
-    if (!email || !name) {
-        return res.status(400).json({ message: 'Email and name are required' })
-    }
-    
-    // Validate email format
-    if (!isValidEmail(email)) {
-        return res.status(400).json({ message: 'Invalid email format' })
-    }
-    
-    // Check if email already exists
-    const existingEmail = EmailModel.findEmailByAddress(email)
-    if (existingEmail) {
-        return res.status(409).json({ message: 'Email already subscribed' })
-    }
-    
-    // Create subscription
-    const newSubscription = EmailModel.createEmailSubscription(
-        email, 
-        name, 
-        marketingConsent || false
-    )
-    
-    // Return success response
-    return res.status(201).json({
-        id: newSubscription.id,
-        email: newSubscription.email,
-        name: newSubscription.name,
-        subscriptionDate: newSubscription.subscriptionDate
-    })
-}
-
-/**
- * Verify an email subscription
- */
+* Verify an email subscription
+*/
 exports.verifyEmail = (req, res) => {
     const id = parseInt(req.params.id, 10)
     
@@ -56,26 +30,78 @@ exports.verifyEmail = (req, res) => {
 }
 
 /**
- * Get all verified emails
- */
+* Get all verified emails
+*/
 exports.getVerifiedEmails = (req, res) => {
     const verifiedEmails = EmailModel.getVerifiedEmails()
     return res.status(200).json(verifiedEmails)
 }
 
-/**
- * Unsubscribe from email list
- */
-exports.unsubscribeEmail = (req, res) => {
-    const id = parseInt(req.params.id, 10)
-    const subscription = EmailModel.findEmailById(id)
-    
-    if (!subscription) {
-        return res.status(404).json({ message: 'Email subscription not found' })
+function getMails(req, res) {
+    try{
+        const userId = req.headers.userId;
+        if (!userId) {
+            return res.status(400).json({ message: 'User ID is required' });
+        }
+        const usersMails = EmailModel.getLastMails(userId);
+        return res.status(200).json(usersMails);
+    } catch (error) {
+        return res.status(500).json({ message: 'An error occurred while retrieving mails'});
     }
-    
-    // In a real application, you'd want to actually remove the subscription
-    // or mark it as unsubscribed. For this example, we'll pretend we did.
-    
-    return res.status(200).json({ message: 'Successfully unsubscribed' })
 }
+function getMailById(req, res) {
+    try {
+        const userId = req.headers.userId;
+        const mailId = req.params.id;
+        if (!userId || !mailId) {
+            return res.status(400).json({ message: 'User ID and Mail ID are required' });
+        }
+        const mail = EmailModel.findEmailById(userId, mailId);
+        if (!mail) {
+            return res.status(404).json({ message: 'Mail not found' });
+        }
+        return res.status(200).json(mail);
+    } catch (error) {
+        return res.status(500).json({ message: 'An error occurred while retrieving the mail' });
+    }
+}
+function removeMail(req, res) {
+    try {
+        const userId = req.headers.userId;
+        const mailId = req.params.id;
+        if (!userId || !mailId) {
+            return res.status(400).json({ message: 'User ID and Mail ID are required' });
+        }
+        const deleted = EmailModel.deleteMailById(userId, mailId);
+        if (!deleted) {
+            return res.status(404).json({ message: 'Mail not found' });
+        }
+        return res.status(204).end();
+    } catch (error) {
+        return res.status(500).json({ message: 'An error occurred while deleting the mail' });
+    }
+}
+
+function findInMails(req, res) {
+    try {
+        const userId = req.headers.userId;
+        const searchTerm = req.query.q;
+        if (!userId || !searchTerm) {
+            return res.status(400).json({ message: 'User ID and search term are required' });
+        }
+        const foundMails = EmailModel.searchMails(userId, searchTerm);
+        return res.status(200).json(foundMails);
+    } catch (error) {
+        return res.status(500).json({ message: 'An error occurred while searching for mails' });
+    }
+}
+
+module.exports = {
+    getMails,
+    getMailById,
+    removeMail,
+    findInMails
+}
+
+        
+        
