@@ -179,5 +179,5 @@ cython_debug/
 # BUILD
 /build
 
-# EXPRESS 
-/node_modules
+# node_modules
+node_modules/
