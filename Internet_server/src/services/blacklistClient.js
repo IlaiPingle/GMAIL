@@ -11,6 +11,7 @@ function sendCommand(command, url) {
         
         client.on('data', (data) => {
             response += data.toString();
+            client.end(); // Close the connection after receiving data
         });
         client.on('end',() => {
             resolve(response.trim());
