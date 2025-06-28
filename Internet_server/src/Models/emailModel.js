@@ -9,7 +9,7 @@ let nextEmailId = 1
  * @param {*} param1 - an object containing the email details.
  * @returns - {Object} - Returns the newly created email object.
  */
-function createNewMail(userId , { sender , receiver , subject , body, link = [] }) {
+function createNewMail(userId, { sender, receiver, subject, body, link = [], labels = [] }) {
 	const newMail = {
 		id: nextEmailId++,
 		sender,
@@ -17,7 +17,8 @@ function createNewMail(userId , { sender , receiver , subject , body, link = [] 
 		subject,
 		body,
 		dateCreated: new Date(),
-		link 
+		link,
+		labels
 	}
 	if (!MailsRepository.has(userId)) {
 		MailsRepository.set(userId, []);
@@ -31,8 +32,8 @@ function createNewMail(userId , { sender , receiver , subject , body, link = [] 
  * @param {*} id - The ID of the email to be found.
  * @returns - {Object|null} - Returns the email object if found, or null if not found.
  */
-function findEmailById(userId,id) {
-	return (MailsRepository.get(userId) || []).find(mail=> mail.id === parseInt(id));
+function findEmailById(userId, id) {
+	return (MailsRepository.get(userId) || []).find(mail => mail.id === parseInt(id));
 }
 
 /**
@@ -43,7 +44,7 @@ function findEmailById(userId,id) {
 function getLastMails(userId) {
 	const userMails = (MailsRepository.get(userId) || []).slice();
 	userMails.sort((a, b) => b.dateCreated - a.dateCreated);
-	return userMails.slice(0,50);
+	return userMails.slice(0, 50);
 }
 
 /**
@@ -54,8 +55,8 @@ function getLastMails(userId) {
  */
 function deleteMailById(userId, id) {
 	const userMails = MailsRepository.get(userId) || [];
-	const mailIndex = userMails.findIndex(mail => mail.id === parseInt(id)); 
-	if (mailIndex != -1){
+	const mailIndex = userMails.findIndex(mail => mail.id === parseInt(id));
+	if (mailIndex != -1) {
 		userMails.splice(mailIndex, 1);
 		return true;
 	}
@@ -72,7 +73,7 @@ function deleteMailById(userId, id) {
  * @returns  - The updated mail object if the mail was found and updated.
  * If the mail with the specified ID is not found, it returns null.
  */
-function editMailById(userId, updatedfeilds){
+function editMailById(userId, updatedfeilds) {
 	const userMails = MailsRepository.get(userId) || [];
 	const mail = findEmailById(userId, updatedfeilds.id);
 	if (mailIndex != -1) {
@@ -93,12 +94,69 @@ function editMailById(userId, updatedfeilds){
 function searchMails(userId, query) {
 	const userMails = MailsRepository.get(userId) || [];
 	const filteredMails = userMails.filter(mail =>
-		Object.values(mail).some(value => 
+		Object.values(mail).some(value =>
 			String(value).toLowerCase().includes(query.toLowerCase())
 		)
 	);
 	return filteredMails;
 }
+
+/**
+ * Add a label to an email
+ * @param {*} userId - User ID
+ * @param {*} emailId - Email ID
+ * @param {*} labelId - Label ID to add
+ * @returns {boolean} - True if successful, false otherwise
+ */
+/*function addLabelToEmail(userId, emailId, labelId) {
+	const email = findEmailById(userId, emailId);
+	if (!email) return false;
+
+	// Initialize labels array if it doesn't exist
+	if (!email.labels) {
+		email.labels = [];
+	}
+
+	// Check if label is already added
+	if (!email.labels.includes(labelId)) {
+		email.labels.push(labelId);
+	}
+
+	return true;
+}*/
+
+/**
+ * Remove a label from an email
+ * @param {*} userId - User ID
+ * @param {*} emailId - Email ID
+ * @param {*} labelId - Label ID to remove
+ * @returns {boolean} - True if successful, false otherwise
+ */
+/*function removeLabelFromEmail(userId, emailId, labelId) {
+	const email = findEmailById(userId, emailId);
+	if (!email || !email.labels) return false;
+
+	const labelIndex = email.labels.indexOf(labelId);
+	if (labelIndex !== -1) {
+		email.labels.splice(labelIndex, 1);
+		return true;
+	}
+
+	return false;
+}*/
+
+/**
+ * Get all emails with a specific label
+ * @param {*} userId - User ID
+ * @param {*} labelId - Label ID to filter by
+ * @returns {Array} - Array of emails with the specified label
+ */
+/*function getEmailsByLabel(userId, labelId) {
+	const userMails = MailsRepository.get(userId) || [];
+	return userMails.filter(mail =>
+		mail.labels && mail.labels.includes(parseInt(labelId))
+	);
+}*/
 
 module.exports = {
 	getLastMails,
@@ -106,5 +164,8 @@ module.exports = {
 	createNewMail,
 	findEmailById,
 	editMailById,
-	searchMails
+	searchMails,
+	//addLabelToEmail,
+	//removeLabelFromEmail,
+	//getEmailsByLabel
 }

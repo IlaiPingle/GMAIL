@@ -1,0 +1,210 @@
+const LabelModel = require('../Models/labelModel');
+const EmailModel = require('../Models/emailModel');
+
+/**
+ * Create a new label
+ */
+function createLabel(req, res) {
+    try {
+        const userId = parseInt(req.headers.userId, 10);
+        const { name, color } = req.body;
+        
+        if (!userId || !name) {
+            return res.status(400).json({ message: 'User ID and label name are required' });
+        }
+        
+        const newLabel = LabelModel.createLabel(userId, name, color);
+        return res.status(201).json(newLabel);
+    } catch (error) {
+        return res.status(500).json({ message: 'An error occurred while creating the label' });
+    }
+}
+
+/**
+ * Get all labels for a user
+ */
+function getUserLabels(req, res) {
+    try {
+        const userId = parseInt(req.headers.userId, 10);
+        
+        if (!userId) {
+            return res.status(400).json({ message: 'User ID is required' });
+        }
+        
+        const labels = LabelModel.getUserLabels(userId);
+        return res.status(200).json(labels);
+    } catch (error) {
+        return res.status(500).json({ message: 'An error occurred while retrieving labels' });
+    }
+}
+
+/**
+ * Get a specific label by ID
+ */
+function getLabelById(req, res) {
+    try {
+        const userId = parseInt(req.headers.userId, 10);
+        const labelId = parseInt(req.params.id, 10);
+        
+        if (!userId || !labelId) {
+            return res.status(400).json({ message: 'User ID and label ID are required' });
+        }
+        
+        const label = LabelModel.findLabelById(userId, labelId);
+        
+        if (!label) {
+            return res.status(404).json({ message: 'Label not found' });
+        }
+        
+        return res.status(200).json(label);
+    } catch (error) {
+        return res.status(500).json({ message: 'An error occurred while retrieving the label' });
+    }
+}
+
+/**
+ * Update a label
+ */
+function updateLabel(req, res) {
+    try {
+        const userId = parseInt(req.headers.userId, 10);
+        const labelId = parseInt(req.params.id, 10);
+        const updates = req.body;
+        
+        if (!userId || !labelId) {
+            return res.status(400).json({ message: 'User ID and label ID are required' });
+        }
+        
+        const updatedLabel = LabelModel.updateLabel(userId, labelId, updates);
+        
+        if (!updatedLabel) {
+            return res.status(404).json({ message: 'Label not found' });
+        }
+        
+        return res.status(200).json(updatedLabel);
+    } catch (error) {
+        return res.status(500).json({ message: 'An error occurred while updating the label' });
+    }
+}
+
+/**
+ * Delete a label
+ */
+function deleteLabel(req, res) {
+    try {
+        const userId = parseInt(req.headers.userId, 10);
+        const labelId = parseInt(req.params.id, 10);
+        
+        if (!userId || !labelId) {
+            return res.status(400).json({ message: 'User ID and label ID are required' });
+        }
+        
+        const deleted = LabelModel.deleteLabel(userId, labelId);
+        
+        if (!deleted) {
+            return res.status(404).json({ message: 'Label not found' });
+        }
+        
+        return res.status(204).end();
+    } catch (error) {
+        return res.status(500).json({ message: 'An error occurred while deleting the label' });
+    }
+}
+
+/**
+ * Add a label to an email
+ */
+function addLabelToEmail(req, res) {
+    try {
+        const userId = parseInt(req.headers.userId, 10);
+        const emailId = parseInt(req.params.emailId, 10);
+        const { labelId } = req.body;
+        
+        if (!userId || !emailId || !labelId) {
+            return res.status(400).json({ message: 'User ID, email ID, and label ID are required' });
+        }
+        
+        // Check if label exists
+        const label = LabelModel.findLabelById(userId, labelId);
+        if (!label) {
+            return res.status(404).json({ message: 'Label not found' });
+        }
+        
+        // Check if email exists
+        const email = EmailModel.findEmailById(userId, emailId);
+        if (!email) {
+            return res.status(404).json({ message: 'Email not found' });
+        }
+        
+        const success = EmailModel.addLabelToEmail(userId, emailId, parseInt(labelId, 10));
+        
+        if (!success) {
+            return res.status(400).json({ message: 'Failed to add label to email' });
+        }
+        
+        return res.status(200).json({ message: 'Label added to email successfully' });
+    } catch (error) {
+        return res.status(500).json({ message: 'An error occurred while adding label to email' });
+    }
+}
+
+/**
+ * Remove a label from an email
+ */
+function removeLabelFromEmail(req, res) {
+    try {
+        const userId = parseInt(req.headers.userId, 10);
+        const emailId = parseInt(req.params.emailId, 10);
+        const labelId = parseInt(req.params.labelId, 10);
+        
+        if (!userId || !emailId || !labelId) {
+            return res.status(400).json({ message: 'User ID, email ID, and label ID are required' });
+        }
+        
+        const success = EmailModel.removeLabelFromEmail(userId, emailId, labelId);
+        
+        if (!success) {
+            return res.status(404).json({ message: 'Email or label not found' });
+        }
+        
+        return res.status(200).json({ message: 'Label removed from email successfully' });
+    } catch (error) {
+        return res.status(500).json({ message: 'An error occurred while removing label from email' });
+    }
+}
+
+/**
+ * Get all emails with a specific label
+ */
+function getEmailsByLabel(req, res) {
+    try {
+        const userId = parseInt(req.headers.userId, 10);
+        const labelId = parseInt(req.params.id, 10);
+        
+        if (!userId || !labelId) {
+            return res.status(400).json({ message: 'User ID and label ID are required' });
+        }
+        
+        // Check if label exists
+        const label = LabelModel.findLabelById(userId, labelId);
+        if (!label) {
+            return res.status(404).json({ message: 'Label not found' });
+        }
+        
+        const emails = EmailModel.getEmailsByLabel(userId, labelId);
+        return res.status(200).json(emails);
+    } catch (error) {
+        return res.status(500).json({ message: 'An error occurred while retrieving emails by label' });
+    }
+}
+
+module.exports = {
+    createLabel,
+    getUserLabels,
+    getLabelById,
+    updateLabel,
+    deleteLabel,
+    addLabelToEmail,
+    removeLabelFromEmail,
+    getEmailsByLabel
+};
