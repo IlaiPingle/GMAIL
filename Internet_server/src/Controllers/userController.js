@@ -3,10 +3,9 @@ const User = require('../Models/userModel')
 
 exports.registerUser = (req, res) => {
     
-    const { username, password , first_name, sur_name , picture } = req.body
-    
-    if (!username || !password || !first_name || !sur_name || !picture) {
-        return res.status(400).json({ message: 'Missing required feilds' })
+    const { username, password, first_name, sur_name, picture } = req.body;
+    if (!username ||!password ||!first_name ||!sur_name ||picture === undefined) {
+      return res.status(400).json({ message: "Missing required fields" });
     }
     
     const existingUser = User.findUserByUsername(username)

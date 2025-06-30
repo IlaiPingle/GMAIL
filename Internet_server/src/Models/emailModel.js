@@ -1,15 +1,9 @@
-const MailsRepository = new Map();
 
 // This variable is used to generate unique IDs for each email entry
 let nextEmailId = 1
 
-/**
- * This function creates a new email entry for a user.
- * @param {*} userId - the Id of the user who is creating the email.
- * @param {*} param1 - an object containing the email details.
- * @returns - {Object} - Returns the newly created email object.
- */
-function createNewMail(userId , { sender , receiver , subject , body, link = [] }) {
+
+function createNewMail(sender , receiver , subject , body, link = []) {
 	const newMail = {
 		id: nextEmailId++,
 		sender,
@@ -17,12 +11,7 @@ function createNewMail(userId , { sender , receiver , subject , body, link = [] 
 		subject,
 		body,
 		dateCreated: new Date(),
-		link 
 	}
-	if (!MailsRepository.has(userId)) {
-		MailsRepository.set(userId, []);
-	}
-	MailsRepository.get(userId).push(newMail);
 	return newMail;
 }
 /**
@@ -31,8 +20,8 @@ function createNewMail(userId , { sender , receiver , subject , body, link = [] 
  * @param {*} id - The ID of the email to be found.
  * @returns - {Object|null} - Returns the email object if found, or null if not found.
  */
-function findEmailById(userId,id) {
-	return (MailsRepository.get(userId) || []).find(mail=> mail.id === parseInt(id));
+function findEmailById(id) {
+	return inbox.find(mail => mail.id === parseInt(id));
 }
 
 /**
@@ -40,8 +29,8 @@ function findEmailById(userId,id) {
  * @param {*} userId - The ID of the user whose mails are being retrieved.
  * @returns - {Array} - An array of the last 50 mails for the user, sorted by dateCreated in descending order.
  */
-function getLastMails(userId) {
-	const userMails = (MailsRepository.get(userId) || []).slice();
+function getLastMails() {
+	const userMails = inbox
 	userMails.sort((a, b) => b.dateCreated - a.dateCreated);
 	return userMails.slice(0,50);
 }

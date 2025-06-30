@@ -5,5 +5,5 @@ DeleteCommand::DeleteCommand(shared_ptr<IFilterService> filterService)
 
 string DeleteCommand::execute(const string& url) {
     bool success = m_filterService->remove(url);
-    return success ? "204 No Content\n" : ""; 
+    return success ? "204 \n" : ""; 
 }
