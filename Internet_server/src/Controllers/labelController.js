@@ -1,6 +1,6 @@
 const LabelModel = require('../Models/labelModel');
 const EmailModel = require('../Models/emailModel');
-const Users = require('../Models/usersModel');
+const Users = require('../Models/userModel');
 /**
 * Create a new label
 */
