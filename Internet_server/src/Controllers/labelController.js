@@ -1,19 +1,26 @@
 const LabelModel = require('../Models/labelModel');
 const EmailModel = require('../Models/emailModel');
-
+const Users = require('../Models/usersModel');
 /**
- * Create a new label
- */
+* Create a new label
+*/
 function createLabel(req, res) {
     try {
-        const userId = parseInt(req.headers.userId, 10);
-        const { name, color } = req.body;
-        
-        if (!userId || !name) {
+        const userId = parseInt(req.header("user-id"), 10);  
+        const lableName  = req.body;
+        if (!userId || !lableName) {
             return res.status(400).json({ message: 'User ID and label name are required' });
         }
-        
-        const newLabel = LabelModel.createLabel(userId, name, color);
+        const user = Users.findUserById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' }); 
+        }
+        const UsersLables = user.labels;
+        if(UsersLables.has(lableName)) {
+            return res.status(400).json({ message: 'Label already exists' });
+        }   
+        const newLabel = LabelModel.createLabel(lableName);
+        UsersLables.set(lableName, newLabel);
         return res.status(201).json(newLabel);
     } catch (error) {
         return res.status(500).json({ message: 'An error occurred while creating the label' });
@@ -21,17 +28,19 @@ function createLabel(req, res) {
 }
 
 /**
- * Get all labels for a user
- */
+* Get all labels for a user
+*/
 function getUserLabels(req, res) {
     try {
-        const userId = parseInt(req.headers.userId, 10);
-        
+        const userId = parseInt(req.header("user-id"), 10);
         if (!userId) {
             return res.status(400).json({ message: 'User ID is required' });
         }
-        
-        const labels = LabelModel.getUserLabels(userId);
+        const user = Users.findUserById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        const labels =  Array.from(user.labels.keys());
         return res.status(200).json(labels);
     } catch (error) {
         return res.status(500).json({ message: 'An error occurred while retrieving labels' });
@@ -39,18 +48,22 @@ function getUserLabels(req, res) {
 }
 
 /**
- * Get a specific label by ID
- */
+* Get a specific label by ID
+*/
 function getLabelById(req, res) {
     try {
-        const userId = parseInt(req.headers.userId, 10);
-        const labelId = parseInt(req.params.id, 10);
+        const userId = parseInt(req.header("user-id"), 10);
+        const labelName = req.params.id;
         
-        if (!userId || !labelId) {
+        if (!userId || !labelName) {
             return res.status(400).json({ message: 'User ID and label ID are required' });
         }
         
-        const label = LabelModel.findLabelById(userId, labelId);
+        const user = Users.findUserById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        const label = user.labels.get(labelName);
         
         if (!label) {
             return res.status(404).json({ message: 'Label not found' });
@@ -63,48 +76,57 @@ function getLabelById(req, res) {
 }
 
 /**
- * Update a label
- */
+* Update a label
+*/
 function updateLabel(req, res) {
     try {
-        const userId = parseInt(req.headers.userId, 10);
-        const labelId = parseInt(req.params.id, 10);
-        const updates = req.body;
+        const userId = parseInt(req.header("user-id"), 10);
+        const labelName = req.params.id;
+        const {newName} = req.body;
         
-        if (!userId || !labelId) {
+        if (!userId || !labelName) {
             return res.status(400).json({ message: 'User ID and label ID are required' });
         }
-        
-        const updatedLabel = LabelModel.updateLabel(userId, labelId, updates);
-        
-        if (!updatedLabel) {
+        const user = Users.findUserById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        if (!user.labels.has(labelName)) {
             return res.status(404).json({ message: 'Label not found' });
         }
-        
-        return res.status(200).json(updatedLabel);
+        if (user.labels.has(newName)) {
+            return res.status(400).json({ message: 'Label with this name already exists' });
+        }
+        const OldLabel = user.labels.get(labelName);
+        OldLabel.labelName = newName;
+        user.labels.delete(labelName);
+        user.labels.set(newName, OldLabel);
+        const updatedLabel = user.labels.get(newName);
+        return res.status(201).json(updatedLabel);
     } catch (error) {
         return res.status(500).json({ message: 'An error occurred while updating the label' });
     }
 }
 
 /**
- * Delete a label
- */
+* Delete a label
+*/
 function deleteLabel(req, res) {
     try {
-        const userId = parseInt(req.headers.userId, 10);
-        const labelId = parseInt(req.params.id, 10);
+        const userId = parseInt(req.header("user-id"), 10);
+        const labelName = req.params.id;
         
-        if (!userId || !labelId) {
+        if (!userId || !labelName) {
             return res.status(400).json({ message: 'User ID and label ID are required' });
         }
-        
-        const deleted = LabelModel.deleteLabel(userId, labelId);
-        
-        if (!deleted) {
+        const user = Users.findUserById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        if (!user.labels.has(labelName)) {
             return res.status(404).json({ message: 'Label not found' });
         }
-        
+        user.labels.delete(labelName);
         return res.status(204).end();
     } catch (error) {
         return res.status(500).json({ message: 'An error occurred while deleting the label' });
@@ -112,8 +134,8 @@ function deleteLabel(req, res) {
 }
 
 /**
- * Add a label to an email
- */
+* Add a label to an email
+*/
 function addLabelToEmail(req, res) {
     try {
         const userId = parseInt(req.headers.userId, 10);
@@ -149,8 +171,8 @@ function addLabelToEmail(req, res) {
 }
 
 /**
- * Remove a label from an email
- */
+* Remove a label from an email
+*/
 function removeLabelFromEmail(req, res) {
     try {
         const userId = parseInt(req.headers.userId, 10);
@@ -174,8 +196,8 @@ function removeLabelFromEmail(req, res) {
 }
 
 /**
- * Get all emails with a specific label
- */
+* Get all emails with a specific label
+*/
 function getEmailsByLabel(req, res) {
     try {
         const userId = parseInt(req.headers.userId, 10);
@@ -204,7 +226,7 @@ module.exports = {
     getLabelById,
     updateLabel,
     deleteLabel,
-    addLabelToEmail,
-    removeLabelFromEmail,
-    getEmailsByLabel
+    // addLabelToEmail,
+    // removeLabelFromEmail,
+    // getEmailsByLabel
 };

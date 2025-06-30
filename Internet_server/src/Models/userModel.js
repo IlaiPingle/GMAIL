@@ -13,7 +13,8 @@ function createUser(username, password, first_name, sur_name, picture) {
         first_name,
         sur_name,
         picture,
-        inbox : []
+        inbox : [],
+        labels : new Map()
     }
     users.set(userId, newUser);
     return newUser;

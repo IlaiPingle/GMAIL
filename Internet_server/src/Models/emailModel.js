@@ -3,7 +3,7 @@
 let nextEmailId = 1
 
 
-function createNewMail(sender , receiver , subject , body, link = []) {
+function createNewMail(sender , receiver , subject , body) {
 	const newMail = {
 		id: nextEmailId++,
 		sender,
