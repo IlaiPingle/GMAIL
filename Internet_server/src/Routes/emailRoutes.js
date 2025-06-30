@@ -2,19 +2,13 @@ const express = require('express')
 const router = express.Router()
 const emailController = require('../Controllers/emailController')
 
-// Route to subscribe a new email
-router.post('/api/emails/subscribe', emailController.subscribeEmail)
-
-// Route to verify an email subscription
-router.post('/api/emails/verify/:id', emailController.verifyEmail)
-
-// Route to get all verified emails (admin endpoint)
-router.get('/api/emails/verified', emailController.getVerifiedEmails)
-
-// Route to unsubscribe
-router.delete('/api/emails/unsubscribe/:id', emailController.unsubscribeEmail)
 
 router.get('/api/mails', emailController.getMails);
+router.post('/api/mails', emailController.sendNewMail);
+router.get('/api/mails/search', emailController.findInMails);
+router.get('/api/mails/:id', emailController.getMailById);
+router.delete('/api/mails/:id', emailController.removeMail);
+router.patch('/api/mails/:id', emailController.updatemail);
 
 
 module.exports = router
