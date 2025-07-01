@@ -14,10 +14,10 @@ exports.registerUser = (req, res) => {
         return res.status(400).json({ message: 'Username already exists' })
     }
     const newUser = User.createUser(username, password, first_name, sur_name, picture)
-
+    res.set('Location', `/api/users/${newUser.id}`);
     res.status(201).json({
-        id : newUser.id,
-        username: newUser.username,
+        id: newUser.id,
+        username: newUser.username, 
         first_name: newUser.first_name,
         sur_name: newUser.sur_name,
         picture: newUser.picture
@@ -36,7 +36,6 @@ exports.loginUser = (req, res) => {
     if (!user || user.password !== password) {
         return res.status(401).json({ message: 'Invalid username or password' })
     }
-
     res.status(200).json({
         id: user.id,
     })

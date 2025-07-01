@@ -21,7 +21,8 @@ function createLabel(req, res) {
         }   
         const newLabel = LabelModel.createLabel(lableName);
         UsersLables.set(lableName, newLabel);
-        return res.status(201).json(newLabel);
+        res.set('Location', `/api/labels/${newLabel.labelName}`);
+        return res.status(201).end();
     } catch (error) {
         return res.status(500).json({ message: 'An error occurred while creating the label' });
     }

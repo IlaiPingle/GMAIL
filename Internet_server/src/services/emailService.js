@@ -23,12 +23,18 @@ async function sendNewMail(userId, receiver, subject, body) {
     }
     
     // Security check
-    await validateEmailSecurity(subject, body);
+    const isBlacklisted = await validateEmailSecurity(subject, body);
+    if (isBlacklisted) {
+        const error = new Error('Mail contains blacklisted content');
+        error.status = 400;
+        throw error;
+    }
     
     // Create and send email
-    const newMail =createNewMail(user.username, receiver, subject, body);
-    user.inbox.push(newMail);
-    receiverUser.inbox.push(newMail);
+    const senderMail = createNewMail(user.username, receiver, subject, body);
+    const receiverMail = createNewMail(user.username, receiver, subject, body);
+    user.inbox.push(senderMail);
+    receiverUser.inbox.push(receiverMail);
     
     return newMail;
 }
@@ -148,17 +154,15 @@ async function validateEmailSecurity(subject, body) {
         try {
             const response = await sendCommand('GET', word);
             if (response.startsWith("200") && response.includes("True")) {
-                const error = new Error('Mail contains blacklisted content');
-                error.status = 400;
-                throw error;
-            }
+                return true; // blacklisted content found
+            }   
         } catch (error) {
-            // אם יש בעיה בחיבור לשרת הבלום פילטר, נזרוק שגיאה
             const validationError = new Error('An error occurred while validating the mail');
             validationError.status = 500;
             throw validationError;
         }
     }
+    return false; // no blacklisted content found
 }
 
 function createNewMail(sender, receiver, subject, body) {
