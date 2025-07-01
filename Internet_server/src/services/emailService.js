@@ -7,13 +7,7 @@ let nextEmailId = 1;
 */
 
 async function sendNewMail(userId, receiver, subject, body) {
-    // Find users
-    const user = Users.findUserById(userId);
-    if (!user) {
-        const error = new Error('User not found');
-        error.status = 404;
-        throw error;
-    }
+	const user = Users.findUserById(userId);
     
     const receiverUser = Users.findUserByUsername(receiver);
     if (!receiverUser) {
@@ -44,11 +38,6 @@ async function sendNewMail(userId, receiver, subject, body) {
 */
 function getUserMails(userId) {
     const user = Users.findUserById(userId);
-    if (!user) {
-        const error = new Error('User not found');
-        error.status = 404;
-        throw error;
-    }
     
     const lastMails = user.inbox.slice();
     lastMails.sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
@@ -60,11 +49,6 @@ function getUserMails(userId) {
 */
 function getMailById(userId, mailId) {
     const user = Users.findUserById(userId);
-    if (!user) {
-        const error = new Error('User not found');
-        error.status = 404;
-        throw error;
-    }
     
     const mail = user.inbox.find(mail => mail.id === mailId);
     if (!mail) {
@@ -81,11 +65,6 @@ function getMailById(userId, mailId) {
 */
 function removeMail(userId, mailId) {
     const user = Users.findUserById(userId);
-    if (!user) {
-        const error = new Error('User not found');
-        error.status = 404;
-        throw error;
-    }
     
     const mailIndex = user.inbox.findIndex(mail => mail.id === mailId);
     if (mailIndex === -1) {
@@ -103,11 +82,6 @@ function removeMail(userId, mailId) {
 */
 function searchMails(userId, searchTerm) {
     const user = Users.findUserById(userId);
-    if (!user) {
-        const error = new Error('User not found');
-        error.status = 404;
-        throw error;
-    }
     
     return user.inbox.filter(mail =>
         Object.values(mail).some(value =>
@@ -121,11 +95,6 @@ function searchMails(userId, searchTerm) {
 */
 function updateMail(userId, mailId, subject, body) {
     const user = Users.findUserById(userId);
-    if (!user) {
-        const error = new Error('User not found');
-        error.status = 404;
-        throw error;
-    }
     
     const mail = user.inbox.find(mail => mail.id === mailId);
     if (!mail) {
@@ -175,6 +144,16 @@ function createNewMail(sender, receiver, subject, body) {
         dateCreated: new Date().toISOString()
     };
     return newMail;
+}
+
+function getUserOrThrow(userId) {
+	const user = Users.findUserById(userId);
+	if (!user) {
+		const error = new Error('User not found');
+		error.status = 404;
+		throw error;
+	}
+	return user;
 }
 
 module.exports = {
