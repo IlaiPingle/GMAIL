@@ -1,4 +1,5 @@
 const net = require('net');
+const { endianness } = require('os');
 const PORT = 4000;
 
 function sendCommand(command, url) {
@@ -9,9 +10,11 @@ function sendCommand(command, url) {
             client.write(`${command} ${url}\n`);
         });
         
-        client.on('data', (data) => {
+        client.on("data", (data) => {
             response += data.toString();
-            client.end(); // Close the connection after receiving data
+            if (response.endsWith('\n')) {
+                client.end();
+            }
         });
         client.on('end',() => {
             resolve(response.trim());
