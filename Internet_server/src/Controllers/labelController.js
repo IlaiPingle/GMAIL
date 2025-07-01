@@ -13,21 +13,8 @@ function createLabel(req, res) {
         }
         
         const newLabel = LabelService.createLabel(userId, lableName);
-        return res.status(201).json(newLabel);
-      
-        const user = Users.findUserById(userId);
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' }); 
-        }
-        const UsersLables = user.labels;
-        if(UsersLables.has(lableName)) {
-            return res.status(400).json({ message: 'Label already exists' });
-        }   
-        const newLabel = LabelModel.createLabel(lableName);
-        UsersLables.set(lableName, newLabel);
-        res.set('Location', `/api/labels/${newLabel.labelName}`);
+		res.set('Location', `/api/labels/${lableName}`);
         return res.status(201).end();
-
     } catch (error) {
         return res.status(error.status || 500).json({ message: error.message || 'An error occurred while creating the label' });
     }
