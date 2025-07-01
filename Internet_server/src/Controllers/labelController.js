@@ -1,13 +1,13 @@
 const LabelModel = require('../Models/labelModel');
 const EmailModel = require('../Models/emailModel');
-const Users = require('../Models/usersModel');
+const Users = require('../Models/userModel');
 /**
 * Create a new label
 */
 function createLabel(req, res) {
     try {
         const userId = parseInt(req.header("user-id"), 10);  
-        const lableName  = req.body;
+        const {lableName} = req.body;
         if (!userId || !lableName) {
             return res.status(400).json({ message: 'User ID and label name are required' });
         }
@@ -133,92 +133,6 @@ function deleteLabel(req, res) {
     }
 }
 
-/**
-* Add a label to an email
-*/
-function addLabelToEmail(req, res) {
-    try {
-        const userId = parseInt(req.headers.userId, 10);
-        const emailId = parseInt(req.params.emailId, 10);
-        const { labelId } = req.body;
-        
-        if (!userId || !emailId || !labelId) {
-            return res.status(400).json({ message: 'User ID, email ID, and label ID are required' });
-        }
-        
-        // Check if label exists
-        const label = LabelModel.findLabelById(userId, labelId);
-        if (!label) {
-            return res.status(404).json({ message: 'Label not found' });
-        }
-        
-        // Check if email exists
-        const email = EmailModel.findEmailById(userId, emailId);
-        if (!email) {
-            return res.status(404).json({ message: 'Email not found' });
-        }
-        
-        const success = EmailModel.addLabelToEmail(userId, emailId, parseInt(labelId, 10));
-        
-        if (!success) {
-            return res.status(400).json({ message: 'Failed to add label to email' });
-        }
-        
-        return res.status(200).json({ message: 'Label added to email successfully' });
-    } catch (error) {
-        return res.status(500).json({ message: 'An error occurred while adding label to email' });
-    }
-}
-
-/**
-* Remove a label from an email
-*/
-function removeLabelFromEmail(req, res) {
-    try {
-        const userId = parseInt(req.headers.userId, 10);
-        const emailId = parseInt(req.params.emailId, 10);
-        const labelId = parseInt(req.params.labelId, 10);
-        
-        if (!userId || !emailId || !labelId) {
-            return res.status(400).json({ message: 'User ID, email ID, and label ID are required' });
-        }
-        
-        const success = EmailModel.removeLabelFromEmail(userId, emailId, labelId);
-        
-        if (!success) {
-            return res.status(404).json({ message: 'Email or label not found' });
-        }
-        
-        return res.status(200).json({ message: 'Label removed from email successfully' });
-    } catch (error) {
-        return res.status(500).json({ message: 'An error occurred while removing label from email' });
-    }
-}
-
-/**
-* Get all emails with a specific label
-*/
-function getEmailsByLabel(req, res) {
-    try {
-        const userId = parseInt(req.headers.userId, 10);
-        const labelId = parseInt(req.params.id, 10);
-        
-        if (!userId || !labelId) {
-            return res.status(400).json({ message: 'User ID and label ID are required' });
-        }
-        
-        // Check if label exists
-        const label = LabelModel.findLabelById(userId, labelId);
-        if (!label) {
-            return res.status(404).json({ message: 'Label not found' });
-        }
-        
-        const emails = EmailModel.getEmailsByLabel(userId, labelId);
-        return res.status(200).json(emails);
-    } catch (error) {
-        return res.status(500).json({ message: 'An error occurred while retrieving emails by label' });
-    }
-}
 
 module.exports = {
     createLabel,
@@ -226,7 +140,4 @@ module.exports = {
     getLabelById,
     updateLabel,
     deleteLabel,
-    // addLabelToEmail,
-    // removeLabelFromEmail,
-    // getEmailsByLabel
 };
