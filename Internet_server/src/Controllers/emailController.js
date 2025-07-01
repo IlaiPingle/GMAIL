@@ -1,63 +1,51 @@
-const send = require('send');
-const EmailModel = require('../Models/emailModel')
-const Users = require('../Models/userModel');
-const { sendCommand } = require('../services/blacklistClient');
+const EmailService = require('../services/emailService');
 
-
+/**
+* Send a new email
+* @param {*} req - The request object containing user ID, receiver, subject, and body.
+* @param {*} res - The response object to send the result.
+* @returns  {Object} - The created email object or an error message.
+*/
 async function sendNewMail(req, res) {
-    const userId = Number(req.header("user-id"));
-    const {receiver, subject, body} = req.body;
-    if (!userId || !receiver ) {
-        return  res.status(400).json({ message: 'missing required fields' });
-    }
-    const user = Users.findUserById(userId);
-    if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-    }
-    const receiverUser = Users.findUserByUsername(receiver);
-    if (!receiverUser) {
-        return res.status(404).json({ message: 'Receiver not found' });
-    }
-    try {
-        const text = `${subject} ${body}`;
-        const urlRegex = /^https?:\/\/[^\s]+$/ ;
-        const words = text.split(/\s+/);
-        for (const word of words) {
-            if (!urlRegex.test(word)) continue;
-            try {
-                const response = await sendCommand('GET', word);
-                if (response.startsWith("200") && response.includes("True")){
-                    return res.status(400).json({ message: 'Mail contains blacklisted content' });                       
-                }
-            } catch (error) {
-                return res.status(500).json({ message: 'An error occurred while validating the mail' });
-            }
+    try{
+        const userId = Number(req.header("user-id"));
+        const {receiver, subject, body} = req.body;
+        
+        if (!userId || !receiver ) {
+            return  res.status(400).json({ message: 'missing required fields' });
         }
-        const newMail = EmailModel.createNewMail(user.username , receiver, subject, body);
-        user.inbox.push(newMail);
-        receiverUser.inbox.push(newMail);
+        const newMail = await EmailService.sendNewMail(userId, receiver, subject, body);
         return res.status(201).json(newMail);
     }
     catch (error) {
-        return res.status(500).json({ message: 'An error occurred while sending the mail' });
+        return res.status(error.status || 500).json({ message: error.message  });
     }
 }
-
+/**
+* Get the last 50 mails from the user's inbox
+* @param {*} req - The request object containing user ID.
+* @param {*} res - The response object to send the result.
+* @returns {Object} - An array of the last 50 mails or an error message.
+*/
 function getMails(req, res) {
     try{
         const userId = Number(req.header("user-id"));
         if (!userId) {
             return res.status(400).json({ message: 'User ID is required' });
         }
-        const usersInbox = (Users.findUserById(userId)).inbox;
-        const lastMails = usersInbox.slice(); 
-        lastMails.sort((a, b) => new Date(b.date) - new Date(a.date));
-        lastMails.slice(0, 50);
-        return res.status(200).json(lastMails);
+        const mails = EmailService.getMails(userId);
+        return res.status(200).json(mails);
     } catch (error) {
-        return res.status(500).json({ message: 'An error occurred while retrieving mails'});
+        return res.status(error.status || 500).json({ message: error.message });
     }
 }
+
+/**
+* Get a specific mail by its ID
+* @param {*} req - The request object containing user ID and mail ID.
+* @param {*} res - The response object to send the result.
+* @returns {Object} - The mail object if found or an error message.
+*/
 function getMailById(req, res) {
     try {
         const userId = Number(req.header("user-id"));
@@ -65,16 +53,18 @@ function getMailById(req, res) {
         if (!userId || !mailId) {
             return res.status(400).json({ message: 'User ID and Mail ID are required' });
         }
-        const usersInbox = (Users.findUserById(userId)).inbox;
-        const mail = usersInbox.find(mail => mail.id === mailId);
-        if (!mail) {
-            return res.status(404).json({ message: 'Mail not found' });
-        }
+        const mail = EmailService.getMailById(userId, mailId);
         return res.status(200).json(mail);
     } catch (error) {
-        return res.status(500).json({ message: 'An error occurred while retrieving the mail' });
+        return res.status(error.status || 500).json({ message: error.message });
     }
 }
+/**
+* Remove a mail by its ID
+* @param {*} req - The request object containing user ID and mail ID.
+* @param {*} res - The response object to send the result.
+* @returns {Object} - A success status or an error message.
+*/
 function removeMail(req, res) {
     try {
         const userId = Number(req.header("user-id"));
@@ -82,18 +72,18 @@ function removeMail(req, res) {
         if (!userId || !mailId) {
             return res.status(400).json({ message: 'User ID and Mail ID are required' });
         }
-        const usersInbox = (Users.findUserById(userId)).inbox;
-        const MailIndex = usersInbox.findIndex(mail => mail.id === mailId);
-        if (MailIndex === -1) {
-            return res.status(404).json({ message: 'Mail not found' });
-        }
-        usersInbox.splice(MailIndex ,1);
+        EmailService.removeMail(userId, mailId);
         return res.status(204).end();
     } catch (error) {
-        return res.status(500).json({ message: 'An error occurred while deleting the mail' });
+        return res.status(error.status || 500).json({ message: error.message });
     }
 }
-
+/**
+* Search for mails in the user's inbox based on a search term
+* @param {*} req - The request object containing user ID and search term.
+* @param {*} res - The response object to send the result.
+* @returns {Object} - An array of mails that match the search term or an error message.
+*/
 function findInMails(req, res) {
     try {
         const userId = Number(req.header("user-id"));
@@ -101,33 +91,31 @@ function findInMails(req, res) {
         if (!userId || !searchTerm) {
             return res.status(400).json({ message: 'User ID and search term are required' });
         }
-        const usersInbox = (Users.findUserById(userId)).inbox;
-        const foundMails = usersInbox.filter(mail =>Object.values(mail).some(value =>
-            value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-        ));
+        const foundMails = EmailService.searchMails(userId, searchTerm);
         return res.status(200).json(foundMails);
     } catch (error) {
-        return res.status(500).json({ message: 'An error occurred while searching for mails' });
+        return res.status(error.status || 500).json({ message: error.message });
     }
 }
+/**
+* Update a mail by its ID
+* @param {*} req - The request object containing user ID, mail ID, subject, and body.
+* @param {*} res - The response object to send the result.
+* @returns {Object} - The updated mail object or an error message.
+*/
 function updatemail(req, res) {
     try {
         const userId = Number(req.header("user-id"));
-        const mailId = Number(req.params.id);
+        const mailId = Number(req.params.id); 
         const { subject, body } = req.body;
-        const usersInbox = (Users.findUserById(userId)).inbox;
-        if(!usersInbox){
-            return res.status(404).json({ message: 'USER not found' });
+
+        if (!userId || !mailId) {
+            return res.status(400).json({ message: 'User ID and Mail ID are required' });
         }
-        const mail = usersInbox.find(mail => mail.id === mailId);
-        if (!mail) {
-            return res.status(404).json({ message: 'Mail not found' });
-        }
-        mail.subject = subject;
-        mail.body = body;
-        return res.status(201).json(mail);
+        const updatedMail = EmailService.updateMail(userId, mailId, subject, body);
+        return res.status(201).json(updatedMail);
     } catch (error) {
-        return res.status(500).json({ message: 'An error occurred while updating the mail' });
+        return res.status(error.status || 500).json({ message: error.message });
     }
 }
 module.exports = {

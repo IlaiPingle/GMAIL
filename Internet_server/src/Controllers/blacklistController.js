@@ -1,5 +1,13 @@
 const { sendCommand } = require('../services/blacklistClient');
 const { findUserById} = require('../Models/userModel');
+
+
+/**
+ * Add a URL to the blacklist
+ * @param {*} req - The request object containing user ID and URL to be added.
+ * @param {*} res - The response object to send the result.
+ * @returns {Object} - A success message or an error message.
+ */
 async function addURL(req, res) {
     try {
         const userId = req.header('user-id');
@@ -8,7 +16,7 @@ async function addURL(req, res) {
         }
         const { url } = req.body;
         if (!url) {
-            return res.status(400).json({ error: 'Bad Request (empty URL)' });
+            return res.status(400).json({ error: 'NO URL provided!' });
         }
         const response = await sendCommand('POST', url);
         if (response === "201") {
@@ -23,9 +31,15 @@ async function addURL(req, res) {
         return res.status(400).json({ error: "Bad Request (blacklist service)"});
     }
     catch (error) {
-        return res.status(500).json({ error: "Internal Server Error" });
+        return res.status(500).json({ error: "Web server ERROR!" });
     }
 }
+/**
+ * Remove a URL from the blacklist
+ * @param {*} req - The request object containing user ID and URL to be removed.
+ * @param {*} res - The response object to send the result.
+ * @returns  {Object} - A success status or an error message.
+ */
 async function removeURL(req, res) {
     try {
         const userId = req.header("user-id");
@@ -50,30 +64,8 @@ async function removeURL(req, res) {
     }
 }
 
-async function checkURL(req, res){
-    try {
-        const { url } = req.body;
-        if (!url) {
-            return res.status(400).json({ error: 'URL is required' });
-        }
-        const response = await sendCommand('GET', url);
-        if ( response.startsWith("200") ) {
-            if (response.includes("False")){
-                return res.status(200).json({ isBlacklisted: false });
-            }
-            return res.status(200).json({ isBlacklisted: true });
-        }
-        if (response === "404") {
-            return res.status(404).json({ error: "Not Found" });
-        }
-        return res.status(400).json({ error: "Bad Request" });
-    }
-    catch (error) {
-        return res.status(500).json({ error: "Internal Server Error" });
-    }
-}
+
 module.exports = {
     addURL,
     removeURL,
-    checkURL
 };      

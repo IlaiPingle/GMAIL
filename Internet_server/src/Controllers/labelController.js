@@ -1,8 +1,11 @@
 const LabelModel = require('../Models/labelModel');
 const EmailModel = require('../Models/emailModel');
 const Users = require('../Models/userModel');
+
 /**
-* Create a new label
+* Create a new label for a user
+* @param {Object} req - The request object containing user ID and label name
+* @returns {Object} - The created label object or an error message
 */
 function createLabel(req, res) {
     try {
@@ -29,6 +32,8 @@ function createLabel(req, res) {
 
 /**
 * Get all labels for a user
+* @param {Object} req - The request object containing user ID
+* @returns {Object} - An array of label names or an error message
 */
 function getUserLabels(req, res) {
     try {
@@ -48,7 +53,9 @@ function getUserLabels(req, res) {
 }
 
 /**
-* Get a specific label by ID
+* Get a label by its ID
+* @param {Object} req - The request object containing user ID and label name
+* @returns {Object} - The label object or an error message
 */
 function getLabelById(req, res) {
     try {
@@ -77,6 +84,8 @@ function getLabelById(req, res) {
 
 /**
 * Update a label
+* @param {Object} req - The request object containing user ID, label name, and new label name
+* @returns {Object} - The updated label object or an error message
 */
 function updateLabel(req, res) {
     try {
@@ -110,6 +119,8 @@ function updateLabel(req, res) {
 
 /**
 * Delete a label
+* @param {Object} req - The request object containing user ID and label name
+* @returns {Object} - A success status or an error message
 */
 function deleteLabel(req, res) {
     try {
