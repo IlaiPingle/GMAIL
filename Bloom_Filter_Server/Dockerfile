@@ -21,6 +21,8 @@ WORKDIR /app/build
 
 RUN cmake .. && make
 
+# Expose the port on which the application will run
+EXPOSE 4000
 # run the application
 WORKDIR /app/build
-CMD ["./bloom_filter_app"]
+CMD ["./bloom_filter_app", "4000" , "1000", "1","2", "3", "4", "5", "6", "7", "8", "9", "10","11", "12", "13", "14", "15", "16", "17", "18", "19", "20"]

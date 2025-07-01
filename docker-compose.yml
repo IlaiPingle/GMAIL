@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  bloom-server:
+    build:
+      context: ./Bloom_Filter_Server 
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+
+
+  web-server:
+    build:
+      context: ./Internet_server
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - bloom-server
