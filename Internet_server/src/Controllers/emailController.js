@@ -15,6 +15,7 @@ async function sendNewMail(req, res) {
             return  res.status(400).json({ message: 'missing required fields' });
         }
         const newMail = await EmailService.sendNewMail(userId, receiver, subject, body);
+        res.set('Location', `/api/mails/${newMail.id}`);
         return res.status(201).json(newMail);
     }
     catch (error) {
@@ -33,7 +34,7 @@ function getMails(req, res) {
         if (!userId) {
             return res.status(400).json({ message: 'User ID is required' });
         }
-        const mails = EmailService.getMails(userId);
+        const mails = EmailService.getUserMails(userId);
         return res.status(200).json(mails);
     } catch (error) {
         return res.status(error.status || 500).json({ message: error.message });
@@ -112,8 +113,8 @@ function updatemail(req, res) {
         if (!userId || !mailId) {
             return res.status(400).json({ message: 'User ID and Mail ID are required' });
         }
-        const updatedMail = EmailService.updateMail(userId, mailId, subject, body);
-        return res.status(201).json(updatedMail);
+        EmailService.updateMail(userId, mailId, subject, body);
+        return res.status(204).end();
     } catch (error) {
         return res.status(error.status || 500).json({ message: error.message });
     }
