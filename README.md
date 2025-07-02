@@ -48,7 +48,7 @@ or: `ctrl+c` at the same terminal
 ### Create two Users
 
 ```bash
-curl curl -i -X POST http://localhost:8080/api/users -H 'Content-Type: application/json' -d '{
+curl -i -X POST http://localhost:8080/api/users -H 'Content-Type: application/json' -d '{
   "username": "alice",
   "password": "1234",
   "first_name": "Alice",
