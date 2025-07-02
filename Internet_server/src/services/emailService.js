@@ -30,7 +30,7 @@ async function sendNewMail(userId, receiver, subject, body) {
     user.inbox.push(senderMail);
     receiverUser.inbox.push(receiverMail);
     
-    return newMail;
+    return senderMail;
 }
 
 /**

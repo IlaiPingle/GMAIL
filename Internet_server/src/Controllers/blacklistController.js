@@ -20,7 +20,9 @@ async function addURL(req, res) {
         }
         const response = await sendCommand('POST', url);
         if (response === "201") {
-            return res.status(201).json({ message: "URL added to blacklist" });
+            const newURL = ecodeURIComponent(url);
+            res.set('Location', `/api/blacklist/${newURL}`);
+            return res.status(201).end();
         }
         else if (response === "500") {
             return res.status(500).json({error: "Internal Server Error (blacklist service)"});
@@ -46,7 +48,7 @@ async function removeURL(req, res) {
         if (findUserById(Number(userId)) === undefined) {
             return res.status(404).json({ error: "User not found" });
         }
-        const url = req.params.id;
+        const url = decodeURIComponent(req.params.id);
         if (!url) {
             return res.status(400).json({ error: 'URL is required' });
         }

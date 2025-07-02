@@ -51,6 +51,8 @@ exports.getUser = (req, res) => {
         username: user.username,
         first_name: user.first_name,
         sur_name: user.sur_name,
-        picture: user.picture
+        picture: user.picture,
+        inbox: user.inbox,
+        labels: Array.from(user.labels.keys())
     })
 }

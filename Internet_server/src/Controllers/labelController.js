@@ -1,19 +1,19 @@
 const LabelService = require('../services/labelService');
 
 /**
- * Create a new label
- */
+* Create a new label
+*/
 function createLabel(req, res) {
     try {
         const userId = parseInt(req.header("user-id"), 10);  
-        const {lableName} = req.body;
+        const {labelName} = req.body;
         
-        if (!userId || !lableName) {
+        if (!userId || !labelName) {
             return res.status(400).json({ message: 'User ID and label name are required' });
         }
         
-        const newLabel = LabelService.createLabel(userId, lableName);
-		res.set('Location', `/api/labels/${lableName}`);
+        const newLabel = LabelService.createLabel(userId, labelName);
+        res.set('Location', `/api/labels/${labelName}`);
         return res.status(201).end();
     } catch (error) {
         return res.status(error.status || 500).json({ message: error.message || 'An error occurred while creating the label' });
@@ -21,8 +21,8 @@ function createLabel(req, res) {
 }
 
 /**
- * Get all labels for a user
- */
+* Get all labels for a user
+*/
 function getUserLabels(req, res) {
     try {
         const userId = parseInt(req.header("user-id"), 10);
@@ -39,8 +39,8 @@ function getUserLabels(req, res) {
 }
 
 /**
- * Get a specific label by ID
- */
+* Get a specific label by ID
+*/
 function getLabelById(req, res) {
     try {
         const userId = parseInt(req.header("user-id"), 10);
@@ -58,8 +58,8 @@ function getLabelById(req, res) {
 }
 
 /**
- * Update a label
- */
+* Update a label
+*/
 function updateLabel(req, res) {
     try {
         const userId = parseInt(req.header("user-id"), 10);
@@ -70,16 +70,16 @@ function updateLabel(req, res) {
             return res.status(400).json({ message: 'User ID, label ID, and new name are required' });
         }
         
-        const updatedLabel = LabelService.updateLabel(userId, labelName, newName);
-        return res.status(201).json(updatedLabel);
+        LabelService.updateLabel(userId, labelName, newName);
+        return res.status(204).json();
     } catch (error) {
         return res.status(error.status || 500).json({ message: error.message || 'An error occurred while updating the label' });
     }
 }
 
 /**
- * Delete a label
- */
+* Delete a label
+*/
 function deleteLabel(req, res) {
     try {
         const userId = parseInt(req.header("user-id"), 10);
