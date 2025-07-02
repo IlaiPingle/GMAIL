@@ -20,7 +20,7 @@ async function addURL(req, res) {
         }
         const response = await sendCommand('POST', url);
         if (response === "201") {
-            const newURL = ecodeURIComponent(url);
+            const newURL = encodeURIComponent(url);
             res.set('Location', `/api/blacklist/${newURL}`);
             return res.status(201).end();
         }
