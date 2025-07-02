@@ -8,6 +8,7 @@ const labelRoutes = require('./Routes/labelRoutes')
 const app = express()
 
 app.use(bodyparser.json())
+app.set('json spaces', 2);
 
 app.use(usersRoutes)
 app.use(blacklistRoutes)
