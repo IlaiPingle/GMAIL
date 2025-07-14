@@ -11,7 +11,7 @@ services:
 
   web-server:
     build:
-      context: ./Internet_server
+      context: ./backend
       dockerfile: docker/Dockerfile
     ports:
       - "8080:8080"

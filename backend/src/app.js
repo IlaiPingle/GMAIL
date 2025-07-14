@@ -6,6 +6,8 @@ const emailRoutes = require('./Routes/emailRoutes')
 const labelRoutes = require('./Routes/labelRoutes')
 
 const app = express()
+const cors = require("cors");
+app.use(cors());
 
 app.use(bodyparser.json())
 app.set('json spaces', 2);

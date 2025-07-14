@@ -1,0 +1,72 @@
+.sideBarOption {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 12px;
+    margin: 2px 8px;
+    border: none;
+    border-radius: 20px;
+    background-color: transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    width: calc(100% - 16px);
+    overflow: hidden;
+}
+
+.sideBarOption:hover {
+    background-color: #f1f3f4;
+}
+
+.sideBarOption i {
+    margin-right: 12px;
+    font-size: 20px;
+    color: #5f6368;
+    width: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.sideBarText {
+    font-size: 14px;
+    color: #3c4043;
+    font-weight: 400;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 0s ease;
+    white-space: nowrap;
+    width: 0;
+    overflow: hidden;
+}
+
+/* הצגת הטקסט כאשר ה-SideBar מורחב */
+.sideBar:hover .sideBarText {
+    opacity: 1;
+    transform: translateX(0);
+    width: auto;
+    transition-delay: 0s; /* עיכוב קצר לאחר הרחבת ה-SideBar */
+}
+
+
+/* עיצוב מיוחד לכפתור Compose */
+#compose {
+    background-color: #c2e7ff;
+    color: #001d35;
+    font-weight: 500;
+    box-shadow: 0 1px 2px 0 rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
+    margin: 8px;
+    padding: 12px 24px;
+}
+#compose:hover {
+    background-color: #a8dadc;
+    box-shadow: 0 1px 3px 0 rgba(60,64,67,.3), 0 4px 8px 3px rgba(60,64,67,.15);
+}
+
+#compose i {
+    color: #001d35;
+}
+
+#compose .sideBarText {
+    color: #001d35;
+    font-weight: 500;
+}

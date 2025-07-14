@@ -1,0 +1,21 @@
+.iconButton {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+}
+.iconButton:hover {
+    background-color: rgb(172, 172, 172);
+    border-radius: 50%;
+    background-size: auto;
+}                                                                                                                                                                                       
+#compose-button {
+    background-color: #d93025;
+    color: white;
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

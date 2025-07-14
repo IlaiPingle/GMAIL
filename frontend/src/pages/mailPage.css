@@ -1,0 +1,49 @@
+/* Container for the mail detail page */
+.mail-page {
+  flex: 1;
+  padding: 24px;
+  background-color: #ffffff;
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Subject styling */
+.mail-page h1 {
+  font-size: 24px;
+  margin-bottom: 16px;
+  color: #202124;
+}
+
+/* Metadata styling (sender, receiver, date) */
+.mail-page p {
+  margin: 4px 0;
+  color: #5f6368;
+  font-size: 14px;
+}
+
+/* Divider above body */
+.mail-body {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+  line-height: 1.5;
+  color: #202124;
+  font-size: 16px;
+}
+
+/* Loading and error states */
+.loading,
+.error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: #5f6368;
+  font-size: 16px;
+}
+
+.error {
+  color: #d93025;
+}
