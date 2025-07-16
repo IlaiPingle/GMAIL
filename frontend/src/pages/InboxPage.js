@@ -1,20 +1,52 @@
-import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from 'react-router-dom';
-import MailItem from "../components/mail/mail";
-import Compose from '../components/compose/Compose';
-import CreateLabel from '../components/createLabel/CreateLabel';
+import React, { Component } from "react";
+import { useLocation } from 'react-router-dom';
+import MailItem from "../components/mailItem/MailItem";
 import "./InboxPage.css";
 
-export default function InboxPage() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const showCompose = location.state?.compose;
-  const showCreateLabel = location.state?.newLabel;
+class InboxPage extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      mails: [],
+      loading: true,
+      currentSearchResults: null
+    };
+  }
 
-  const [mails, setMails] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Function to perform search
+  performSearch = async (term) => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/mails/search?q=${encodeURIComponent(term)}`, {
+        headers: {
+          'user-id': '2',
+        },
+      });
 
-  useEffect(() => {
+      if (!response.ok) {
+        throw new Error('Search failed');
+      }
+
+      const searchResults = await response.json();
+      
+      const adaptedResults = searchResults.map(mail => ({
+        id: mail.id,
+        from: mail.sender,
+        to: mail.receiver,
+        subject: mail.subject,
+        body: mail.body,
+        date: mail.dateCreated,
+        isRead: Math.random() > 0.5,
+        isStarred: Math.random() > 0.7
+      }));
+
+      this.setState({ currentSearchResults: adaptedResults });
+    } catch (err) {
+      console.error('Search error:', err);
+      this.setState({ currentSearchResults: [] });
+    }
+  };
+
+  fetchMails = () => {
     console.log("Attempting to fetch from API...");
     fetch("http://localhost:8080/api/mails", {
       headers: {
@@ -43,34 +75,75 @@ export default function InboxPage() {
           isRead: Math.random() > 0.5, // רנדומלי לדוגמה
           isStarred: Math.random() > 0.7 // רנדומלי לדוגמה
         }));
-        setMails(adaptedMails);
+        this.setState({ mails: adaptedMails });
       })
       .catch((err) => {
         console.error("API Error:", err.message);
         console.log("Using dummy data instead");
-        setMails("dummyMails");
+        this.setState({ mails: "dummyMails" });
       })
-      .finally(() => setLoading(false));
-  }, []);
+      .finally(() => this.setState({ loading: false }));
+  };
 
-  if (loading) {
-    return <div className="inbox-page loading">Loading...</div>;
+  componentDidMount() {
+    this.fetchMails();
+    
+    // Handle search query from URL
+    const searchQuery = this.getSearchQuery();
+    if (searchQuery) {
+      this.performSearch(searchQuery);
+    }
   }
 
-  return (
-    <div className="inbox-page">
-      <div className="inbox-header">
-        <h2>Inbox</h2>
-        {showCreateLabel && <CreateLabel />}
+  componentDidUpdate(prevProps) {
+    const prevSearchQuery = this.getSearchQuery(prevProps.location);
+    const currentSearchQuery = this.getSearchQuery();
+    
+    if (prevSearchQuery !== currentSearchQuery) {
+      if (currentSearchQuery) {
+        this.performSearch(currentSearchQuery);
+      } else {
+        this.setState({ currentSearchResults: null });
+      }
+    }
+  }
+
+  getSearchQuery = (location = window.location) => {
+    const query = new URLSearchParams(location.search);
+    return query.get('search');
+  };
+
+  render() {
+    const { searchResults } = this.props;
+    const { mails, loading, currentSearchResults } = this.state;
+    
+    // Use search results if available, otherwise use fetched mails
+    const displayMails = currentSearchResults || searchResults || mails;
+    const searchQuery = this.getSearchQuery();
+    
+    console.log('InboxPage - searchQuery:', searchQuery);
+    console.log('InboxPage - searchResults:', searchResults);
+    console.log('InboxPage - displayMails:', displayMails);
+
+    if (loading) {
+      return <div className="inbox-page loading">Loading...</div>;
+    }
+
+    return (
+      <div className="inbox-page">
+        <div className="inbox-header">
+          <h2>Inbox</h2>
+        </div>
+        <div className="inbox-content">
+          {displayMails && displayMails.length === 0 ? (
+            <p className="no-mails">No mails found.</p>
+          ) : (
+            displayMails && displayMails.map((mail) => <MailItem key={mail.id} mail={mail} />)
+          )}
+        </div>
       </div>
-      <div className="inbox-content">
-        {mails.length === 0 ? (
-          <p className="no-mails">No mails found.</p>
-        ) : (
-          mails.map((mail) => <MailItem key={mail.id} mail={mail} />)
-        )}
-      </div>
-      {showCompose && <Compose />}
-    </div>
-  );
+    );
+  }
 }
+
+export default InboxPage;

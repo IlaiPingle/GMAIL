@@ -1,95 +1,116 @@
-import React, { useState, useEffect } from "react";
+import React, { Component } from "react";
 import "./SideBar.css";
 import IconButton from "../common/IconButton";
 import SideBarOptions from "./SideBarOptions";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-function SideBar() {
-    const navigate = useNavigate();
-    const [labels, setLabels] = useState([]);
+// HOC for navigation hooks in class component
+function withNavigation(Component) {
+    return function ComponentWithNavigation(props) {
+        const navigate = useNavigate();
+        const location = useLocation();
+        return <Component {...props} navigate={navigate} location={location} />;
+    };
+}
+
+class SideBar extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            labels: []
+        };
+    }
 
     // Fetch labels on mount
-    useEffect(() => {
-      const fetchLabels = async () => {
-        try {
-          const res = await fetch('http://localhost:8080/api/labels', {
-            headers: { 'user-id': '2' }
-          });
-          if (res.ok) {
-            const data = await res.json();
-            setLabels(data);
-          }
-        } catch (err) {
-          console.error('Error fetching labels', err);
-        }
-      };
-      fetchLabels();
-    }, []);
+    componentDidMount() {
+        this.fetchLabels();
+    }
 
-    // Open Create Label modal via state
-    const openCreateLabel = () => {
-      navigate('/', { state: { newLabel: true } });
+    fetchLabels = async () => {
+        try {
+            const res = await fetch('http://localhost:8080/api/labels', {
+                headers: { 'user-id': '2' }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                this.setState({ labels: data });
+            }
+        } catch (err) {
+            console.error('Error fetching labels', err);
+        }
     };
 
-    return (
-        <div className="sideBar">
-            <SideBarOptions 
-                id="compose" 
-                icon="bi bi-pencil"
-                text="Compose"
-                onClick={() => navigate('/', { state: { compose: true } })}
-            />
-            <SideBarOptions 
-                icon="bi bi-inbox"
-                text="Inbox"
-                onClick={() => navigate('/')}
-            />
-            <SideBarOptions 
-                icon="bi bi-star"
-                text="Starred"
-                onClick={() => console.log("Starred clicked")}
-            />
-            <SideBarOptions 
-                icon="bi bi-send"
-                text="Sent"
-                onClick={() => console.log("Sent clicked")}
-            />
-            <SideBarOptions 
-                icon="bi bi-file-earmark"
-                text="Drafts"
-                onClick={() => console.log("Drafts clicked")}
-            />
-            <SideBarOptions 
-                icon="bi bi-trash"
-                text="Trash"
-                onClick={() => console.log("Trash clicked")}
-            />
-            <SideBarOptions 
-                icon="bi bi-archive"
-                text="Archive"
-                onClick={() => console.log("Archive clicked")}
-            />
-            <div className="LabelsHeader">
-                <span className="LabelsHeaderText">Labels</span>
-                <IconButton onClick={openCreateLabel}>
-                    bi bi-plus
-                </IconButton>
+    render() {
+        const { navigate, location } = this.props;
+        const { labels } = this.state;
+        
+        // Get current path for highlighting active option
+        const currentPath = location.pathname;
+
+        return (
+            <div className="sideBar">
+                <SideBarOptions 
+                    id="compose" 
+                    icon="edit"
+                    text="Compose"
+                    isActive={currentPath === '/compose'}
+                    onClick={() => navigate('/compose')}
+                />
+                <SideBarOptions 
+                    icon="inbox"
+                    text="Inbox"
+                    isActive={currentPath === '/'}
+                    onClick={() => navigate('/')}
+                />
+                <SideBarOptions 
+                    icon="star_border"
+                    text="Starred"
+                    isActive={false}
+                    onClick={() => console.log("Starred clicked")}
+                />
+                <SideBarOptions 
+                    icon="send"
+                    text="Sent"
+                    isActive={false}
+                    onClick={() => console.log("Sent clicked")}
+                />
+                <SideBarOptions 
+                    icon="draft"
+                    text="Drafts"
+                    isActive={false}
+                    onClick={() => console.log("Drafts clicked")}
+                />
+                <SideBarOptions 
+                    icon="delete"
+                    text="Trash"
+                    isActive={false}
+                    onClick={() => console.log("Trash clicked")}
+                />
+                <SideBarOptions 
+                    icon="archive"
+                    text="Archive"
+                    isActive={false}
+                    onClick={() => console.log("Archive clicked")}
+                />
+                <div className="LabelsHeader">
+                    <span className="LabelsHeaderText">Labels</span>
+                    <IconButton onClick={() => navigate('/create-label')} iconType="material">
+                        add
+                    </IconButton>
+                </div>
+                {/* Render dynamic labels */}
+                {labels.map(label => (
+                    <SideBarOptions
+                        key={label.id}
+                        icon="label"
+                        text={label.name}
+                        isActive={false}
+                        onClick={() => navigate(`/?label=${label.id}`)}
+                    />
+                ))}
             </div>
-            {/* Render dynamic labels */}
-            {labels.map(label => (
-              <SideBarOptions
-                key={label.id}
-                icon="bi bi-tags"
-                text={label.name}
-                onClick={() => navigate(`/?label=${label.id}`)}
-              />
-            ))}
-        </div>
-    );
-
+        );
+    }
 }
 
-function handleCompose() {
-    console.log("Compose clicked");
-}
-export default SideBar;
+export default withNavigation(SideBar);

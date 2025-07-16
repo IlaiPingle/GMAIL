@@ -2,33 +2,29 @@ const Users = require('../Models/userModel');
 const LabelModel = require('../Models/labelModel');
 
 /**
- * Create a new label for a user
- */
+* Create a new label for a user
+*/
 function createLabel(userId, labelName) {
     const user = getUserOrThrow(userId); // Ensure user exists
-    
     if(user.labels.has(labelName)) { // Check if label already exists
         const error = new Error('Label already exists');
         error.status = 400;
         throw error;
     }
-    // Create and add the new label
-    const newLabel = LabelModel.createLabel(labelName);
-    user.labels.set(labelName, newLabel);
-    return newLabel;
+    user.labels.set(labelName,{mailIds: new Set()});
 }
 
 /**
- * Get all labels for a user
- */
+* Get all labels for a user
+*/
 function getUserLabels(userId) {
     const user = getUserOrThrow(userId);
     return Array.from(user.labels.keys());
 }
 
 /**
- * Get a specific label by name
- */
+* Get a specific label by name
+*/
 function getLabelByName(userId, labelName) {
     const user = getUserOrThrow(userId);
     const label = user.labels.get(labelName);
@@ -43,8 +39,8 @@ function getLabelByName(userId, labelName) {
 }
 
 /**
- * Update a label name
- */
+* Update a label name
+*/
 function updateLabel(userId, labelName, newName) {
     const user = getUserOrThrow(userId);
     
@@ -60,17 +56,21 @@ function updateLabel(userId, labelName, newName) {
         throw error;
     }
     
-    const oldLabel = user.labels.get(labelName);
-    oldLabel.labelName = newName;
+    const labelData = user.labels.get(labelName);
+    user.labels.set(newName, labelData);
     user.labels.delete(labelName);
-    user.labels.set(newName, oldLabel);
-    
-    return user.labels.get(newName);
+    for (const mail of user.mails){
+        const index = mail.labels.indexOf(labelName);
+        if (index !== -1) {
+            mail.labels[index] = newName; 
+        }
+    }
+    return true;
 }
 
 /**
- * Delete a label
- */
+* Delete a label
+*/
 function deleteLabel(userId, labelName) {
     const user = getUserOrThrow(userId);
     
@@ -85,8 +85,8 @@ function deleteLabel(userId, labelName) {
 }
 
 /**
- * Helper function to get a user or throw an error
- */
+* Helper function to get a user or throw an error
+*/
 function getUserOrThrow(userId) {
     const user = Users.findUserById(userId);
     if (!user) {

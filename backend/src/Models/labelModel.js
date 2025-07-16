@@ -6,7 +6,7 @@
 function createLabel(labelName) {
     const newLabel = {
         labelName,
-        mails: [],
+        set(mail)
         dateCreated: new Date().toISOString()
     };
     return newLabel;

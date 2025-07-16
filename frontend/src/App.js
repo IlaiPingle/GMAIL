@@ -1,27 +1,29 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Header from './components/header/Header';
-import SideBar from './components/sideBar/SideBar';
+import MainLayout from './pages/MainLayout';
 import InboxPage from './pages/InboxPage';
 import MailPage from './pages/mailPage';
 import Compose from './components/compose/Compose';
+import CreateLabel from './components/createLabel/CreateLabel';
 import './App.css';
 
-function App() {
-  return (
-    <Router>
-      <div className="App">
-        <Header />
-        <div className="app-body">
-          <SideBar />
-          <Routes>
-            <Route path="/" element={<InboxPage />} />
-            <Route path="/mail/:id" element={<MailPage />} />
-          </Routes>
+class App extends Component {
+  render() {
+    return (
+      <Router>
+        <div className="App">
+          <MainLayout >
+            <Routes>
+              <Route path="/" element={<InboxPage />} />
+              <Route path="/mail/:id" element={<MailPage />} />
+              <Route path="/compose" element={<Compose />} />
+              <Route path="/create-label" element={<CreateLabel />} />
+            </Routes>
+          </MainLayout>
         </div>
-      </div>
-    </Router>
-  );
+      </Router>
+    );
+  }
 }
 
 export default App;

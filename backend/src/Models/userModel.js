@@ -2,7 +2,7 @@ const users = new Map(); // <key- userId, value-userObject>
 
 // This variable is used to generate unique IDs for each user.
 let nextUserId = 1
-
+const SYSTEM_LABELS = ['inbox','Starred', 'Snoozed', 'Important', 'Chats', 'Sent', 'Drafts', 'Bin', 'Spam', 'All Mail'];
 // This function creates a new user object and adds it to the users array.
 function createUser(username, password, first_name, sur_name, picture) {
     userId = nextUserId++;
@@ -13,7 +13,7 @@ function createUser(username, password, first_name, sur_name, picture) {
         first_name,
         sur_name,
         picture,
-        inbox : [],
+        mails: [] ,
         labels : new Map()
     }
     users.set(userId, newUser);

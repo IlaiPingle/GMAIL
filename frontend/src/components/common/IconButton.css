@@ -3,12 +3,16 @@
     border: none;
     cursor: pointer;
     padding: 10px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
 }
 .iconButton:hover {
-    background-color: rgb(172, 172, 172);
-    border-radius: 50%;
-    background-size: auto;
-}                                                                                                                                                                                       
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 100%;
+    align-items: center;
+    justify-content: center;
+}                                                                                                                                                                                    
 #compose-button {
     background-color: #d93025;
     color: white;
@@ -18,4 +22,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+.material-symbols-outlined {
+    font-size: 30px;
+    color: #5f6368;
+    font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 50;
 }

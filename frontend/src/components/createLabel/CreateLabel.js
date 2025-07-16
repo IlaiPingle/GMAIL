@@ -1,15 +1,29 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { Component } from "react";
 import { useNavigate } from "react-router-dom";
 import './CreateLabel.css';
 
-const CreateLabel = () => {
-    const navigate = useNavigate();
-    const [labelName, setLabelName] = useState("");
-    const [error, setError] = useState("");
+// HOC for navigation hooks in class component
+function withNavigation(Component) {
+    return function ComponentWithNavigation(props) {
+        const navigate = useNavigate();
+        return <Component {...props} navigate={navigate} />;
+    };
+}
 
-    const handleSubmit = async (e) => {
+class CreateLabel extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            labelName: "",
+            error: ""
+        };
+    }
+
+    handleSubmit = async (e) => {
         e.preventDefault();
+        const { labelName } = this.state;
+        const { navigate } = this.props;
+        
         try {
             const response = await fetch('http://localhost:8080/api/labels', {
                 method: 'POST',
@@ -25,31 +39,37 @@ const CreateLabel = () => {
             }
             navigate('/'); // Redirect to inbox after creation
         } catch (err) {
-            setError(err.message);
+            this.setState({ error: err.message });
         }
-    }
-    return (
-        <div className="create-label-overlay">
-            <div className="create-label-container">
-                <h2>New label</h2>
-                <p>Please enter a new label name:</p>
-                <form onSubmit={handleSubmit}>
-                    <input
-                        type="text"
-                        placeholder="Label Name"
-                        value={labelName}
-                        onChange={(e) => setLabelName(e.target.value)}
-                        required
-                    />
-                    {error && <div className="error">{error}</div>}
-                    <div className="create-label-actions">
-                        <button type="button" className="cancel-btn" onClick={() => navigate('/')}>Cancel</button>
-                        <button type="submit" className="create-btn" disabled={!labelName}>Create</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
-};
+    };
 
-export default CreateLabel;
+    render() {
+        const { labelName, error } = this.state;
+        const { navigate } = this.props;
+        
+        return (
+            <div className="create-label-overlay">
+                <div className="create-label-container">
+                    <h2>New label</h2>
+                    <p>Please enter a new label name:</p>
+                    <form onSubmit={this.handleSubmit}>
+                        <input
+                            type="text"
+                            placeholder="Label Name"
+                            value={labelName}
+                            onChange={(e) => this.setState({ labelName: e.target.value })}
+                            required
+                        />
+                        {error && <div className="error">{error}</div>}
+                        <div className="create-label-actions">
+                            <button type="button" className="cancel-btn" onClick={() => navigate('/')}>Cancel</button>
+                            <button type="submit" className="create-btn" disabled={!labelName}>Create</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        );
+    }
+}
+
+export default withNavigation(CreateLabel);
