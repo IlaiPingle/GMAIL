@@ -1,107 +1,80 @@
-/*
- * registration.css
- * Styles for the user registration page.
- * This file contains styles for the registration form, input fields, buttons, and error messages.
- * It ensures a clean and user-friendly interface for new users to register.
- */
+/* Google Registration Form CSS
+   This CSS is designed to style a registration form similar to Google's design language.
+   It includes responsive design elements and a clean, modern aesthetic.
+*/
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
-    background-color: #f5f5f5;
+    font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+    background-color: #fff;
+    color: #202124;
+    line-height: 1.5;
+}
+
+/* Main container */
+.registration-container {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    padding: 24px;
 }
 
-.container {
+#registration-app {
     width: 100%;
     max-width: 450px;
-    padding: 20px;
+    padding: 48px 40px;
+    border: 1px solid #dadce0;
+    border-radius: 8px;
 }
 
-.form-container {
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-    padding: 30px;
+/* Form layout */
+#registration-form {
+    margin-top: 24px;
 }
 
+.form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.form-row > div {
+    flex: 1;
+}
+
+/* General styles that apply to the entire form */
 h1 {
-    text-align: center;
-    margin-bottom: 25px;
-    color: #333;
-    font-size: 28px;
+    font-family: 'Google Sans', sans-serif;
+    font-size: 24px;
+    font-weight: 400;
+    margin-bottom: 8px;
 }
 
-.form-group {
-    margin-bottom: 20px;
-}
-
-label {
-    display: block;
-    margin-bottom: 6px;
-    font-weight: 500;
-    color: #555;
+p {
+    font-size: 16px;
+    color: #5f6368;
+    margin-bottom: 32px;
 }
 
 input {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
     font-size: 16px;
-    transition: border-color 0.3s ease;
+    width: 100%;
 }
 
-input:focus {
-    outline: none;
-    border-color: #4a90e2;
-    box-shadow: 0 0 5px rgba(74, 144, 226, 0.3);
-}
-
-.btn-register {
-    width: 100%;
-    background-color: #4a90e2;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 14px;
-    font-size: 16px;
-    font-weight: bold;
+button {
     cursor: pointer;
-    transition: background-color 0.3s ease;
 }
 
-.btn-register:hover {
-    background-color: #3a7bc8;
-}
-
-.login-link {
-    text-align: center;
-    margin-top: 20px;
-    color: #666;
-}
-
-.login-link a {
-    color: #4a90e2;
+a {
     text-decoration: none;
-    font-weight: 500;
+    color: #1a73e8;
 }
 
-.login-link a:hover {
+a:hover {
     text-decoration: underline;
-}
-
-.error-message {
-    margin-top: 15px;
-    color: #e74c3c;
-    text-align: center;
-    font-weight: 500;
-    display: none;
 }

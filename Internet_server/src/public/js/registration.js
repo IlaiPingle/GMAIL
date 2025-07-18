@@ -1,82 +1,79 @@
 /*
- * registration.js
- * This file contains the JavaScript logic for the user registration page.
- * It handles form submission, image preview for profile pictures, and error handling.
- * The script uses the Fetch API to send registration data to the server and provides user feedback.
- * It also includes functionality to preview an image from a file input or a URL input.
+ * Registration Page JavaScript
+ * This script handles the registration form functionality including input validation,
+ * image upload, and form submission.
  */
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize components
+    const formHeader = new FormHeader('form-header');
+    
+    const firstNameInput = new FormInput('first-name-input', {
+        id: 'first_name',
+        label: 'First name',
+        required: true,
+        autocomplete: 'given-name'
+    });
+    
+    const lastNameInput = new FormInput('last-name-input', {
+        id: 'sur_name',
+        label: 'Last name',
+        required: true,
+        autocomplete: 'family-name'
+    });
+    
+    const usernameInput = new FormInput('username-input', {
+        id: 'username',
+        label: 'Username',
+        required: true,
+        autocomplete: 'username'
+    });
+    
+    const passwordInput = new FormInput('password-input', {
+        id: 'password',
+        type: 'password',
+        label: 'Password',
+        required: true,
+        autocomplete: 'new-password'
+    });
+    
+    const imageUploader = new ImageUploader('image-uploader');
+    
+    const errorDisplay = new ErrorDisplay('error-display');
+    
+    const formActions = new FormActions('form-actions');
+    
+    // Form submission logic
     const form = document.getElementById('registration-form');
-    const errorMessage = document.getElementById('error-message');
-    const fileInput = document.getElementById('picture');
-    const urlInput = document.getElementById('picture_url');
-    const imagePreview = document.getElementById('image-preview');
-    const imagePreviewContainer = document.getElementById('image-preview-container');
-
-    // Handle image file selection for preview
-    fileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            // Clear URL input when file is selected
-            urlInput.value = '';
-            
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                imagePreview.src = e.target.result;
-                imagePreviewContainer.classList.remove('d-none');
-            };
-            reader.readAsDataURL(file);
-        } else {
-            imagePreviewContainer.classList.add('d-none');
-        }
-    });
-
-    // Handle URL input for preview
-    urlInput.addEventListener('input', (e) => {
-        const url = e.target.value;
-        if (url) {
-            // Clear file input when URL is entered
-            fileInput.value = '';
-            
-            imagePreview.src = url;
-            imagePreview.onerror = () => {
-                imagePreviewContainer.classList.add('d-none');
-                imagePreview.onerror = null;
-            };
-            imagePreview.onload = () => {
-                imagePreviewContainer.classList.remove('d-none');
-                imagePreview.onload = null;
-            };
-        } else {
-            imagePreviewContainer.classList.add('d-none');
-        }
-    });
-
+    
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // Clear previous error messages
-        errorMessage.classList.add('d-none');
+        // Clear previous errors
+        errorDisplay.hideError();
         
         try {
-            let pictureData = urlInput.value;
-            
-            // If file is uploaded, convert to base64 for submission
-            if (fileInput.files && fileInput.files[0]) {
-                const file = fileInput.files[0];
-                pictureData = await convertFileToBase64(file);
-            }
-            
-            // Get form data
+            // Get form values
             const formData = {
-                username: document.getElementById('username').value,
-                password: document.getElementById('password').value,
-                first_name: document.getElementById('first_name').value,
-                sur_name: document.getElementById('sur_name').value,
-                picture: pictureData || "" // Use base64 data or URL or empty string
+                username: usernameInput.getValue(),
+                password: passwordInput.getValue(),
+                first_name: firstNameInput.getValue(),
+                sur_name: lastNameInput.getValue(),
+                picture: ""
             };
             
-            // Send registration request to API
+            // Handle image data
+            const imageData = imageUploader.getImageData();
+            if (imageData) {
+                if (typeof imageData === 'string') {
+                    // If it's a URL
+                    formData.picture = imageData;
+                } else {
+                    // If it's a File, convert to base64
+                    formData.picture = await convertFileToBase64(imageData);
+                }
+            }
+            
+            // Send registration request
             const response = await fetch('/api/users', {
                 method: 'POST',
                 headers: {
@@ -88,17 +85,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             
             if (!response.ok) {
-                throw new Error(data.message || 'Registration failed'); // If the response is unsuccessful, throw an error message
+                throw new Error(data.message || 'Registration failed');
             }
             
-            // Registration successful - redirect to login page or show success message
+            // Success - redirect or show success message
             alert('Registration successful! You can now log in.');
-            window.location.href = 'login.html'; // Redirect to login page
+            window.location.href = 'login.html';
             
         } catch (error) {
             // Show error message
-            errorMessage.textContent = error.message;
-            errorMessage.classList.remove('d-none'); // Remove 'd-none' class to display the error message
+            errorDisplay.showError(error.message);
         }
     });
     
