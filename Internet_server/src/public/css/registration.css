@@ -1,0 +1,80 @@
+/* Google Registration Form CSS
+   This CSS is designed to style a registration form similar to Google's design language.
+   It includes responsive design elements and a clean, modern aesthetic.
+*/
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+    background-color: #fff;
+    color: #202124;
+    line-height: 1.5;
+}
+
+/* Main container */
+.registration-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 24px;
+}
+
+#registration-app {
+    width: 100%;
+    max-width: 450px;
+    padding: 48px 40px;
+    border: 1px solid #dadce0;
+    border-radius: 8px;
+}
+
+/* Form layout */
+#registration-form {
+    margin-top: 24px;
+}
+
+.form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.form-row > div {
+    flex: 1;
+}
+
+/* General styles that apply to the entire form */
+h1 {
+    font-family: 'Google Sans', sans-serif;
+    font-size: 24px;
+    font-weight: 400;
+    margin-bottom: 8px;
+}
+
+p {
+    font-size: 16px;
+    color: #5f6368;
+    margin-bottom: 32px;
+}
+
+input {
+    font-size: 16px;
+    width: 100%;
+}
+
+button {
+    cursor: pointer;
+}
+
+a {
+    text-decoration: none;
+    color: #1a73e8;
+}
+
+a:hover {
+    text-decoration: underline;
+}
