@@ -1,40 +1,35 @@
 import React, { Component } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate , useLocation} from "react-router-dom";
 import "./MailItem.css";
 import IconButton from "../common/IconButton";
-
+import Client from "../../services/Client"; 
 // HOC for navigation hooks in class component
 function withNavigation(Component) {
     return function ComponentWithNavigation(props) {
         const navigate = useNavigate();
+        const location = useLocation();
         return <Component {...props} navigate={navigate} />;
     };
 }
 
 class MailItem extends Component {
     moveToTrash = async (e) => {
-        e.stopPropagation();
-        const { mail } = this.props;
-        
+        e.stopPropagation(); // Prevent the click from navigating to the mail detail
+        const { mail, navigate } = this.props;
+        // let pathname = location.pathname.split('/')[1];
         try {
-            const res = await fetch(`http://localhost:8080/api/mails/${mail.id}`, {
-                method: 'DELETE',
-                headers: { 'user-id': '2' }
-            });
-            if (!res.ok) {
-                console.error('Failed to delete mail', res.status);
-            } else {
-                // Refresh inbox after delete
-                window.location.reload();
-            }
-        } catch (err) {
-            console.error('Error deleting mail', err);
+            await Client.removeLabelFromMail(mail.id, 'bin'); // Assuming 'trash' is the label for deleted mails
+            console.log('Mail moved to trash:', mail.id);
+            navigate('/'); // Redirect to inbox after moving to trash
+        } catch (error) {
+            console.error('Error moving mail to trash:', error);
         }
     };
 
     handleClick = () => {
         const { mail, navigate } = this.props;
-        navigate(`/mail/${mail.id}`); // מעבר לעמוד צפייה במייל
+        navigate(`/mail/${mail.id}`);
+        
     };
 
     // פונקציה לעיצוב התאריך
@@ -57,7 +52,7 @@ class MailItem extends Component {
         const { mail } = this.props;
         
         return (
-            <div className={`mail-item ${mail.isRead ? 'read' : 'unread'}`} onClick={this.handleClick}>
+            <div className={`mail-item ${mail.unread ? 'unread' : 'read'}`} onClick={this.handleClick}>
                 <div className="mail-checkbox">
                     <input type="checkbox" onClick={(e) => e.stopPropagation()} />
                 </div>

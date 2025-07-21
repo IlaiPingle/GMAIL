@@ -2,10 +2,10 @@
     display: flex;
     align-items: center;
     padding: 8px 16px;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid #F2F6FC;
     cursor: pointer;
     transition: all 0.1s ease;
-    background-color: #ffffff;
+    background-color: #F2F6FC;
 }
 
 .mail-item:hover {
@@ -25,7 +25,7 @@
 }
 
 .mail-item.read {
-    background-color: #fafafa;
+    background-color: #F2F6FC;
     font-weight: 400;
     color: #5f6368;
 }

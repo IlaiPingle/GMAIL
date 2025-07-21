@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Compose.css';
+import Client from '../../services/Client';
 
 // HOC for navigation hooks in class component
 function withNavigation(Component) {
@@ -26,21 +27,33 @@ class Compose extends Component {
         const { receiver, subject, body } = this.state;
         const { navigate } = this.props;
         
+        // Validation
+        if (!receiver.trim()) {
+            this.setState({ error: 'Receiver email is required' });
+            return;
+        }
+        
         try {
-            const res = await fetch('http://localhost:8080/api/mails', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'user-id': '2', // Replace with dynamic user ID as needed
-                },
-                body: JSON.stringify({ receiver, subject, body }),
+            this.setState({ error: null }); // Clear previous errors
+            
+            console.log('Sending email with data:', { receiver, subject, body });
+            
+            const response = await Client.sendMail({
+                receiver,
+                subject,
+                body
             });
-            if (!res.ok) throw new Error('Failed to send mail');
+            
+            console.log('Email sent successfully:', response);
+            
+            // If successful, navigate back to inbox
             navigate('/');
-        } catch (err) {
-            this.setState({ error: err.message });
+        } catch (error) {
+            console.error('Error sending email:', error);
+            this.setState({ error: error.message || 'Failed to send email' });
         }
     };
+
 
     render() {
         const { receiver, subject, body, error } = this.state;

@@ -14,8 +14,15 @@ const handleResponse = async (response) => {
     }
     return response.json();
 }
-const getMailsByType = async (type) => {
-    const url = `${API_URL}/mails/${type}`;
+
+const getAllMails = async () => {
+    const url = `${API_URL}/mails`;
+    const response = await fetch(url, {headers: defaultHeaders()});
+    return handleResponse(response);
+}
+
+const getMailsByLabel = async (label) => {
+    const url = `${API_URL}/labels/mails?label=${encodeURIComponent(label)}`;
     const response = await fetch(url, {headers: defaultHeaders()});
     return handleResponse(response);
 }
@@ -57,3 +64,87 @@ const deleteMail = async (id) => {
     });
     return handleResponse(response);
 }
+
+const createLabel = async (labelName) => {
+    const url = `${API_URL}/labels`;
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: defaultHeaders(),
+        body: JSON.stringify({ labelName }),
+    });
+    return handleResponse(response);
+}
+
+const getLabels = async () => {
+    const url = `${API_URL}/labels`;
+    const response = await fetch(url, {headers: defaultHeaders()});
+    return handleResponse(response);
+}   
+
+const deleteLabel = async (labelName) => {
+    const url = `${API_URL}/labels/${encodeURIComponent(labelName)}`;
+    const response = await fetch(url, {
+        method: 'DELETE',
+        headers: defaultHeaders(),
+    });
+    return handleResponse(response);
+}
+const updateLabel = async (labelName, newLabelName) => {
+    const url = `${API_URL}/labels/${encodeURIComponent(labelName)}`;
+    const response = await fetch(url, {
+        method: 'PATCH',
+        headers: defaultHeaders(),
+        body: JSON.stringify({ newLabelName }),
+    });
+    return handleResponse(response);
+}
+
+const getLabelByName = async (labelName) => {
+    const url = `${API_URL}/labels/${encodeURIComponent(labelName)}`;
+    const response = await fetch(url, {headers: defaultHeaders()});
+    return handleResponse(response);
+}
+const reportSpam = async (sender , subject , body) => {
+    const url = `${API_URL}/blacklist`;
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: defaultHeaders(),
+        body: JSON.stringify({ sender, subject, body }),
+    });
+    return handleResponse(response);
+}
+const removeLabelFromMail = async (labelName, mailId) => {
+    const url = `${API_URL}/labels/mails/${mailId}`;
+    const response = await fetch(url, {
+        method: 'DELETE',
+        headers: defaultHeaders(),
+        body: JSON.stringify({ labelName }),
+    });
+    return handleResponse(response);
+}
+const addLabelToMail = async (labelName, mailId) => {
+    const url = `${API_URL}/labels/mails/${mailId}`;
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: defaultHeaders(),
+        body: JSON.stringify({ labelName }),
+    });
+    return handleResponse(response);
+}
+
+export default {
+    getAllMails,
+    getMailsByLabel,
+    getMailById,
+    searchMails,
+    sendMail,
+    updateMail,
+    deleteMail,
+    createLabel,
+    getLabels,
+    deleteLabel,
+    updateLabel,
+    getLabelByName,
+    addLabelToMail,
+    removeLabelFromMail,
+};

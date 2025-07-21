@@ -2,29 +2,18 @@ import React , { Component } from "react";
 import Header from "../components/header/Header";
 import SideBar from "../components/sideBar/SideBar";
 import "./MainLayout.css";
+import { Outlet } from 'react-router-dom';
+
 
 class MainLayout extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            searchResults: null
-        };
-    }
-
-    handleSearch = (results) => {
-        console.log("MainLayout.js - Received search results:", results);
-        this.setState({ searchResults: results });
-    };
-
     render() {
-        const { children } = this.props;
         return (
             <div className="main-layout">
-                <Header onSearch={this.handleSearch} />
+                <Header/>
                 <div className="main-layout-body">
-                    <SideBar />
-                    <div className="main-content">
-                        {children}  
+                    <SideBar/>
+                    <div className="content">
+                        <Outlet/>
                     </div>
                 </div>
             </div>

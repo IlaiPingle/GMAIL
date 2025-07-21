@@ -1,8 +1,7 @@
 .sideBar {
-    width: 80px; /* רוחב קטן בהתחלה */
+    width: 60px;
     min-height: 100vh;
-    background-color: #ffffff;
-    border-right: 1px solid #dadce0;
+    background-color: #F8FAFD;
     padding: 8px 0;
     overflow-y: auto;
     overflow-x: visible;
@@ -10,7 +9,7 @@
 }
 
 .sideBar:hover {
-    width: 256px; /* התרחבות בעת hover על כל ה-sidebar */
+    width: 256px; 
 }
 
 .sideBar::-webkit-scrollbar {
@@ -30,7 +29,6 @@
     background: #bdc1c6;
 }
 
-/* עיצוב לכותרת Labels */
 .LabelsHeader {
     display: flex;
     align-items: center;
@@ -40,7 +38,7 @@
     transition: 0s;
 }
 
-/* כאשר ה-SideBar סגור - הצגת רק האייקון + במרכז */
+
 .LabelsHeader {
     justify-content: center;
 }
@@ -55,11 +53,13 @@
     transition: 0s;
 }
 
-/* כאשר ה-SideBar פתוח - הצגת הטקסט והסידור מחדש */
 .sideBar:hover .LabelsHeader {
     justify-content: space-between;
 }
 
+.sidebar:hover #compose {
+    border-radius: 100%;
+}
 .sideBar:hover .LabelsHeaderText {
     opacity: 1;
     width: auto;

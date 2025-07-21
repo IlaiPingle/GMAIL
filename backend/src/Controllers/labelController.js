@@ -96,10 +96,59 @@ function deleteLabel(req, res) {
     }
 }
 
+function getMailsByLabel(req, res) {
+    try {
+        const userId = parseInt(req.header("user-id"), 10);
+        const labelName = req.query.label;
+        if (!userId || !labelName) {
+            return res.status(400).json({ message: 'User ID and label name are required' });
+        }
+        const mails = LabelService.getMailsByLabel(userId, labelName);
+        return res.status(200).json(mails);
+    } catch (error) {
+        return res.status(error.status || 500).json({ message: error.message || 'An error occurred while retrieving mails by label' });
+    }
+}
+ function removeLabelFromMails(req, res) {
+    try {
+        const userId = parseInt(req.header("user-id"), 10);
+        const mailId = req.params.id;
+        const labelName = req.body.labelName;
+
+        if (!userId || !mailId || !labelName) {
+            return res.status(400).json({ message: 'User ID, mail ID, and label name are required' });
+        }
+
+        LabelService.removeLabelfromMail(userId, mailId, labelName);
+        return res.status(204).end();
+    } catch (error) {
+        return res.status(error.status || 500).json({ message: error.message || 'An error occurred while removing the label from mails' });
+    }
+};
+function addLabelToMail(req, res) {
+    try {
+        const userId = parseInt(req.header("user-id"), 10);
+        const mailId = req.params.id;
+        const labelName = req.body.labelName;
+
+        if (!userId || !mailId || !labelName) {
+            return res.status(400).json({ message: 'User ID, mail ID, and label name are required' });
+        }
+
+        LabelService.addLabelToMail(userId, mailId, labelName);
+        return res.status(201).end();
+    } catch (error) {
+        return res.status(error.status || 500).json({ message: error.message || 'An error occurred while adding the label to the mail' });
+    }
+}
+
 module.exports = {
     createLabel,
     getUserLabels,
     getLabelById,
     updateLabel,
-    deleteLabel
+    deleteLabel,
+    getMailsByLabel,
+    removeLabelFromMails,
+    addLabelToMail
 };

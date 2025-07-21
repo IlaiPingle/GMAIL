@@ -26,14 +26,15 @@ async function sendNewMail(userId, receiver, subject, body) {
     
     // Crete mail for Sender:
     const senderMail = createNewMail(user.username, receiver, subject, body);
-    senderMail.labels.push('Inbox');
+    senderMail.labels.push('sent');
     user.mails.push(senderMail);
+    user.labels.get('sent').mailIds.add(senderMail.id);
 
     // Create mail for Receiver:
     const receiverMail = createNewMail(user.username, receiver, subject, body);
-    receiverMail.labels.push('Sent');
+    receiverMail.labels.push('inbox');
     receiverUser.mails.push(receiverMail);
-
+    receiverUser.labels.get('inbox').mailIds.add(receiverMail.id);
     return senderMail;
 }
 
@@ -59,6 +60,7 @@ function getMailById(userId, mailId) {
         error.status = 404;        
         throw error;
     }
+    mail.unread = false; // Mark mail as read
     return mail;
 }
 
@@ -98,7 +100,7 @@ function searchMails(userId, searchTerm) {
 function updateMail(userId, mailId, subject, body) {
     const user = Users.findUserById(userId);
     
-    const mail = user.labels[''].find(mail => mail.id === mailId);
+    const mail = user.mails.find(mail => mail.id === mailId);
     if (!mail) {
         const error = new Error('Mail not found');
         error.status = 404;

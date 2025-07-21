@@ -10,8 +10,7 @@ class SideBarOptions extends Component {
     };
 
     render() {
-        const { icon, text, id, isActive = false, iconType = "bootstrap" } = this.props;
-        
+        const { text, icon, isActive, id } = this.props;
         return (
             <button className={`sideBarOption ${isActive ? 'selected' : ''}`} onClick={this.handleClick} id={id}>
                 <span className="material-symbols-outlined">{icon}</span>

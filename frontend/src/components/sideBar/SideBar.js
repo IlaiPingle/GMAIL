@@ -3,6 +3,7 @@ import "./SideBar.css";
 import IconButton from "../common/IconButton";
 import SideBarOptions from "./SideBarOptions";
 import { useNavigate, useLocation } from 'react-router-dom';
+import Client from "../../services/Client";
 
 // HOC for navigation hooks in class component
 function withNavigation(Component) {
@@ -12,6 +13,8 @@ function withNavigation(Component) {
         return <Component {...props} navigate={navigate} location={location} />;
     };
 }
+
+const SYSTEM_LABELS = ['inbox', 'sent', 'drafts', 'bin', 'archive', 'starred'];
 
 class SideBar extends Component {
     constructor(props) {
@@ -28,13 +31,8 @@ class SideBar extends Component {
 
     fetchLabels = async () => {
         try {
-            const res = await fetch('http://localhost:8080/api/labels', {
-                headers: { 'user-id': '2' }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                this.setState({ labels: data });
-            }
+            const data = await Client.getLabels();
+            this.setState({ labels: data });
         } catch (err) {
             console.error('Error fetching labels', err);
         }
@@ -44,71 +42,70 @@ class SideBar extends Component {
         const { navigate, location } = this.props;
         const { labels } = this.state;
         
-        // Get current path for highlighting active option
         const currentPath = location.pathname;
 
         return (
-            <div className="sideBar">
-                <SideBarOptions 
-                    id="compose" 
-                    icon="edit"
-                    text="Compose"
-                    isActive={currentPath === '/compose'}
-                    onClick={() => navigate('/compose')}
-                />
-                <SideBarOptions 
-                    icon="inbox"
-                    text="Inbox"
-                    isActive={currentPath === '/'}
-                    onClick={() => navigate('/')}
-                />
-                <SideBarOptions 
-                    icon="star_border"
-                    text="Starred"
-                    isActive={false}
-                    onClick={() => console.log("Starred clicked")}
-                />
-                <SideBarOptions 
-                    icon="send"
-                    text="Sent"
-                    isActive={false}
-                    onClick={() => console.log("Sent clicked")}
-                />
-                <SideBarOptions 
-                    icon="draft"
-                    text="Drafts"
-                    isActive={false}
-                    onClick={() => console.log("Drafts clicked")}
-                />
-                <SideBarOptions 
-                    icon="delete"
-                    text="Trash"
-                    isActive={false}
-                    onClick={() => console.log("Trash clicked")}
-                />
-                <SideBarOptions 
-                    icon="archive"
-                    text="Archive"
-                    isActive={false}
-                    onClick={() => console.log("Archive clicked")}
-                />
-                <div className="LabelsHeader">
-                    <span className="LabelsHeaderText">Labels</span>
-                    <IconButton onClick={() => navigate('/create-label')} iconType="material">
-                        add
-                    </IconButton>
-                </div>
-                {/* Render dynamic labels */}
-                {labels.map(label => (
-                    <SideBarOptions
-                        key={label.id}
-                        icon="label"
-                        text={label.name}
-                        isActive={false}
-                        onClick={() => navigate(`/?label=${label.id}`)}
-                    />
-                ))}
+          <div className="sideBar">
+            <SideBarOptions
+              id="compose"
+              icon="edit"
+              text="Compose"
+              isActive={currentPath === "/compose=new"}
+              onClick={() => navigate("/compose=new")}
+            />
+            <SideBarOptions
+              icon="inbox"
+              text="Inbox"
+              isActive={currentPath === "/inbox"}
+              onClick={() => navigate("/inbox")}
+            />
+            <SideBarOptions
+              icon="star_border"
+              text="Starred"
+              isActive={currentPath === "/starred"}
+              onClick={() => navigate("/starred")}
+            />
+            <SideBarOptions
+              icon="send"
+              text="Sent"
+              isActive={currentPath === "/sent"}
+              onClick={() => navigate("/sent")}
+            />
+            <SideBarOptions
+              icon="draft"
+              text="Drafts"
+              isActive={currentPath === "/drafts"}
+              onClick={() => navigate("/drafts")}
+            />
+            <SideBarOptions
+              icon="delete"
+              text="Bin"
+              isActive={currentPath === "/bin"}
+              onClick={() => navigate("/bin")}
+            />
+            <SideBarOptions
+              icon="archive"
+              text="Archive"
+              isActive={currentPath === "/archive"}
+              onClick={() =>navigate("/archive")}
+            />
+            <div className="LabelsHeader">
+              <span className="LabelsHeaderText">Labels</span>
+              <IconButton onClick={() => navigate("/create-label")}>
+                add
+              </IconButton>
             </div>
+            {/* Render dynamic labels */}
+            {labels.map((label) => (
+              <SideBarOptions
+                key={label}
+                icon="label"
+                text={label}
+                isActive={currentPath === `/label/${encodeURIComponent(label)}`}
+                onClick={() => navigate(`/label/${encodeURIComponent(label)}`)}
+              />
+            ))}
+          </div>
         );
     }
 }

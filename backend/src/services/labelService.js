@@ -1,5 +1,4 @@
 const Users = require('../Models/userModel');
-const LabelModel = require('../Models/labelModel');
 
 /**
 * Create a new label for a user
@@ -19,7 +18,7 @@ function createLabel(userId, labelName) {
 */
 function getUserLabels(userId) {
     const user = getUserOrThrow(userId);
-    return Array.from(user.labels.keys());
+    return Array.from(user.labels.keys()).filter(label => !Users.isSystemLabel(label));
 }
 
 /**
@@ -81,8 +80,66 @@ function deleteLabel(userId, labelName) {
     }
     
     user.labels.delete(labelName);
+    for (const mail of user.mails) {
+        const index = mail.labels.indexOf(labelName);
+        if (index !== -1) {
+            mail.labels.splice(index, 1); // Remove label from mail
+        }
+    }
     return true;
 }
+
+function addLabelToMail(userId, mailId, labelName) {
+    const user = getUserOrThrow(userId);
+    const mail = user.mails.find(mail => mail.id === mailId);
+    if (!mail) {
+        const error = new Error('Mail not found');
+        error.status = 404;         
+        throw error;
+    }
+    if (!Users.isSystemLabel(labelName)) {
+        if(!user.labels.has(labelName)){
+            user.labels.Set(labelName,{
+                mailIds:new Set()
+            });
+        }
+        user.labels.get(labelName).mailIds.add(mailId);
+    }
+    return true;
+}
+function removeLabelfromMail(userId,mailId,labelName){
+    const user = getUserOrThrow(userId);
+    const mail = user.mails.find (mail => mail.id === mailId)
+    if(!mail){
+        const error = new error('Mail not found');
+        error.status = 404;
+        throw error;    
+    }
+    mail.labels = mail.labels.filter(label => label !== labelName);
+
+    if(user.labels.has(labelName)){
+        Users.users.labels.get(labelName).mailIds.delete(mailId);
+    }
+}
+function getMailsByLabel(userId, labelName) {
+    const user = getUserOrThrow(userId);
+    
+    // For system labels, check if label exists
+    const label = user.labels.get(labelName);
+    if (!label) {
+        const error = new Error('Label not found');
+        error.status = 404;
+        throw error;
+    }
+    
+    // Filter mails that have this label
+    return user.mails.filter(mail => mail.labels.includes(labelName));
+}
+
+
+
+
+
 
 /**
 * Helper function to get a user or throw an error
@@ -97,10 +154,16 @@ function getUserOrThrow(userId) {
     return user;
 }
 
+
+
 module.exports = {
     createLabel,
     getUserLabels,
     getLabelByName,
     updateLabel,
-    deleteLabel
+    deleteLabel,
+    addLabelToMail,
+    removeLabelfromMail,
+    getMailsByLabel,
+    removeLabelfromMail
 };
