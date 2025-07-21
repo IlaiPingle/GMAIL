@@ -1,0 +1,22 @@
+.userActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+#Avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+#userImage{
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: rgb(48, 163, 3) 2px solid;
+    background: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

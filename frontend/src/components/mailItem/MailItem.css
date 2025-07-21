@@ -1,0 +1,261 @@
+.mail-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    border-bottom: 1px solid #F2F6FC;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    background-color: #F2F6FC;
+}
+
+.mail-item:hover {
+    background-color: #f5f5f5;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    
+}
+.mail-options {
+    display: flex;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.mail-item.unread {
+    background-color: #ffffff;
+    font-weight: 600;
+}
+
+.mail-item.read {
+    background-color: #F2F6FC;
+    font-weight: 400;
+    color: #5f6368;
+}
+
+.mail-checkbox {
+    margin-right: 12px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.mail-item:hover .mail-checkbox {
+    opacity: 1;
+}
+
+.mail-checkbox input {
+    cursor: pointer;
+}
+
+.mail-star {
+    margin-right: 12px;
+    color: #fbb034;
+    cursor: pointer;
+    width: 20px;
+    text-align: center;
+}
+
+.mail-star i {
+    font-size: 16px;
+    transition: color 0.2s;
+}
+
+.mail-star i:hover {
+    color: #ea8600;
+}
+
+.mail-sender {
+    width: 200px;
+    flex-shrink: 0;
+    font-size: 14px;
+    color: #202124;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mail-item.read .mail-sender {
+    color: #5f6368;
+}
+
+.mail-content {
+    flex: 1;
+    margin-right: 16px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+}
+
+.mail-subject {
+    color: #202124;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mail-item.read .mail-subject {
+    color: #5f6368;
+}
+
+.mail-preview {
+    color: #5f6368;
+    font-size: 14px;
+    margin-left: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 400;
+}
+
+.mail-date {
+    font-size: 12px;
+    color: #5f6368;
+    white-space: nowrap;
+    width: 80px;
+    text-align: right;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .mail-sender {
+        width: 120px;
+    }
+    
+    .mail-preview {
+        display: none;
+    }
+    
+    .mail-date {
+        width: 60px;
+    }
+}
+
+.select-all {
+    cursor: pointer;
+}
+
+.refresh-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.refresh-btn:hover {
+    background-color: #f1f3f4;
+}
+
+.emailList-content {
+    padding: 0;
+}
+
+.email-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: background-color 0.1s;
+}
+
+.email-item:hover {
+    background-color: #f5f5f5;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.email-item.unread {
+    background-color: #ffffff;
+    font-weight: 600;
+}
+
+.email-item.read {
+    background-color: #fafafa;
+    font-weight: 400;
+}
+
+.email-checkbox {
+    margin-right: 12px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.email-item:hover .email-checkbox {
+    opacity: 1;
+}
+
+.email-star {
+    margin-right: 12px;
+    color: #fbb034;
+    cursor: pointer;
+}
+
+.email-star i {
+    font-size: 16px;
+}
+
+.email-sender {
+    width: 200px;
+    flex-shrink: 0;
+    font-size: 14px;
+    color: #202124;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.email-content {
+    flex: 1;
+    margin-right: 16px;
+    overflow: hidden;
+}
+
+.email-subject {
+    color: #202124;
+    font-size: 14px;
+}
+
+.email-preview {
+    color: #5f6368;
+    font-size: 14px;
+    margin-left: 4px;
+}
+
+.email-date {
+    font-size: 12px;
+    color: #5f6368;
+    white-space: nowrap;
+    width: 80px;
+    text-align: right;
+}
+
+.loading, .error, .no-emails {
+    text-align: center;
+    padding: 40px;
+    color: #5f6368;
+    font-size: 16px;
+}
+
+.error {
+    color: #d93025;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .email-sender {
+        width: 120px;
+    }
+    
+    .email-preview {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .email-sender {
+        width: 80px;
+    }
+    
+    .email-date {
+        width: 60px;
+    }
+}

@@ -1,0 +1,101 @@
+.sideBarOption {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 12px;
+    margin: 2px 8px;
+    border: none;
+    border-radius: 20px;
+    background-color: transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    width: calc(100% - 16px);
+    overflow: hidden;
+}
+
+.sideBarOption:hover {
+    background-color: #EBEDF0;
+}
+.sideBarOption:focus {
+    outline: none;
+    background-color: #e8f0fe;
+}
+
+
+.sideBarText {
+    font-size: 14px;
+    color: #3c4043;
+    font-weight: 400;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 0s ease;
+    white-space: nowrap;
+    width: 0;
+    overflow: hidden;
+}
+.sideBarOption::selection .material-symbols-outlined{
+    font-weight: 200;
+}
+
+/* Default material symbols settings */
+.material-symbols-outlined {
+    font-size: 20px;
+    color: #5f6368;
+    margin-right: 12px;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    transition: all 0.2s ease;
+} 
+
+
+/* הצגת הטקסט כאשר ה-SideBar מורחב */
+.sideBar:hover .sideBarText {
+    opacity: 1;
+    transform: translateX(0);
+    width: auto;
+    transition-delay: 0s; /* עיכוב קצר לאחר הרחבת ה-SideBar */
+}
+
+
+/* compose button style */
+#compose {
+    background-color: #c2e7ff;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    color: #001d35;
+    font-weight: 500;
+    box-shadow: 0 1px 2px 0 rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
+    margin: 8px;
+    padding: 12px 24px;
+}
+#compose:hover {
+    background-color: #a8dadc;
+    box-shadow: 0 1px 3px 0 rgba(60,64,67,.3), 0 4px 8px 3px rgba(60,64,67,.15);
+}
+
+#compose i {
+    color: #001d35;
+}
+
+#compose .sideBarText {
+    color: #001d35;
+    font-weight: 500;
+}
+
+/* Selected state styles */
+.sideBarOption.selected {
+    background-color: rgb(211,227,254);
+    font-weight: 500;
+}
+
+.sideBarOption.selected .material-symbols-outlined {
+    color: #000000;
+    font-weight: 600;
+    font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 20;
+}
+
+.sideBarOption.selected .sideBarText {
+    color: #000000;
+    font-weight: 600;
+}

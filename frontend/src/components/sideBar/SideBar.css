@@ -1,0 +1,71 @@
+.sideBar {
+    width: 60px;
+    min-height: 100vh;
+    background-color: #F8FAFD;
+    padding: 8px 0;
+    overflow-y: auto;
+    overflow-x: visible;
+    transition: width 0.3s ease;
+}
+
+.sideBar:hover {
+    width: 256px; 
+}
+
+.sideBar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sideBar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sideBar::-webkit-scrollbar-thumb {
+    background: #dadce0;
+    border-radius: 3px;
+}
+
+.sideBar::-webkit-scrollbar-thumb:hover {
+    background: #bdc1c6;
+}
+
+.LabelsHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    margin-top: 16px;
+    transition: 0s;
+}
+
+
+.LabelsHeader {
+    justify-content: center;
+}
+
+.LabelsHeaderText {
+    font-size: 14px;
+    color: #3c4043;
+    font-weight: 500;
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+    transition: 0s;
+}
+
+.sideBar:hover .LabelsHeader {
+    justify-content: space-between;
+}
+
+.sidebar:hover #compose {
+    border-radius: 100%;
+}
+.sideBar:hover .LabelsHeaderText {
+    opacity: 1;
+    width: auto;
+    transition-delay: 0.3s;
+}
+
+.LabelsHeader .iconButton {
+    flex-shrink: 0;
+}
