@@ -97,6 +97,10 @@ function addLabelToMail(userId, mailId, labelName) {
         error.status = 404;         
         throw error;
     }
+    if(!mail.labels.includes(labelName)) {
+        mail.labels.push(labelName);
+    }
+    // If the label is not a system label, add it to user's labels
     if (!Users.isSystemLabel(labelName)) {
         if(!user.labels.has(labelName)){
             user.labels.Set(labelName,{
@@ -118,7 +122,7 @@ function removeLabelfromMail(userId,mailId,labelName){
     mail.labels = mail.labels.filter(label => label !== labelName);
 
     if(user.labels.has(labelName)){
-        Users.users.labels.get(labelName).mailIds.delete(mailId);
+        Users.users.labels?.get(labelName)?.mailIds.delete(mailId);
     }
 }
 function getMailsByLabel(userId, labelName) {

@@ -44,12 +44,23 @@ class MailList extends React.Component {
             return <p>No mails found.</p>
         }
         return (
-        <div className="mail-list">
-            {mails.map(mail => (
-                <MailItem key={mail.id} mail={mail} />
+          <div className="mail-list">
+            <div className="mail-list-header">
+              <h2>{this.props.label}</h2>
+            </div>
+            {mails.map((mail) => (
+              <MailItem
+                key={mail.id}
+                mail={mail}
+                onDeleted={() => {
+                  this.setState((prev) => ({
+                    mails: prev.mails.filter((m) => m.id !== mail.id),
+                  }));
+                }}
+              />
             ))}
-        </div>
-     );
+          </div>
+        );
     }
 }
 export default MailList;

@@ -28,13 +28,12 @@ async function sendNewMail(userId, receiver, subject, body) {
     const senderMail = createNewMail(user.username, receiver, subject, body);
     senderMail.labels.push('sent');
     user.mails.push(senderMail);
-    user.labels.get('sent').mailIds.add(senderMail.id);
+    
 
     // Create mail for Receiver:
     const receiverMail = createNewMail(user.username, receiver, subject, body);
     receiverMail.labels.push('inbox');
     receiverUser.mails.push(receiverMail);
-    receiverUser.labels.get('inbox').mailIds.add(receiverMail.id);
     return senderMail;
 }
 

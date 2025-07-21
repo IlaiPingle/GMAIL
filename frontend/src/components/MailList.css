@@ -1,3 +1,12 @@
 .mail-list{
-    border-radius: 20px;
+    display: grid;
+    grid-template-columns: 1fr;
+    border-radius: 10px;
+
+}
+h2{
+    margin: 0;
+    padding-left: 15px;
+    text-align: center;
+    color: #202124;
 }

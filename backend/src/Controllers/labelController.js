@@ -109,10 +109,10 @@ function getMailsByLabel(req, res) {
         return res.status(error.status || 500).json({ message: error.message || 'An error occurred while retrieving mails by label' });
     }
 }
- function removeLabelFromMails(req, res) {
+ function removeLabelFromMail(req, res) {
     try {
         const userId = parseInt(req.header("user-id"), 10);
-        const mailId = req.params.id;
+        const mailId = parseInt(req.params.id , 10);
         const labelName = req.body.labelName;
 
         if (!userId || !mailId || !labelName) {
@@ -128,7 +128,7 @@ function getMailsByLabel(req, res) {
 function addLabelToMail(req, res) {
     try {
         const userId = parseInt(req.header("user-id"), 10);
-        const mailId = req.params.id;
+        const mailId = parseInt(req.params.id, 10);
         const labelName = req.body.labelName;
 
         if (!userId || !mailId || !labelName) {
@@ -136,7 +136,7 @@ function addLabelToMail(req, res) {
         }
 
         LabelService.addLabelToMail(userId, mailId, labelName);
-        return res.status(201).end();
+        return res.status(204).end();
     } catch (error) {
         return res.status(error.status || 500).json({ message: error.message || 'An error occurred while adding the label to the mail' });
     }
@@ -149,6 +149,6 @@ module.exports = {
     updateLabel,
     deleteLabel,
     getMailsByLabel,
-    removeLabelFromMails,
+    removeLabelFromMail,
     addLabelToMail
 };

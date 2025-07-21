@@ -8,19 +8,33 @@ function withNavigation(Component) {
     return function ComponentWithNavigation(props) {
         const navigate = useNavigate();
         const location = useLocation();
-        return <Component {...props} navigate={navigate} />;
+        return <Component {...props} navigate={navigate} location={location} />;
     };
 }
 
 class MailItem extends Component {
+    constructor(props) {
+        super(props);
+        const isStarred = props.mail.labels.includes('starred');
+        this.state = {
+            isStarred
+        };
+    }
     moveToTrash = async (e) => {
         e.stopPropagation(); // Prevent the click from navigating to the mail detail
-        const { mail, navigate } = this.props;
-        // let pathname = location.pathname.split('/')[1];
+        const { mail, location ,onDeleted} = this.props;
+        const currentPath = location.pathname;
+        const currentLabel = currentPath.split('/')[1]; 
         try {
-            await Client.removeLabelFromMail(mail.id, 'bin'); // Assuming 'trash' is the label for deleted mails
+            if (currentLabel === "bin") {
+                 await Client.deleteMail(mail.id);
+            }
+            await Client.removeLabelFromMail(currentLabel,mail.id); // Assuming 'trash' is the label for deleted mails
             console.log('Mail moved to trash:', mail.id);
-            navigate('/'); // Redirect to inbox after moving to trash
+            await Client.addLabelToMail("bin", mail.id);
+            if (onDeleted) {
+                onDeleted(mail);
+            }
         } catch (error) {
             console.error('Error moving mail to trash:', error);
         }
@@ -47,42 +61,51 @@ class MailItem extends Component {
             return date.toLocaleDateString('he-IL', { day: 'numeric', month: 'short' });
         }
     };
-
+    handleStarClicked = async (e) => {
+        e.stopPropagation(); // Prevent the click from navigating to the mail detail
+        const { mail } = this.props;
+        try {
+            if (this.state.isStarred) {
+                await Client.removeLabelFromMail('starred', mail.id);
+                mail.labels = mail.labels.filter(label => label !== 'starred');
+            } else {
+                await Client.addLabelToMail("starred", mail.id);
+                mail.labels.push('starred');
+            }
+            this.setState(prevState => ({isStarred : !prevState.isStarred}));       
+        } catch (error) {
+            console.error('Error updating star status:', error);
+        }
+    };
     render() {
         const { mail } = this.props;
-        
         return (
-            <div className={`mail-item ${mail.unread ? 'unread' : 'read'}`} onClick={this.handleClick}>
-                <div className="mail-checkbox">
-                    <input type="checkbox" onClick={(e) => e.stopPropagation()} />
-                </div>
-                
-                <div className="mail-star">
-                    <i className={`bi ${mail.isStarred ? 'bi-star-fill' : 'bi-star'}`}></i>
-                </div>
-                
-                <div className="mail-sender">
-                    {mail.from}
-                </div>
-                
-                <div className="mail-content">
-                    <span className="mail-subject">
-                        {mail.subject}
-                    </span>
-                    <span className="mail-preview">
-                        {mail.body ? ` - ${mail.body.substring(0, 100)}...` : ''}
-                    </span>
-                </div> 
-                <IconButton
-                    iconType="material" 
-                    onClick={this.moveToTrash}>
-                    Delete
-                </IconButton>
-                
-                <div className="mail-date">
-                    {this.formatDate(mail.date || new Date())}
-                </div>
+          <div
+            className={`mail-item ${mail.unread ? "unread" : "read"}`}
+            onClick={this.handleClick}
+          >
+            <div className="mail-checkbox">
+              <input type="checkbox" onClick={(e) => e.stopPropagation()} />
             </div>
+            <button className="star-button" onClick={this.handleStarClicked}>
+                <span className={`material-symbols-outlined star-icon ${this.state.isStarred ? 'starred' : ''}`}>
+                    star
+                </span>
+            </button>
+            <div className="mail-sender">{mail.sender}</div>
+
+            <div className="mail-content">
+              <span className="mail-subject">{mail.subject}</span>
+              <span className="mail-preview">
+                {mail.body ? ` - ${mail.body.substring(0, 100)}...` : ""}
+              </span>
+            </div>
+            <IconButton onClick={this.moveToTrash}>Delete</IconButton>
+
+            <div className="mail-date">
+              {this.formatDate(mail.date || new Date())}
+            </div>
+          </div>
         );
     }
 }

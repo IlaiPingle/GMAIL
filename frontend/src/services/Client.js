@@ -9,8 +9,15 @@ const defaultHeaders = () => ({
 
 const handleResponse = async (response) => {
     if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Request failed');
+        let errorMessage = 'Request failed';
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+        } catch (e) {}
+        throw new Error(errorMessage);    
+    }
+    if (response.status === 204) {
+        return null; // No content
     }
     return response.json();
 }
@@ -114,6 +121,9 @@ const reportSpam = async (sender , subject , body) => {
     return handleResponse(response);
 }
 const removeLabelFromMail = async (labelName, mailId) => {
+    if (!mailId) {
+      throw new Error("Mail ID is missing");
+    }
     const url = `${API_URL}/labels/mails/${mailId}`;
     const response = await fetch(url, {
         method: 'DELETE',
@@ -123,6 +133,9 @@ const removeLabelFromMail = async (labelName, mailId) => {
     return handleResponse(response);
 }
 const addLabelToMail = async (labelName, mailId) => {
+    if (!mailId) {
+      throw new Error("Mail ID is missing");
+    }
     const url = `${API_URL}/labels/mails/${mailId}`;
     const response = await fetch(url, {
         method: 'POST',

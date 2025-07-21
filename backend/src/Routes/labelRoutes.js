@@ -6,7 +6,7 @@ const labelController = require('../Controllers/labelController');
 router.post('/api/labels', labelController.createLabel); // Create a new label
 router.get('/api/labels', labelController.getUserLabels); // Get all labels for a user
 router.get('/api/labels/mails', labelController.getMailsByLabel); // Get mails by label
-router.delete('/api/labels/mails/:id', labelController.removeLabelFromMails); // Remove a label from mails
+router.delete('/api/labels/mails/:id', labelController.removeLabelFromMail); // Remove a label from mails
 router.post('/api/labels/mails/:id', labelController.addLabelToMail); // Add a label to a mail
 router.get('/api/labels/:id', labelController.getLabelById); // Get a specific label by ID
 router.patch('/api/labels/:id', labelController.updateLabel); // Update a specific label by ID
