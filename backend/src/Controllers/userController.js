@@ -1,4 +1,6 @@
 const User = require('../Models/userModel')
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 function validatePassword(password) {
 	if (password.length < 8) {
@@ -27,7 +29,7 @@ function validatePassword(password) {
 	return { valid: true };
 }
 
-exports.registerUser = (req, res) => {
+exports.registerUser = async (req, res) => {
 	try {
 	const { username, password, first_name, sur_name, picture } = req.body;
 	if (!username || !password || !first_name || !sur_name || picture === undefined) {
@@ -43,7 +45,9 @@ exports.registerUser = (req, res) => {
 	if (existingUser) {
 		return res.status(400).json({ message: 'Username already exists' })
 	}
-	const newUser = User.createUser(username, password, first_name, sur_name, picture)
+	const saltRounds = 10;
+	const hashedPassword = await bcrypt.hash(password, saltRounds);
+	const newUser = User.createUser(username, hashedPassword, first_name, sur_name, picture)
 	res.set('Location', `/api/users/${newUser.id}`);
 	res.status(201).json({
 		id: newUser.id,
@@ -58,7 +62,7 @@ exports.registerUser = (req, res) => {
 	}
 }
 
-exports.loginUser = (req, res) => {
+exports.loginUser = async (req, res) => {
 	const { username, password } = req.body
 
 	if (!username || !password) {
@@ -67,13 +71,37 @@ exports.loginUser = (req, res) => {
 
 	const user = User.findUserByUsername(username)
 
-	if (!user || user.password !== password) {
-		return res.status(401).json({ message: 'Invalid username or password' })
+	if (!user) {
+		return res.status(401).json({ message: 'Invalid username or password' });
 	}
+	const passwordMatch = await bcrypt.compare(password, user.password);
+	if (!passwordMatch) {
+		return res.status(401).json({ message: 'Invalid username or password' });
+	}
+	// Generate JWT token
+	if (!process.env.JWT_SECRET) {
+		console.error('JWT_SECRET is not set in environment variables');
+		return res.status(500).json({ message: 'Server configuration error' });
+	}
+	const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '24h' })
+	res.cookie('authToken', token, {
+		httpOnly: true,
+		secure: process.env.NODE_ENV === 'production',
+		sameSite: 'Strict',
+		maxAge: 24 * 60 * 60 * 1000 // 24 hours
+	})
+
 	res.status(200).json({
 		id: user.id,
+		username: user.username,
 	})
 }
+
+exports.logoutUser = (req, res) => {
+	res.clearCookie('authToken');
+	res.status(200).json({ message: 'Logged out successfully' });
+}
+
 exports.getUser = (req, res) => {
 	const Id = parseInt(req.params.id, 10)
 	const user = User.findUserById(Id)

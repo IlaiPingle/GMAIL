@@ -7,16 +7,23 @@ const labelRoutes = require('./Routes/labelRoutes')
 const path = require('path') // Importing the path module to handle file paths
 const app = express()
 const cors = require("cors");
-app.use(cors());
+const cookieParser = require('cookie-parser')
+app.use(cors({
+  origin: 'http://localhost:3000', // Adjust this to your frontend URL
+  credentials: true // Allow credentials (cookies) to be sent
+}));
 
-app.use(bodyparser.json())
+app.use(cookieParser());
+app.use(bodyparser.json());
 app.set('json spaces', 2);
 
 app.use(express.static(path.join(__dirname, 'public'))) // Serve static files from the 'public' directory
-
-app.use(usersRoutes)
-app.use(blacklistRoutes)
-app.use(emailRoutes)
-app.use(labelRoutes)
+// Public routes (no authentication required)
+app.use('/api/tokens', usersRoutes); // Login route
+// Protected routes (auth required)
+const authMiddleware = require('./middleware/authMiddleware');
+app.use('/api/mails', authMiddleware, emailRoutes);
+app.use('/api/labels', authMiddleware, labelRoutes);
+app.use('/api/blacklist', authMiddleware, blacklistRoutes);
 
 module.exports = app

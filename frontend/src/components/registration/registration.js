@@ -275,7 +275,7 @@ const Registration = () => {
 						>
 							Sign in instead
 						</button>
-						<button type="submit" className="next-button">Next</button>
+						<button type="submit" className="next-button">Sign Up</button>
 					</div>
 				</form>
 			</div>
