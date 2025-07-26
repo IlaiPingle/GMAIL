@@ -50,8 +50,12 @@ class SideBar extends Component {
               id="compose"
               icon="edit"
               text="Compose"
-              isActive={currentPath === "/compose=new"}
-              onClick={() => navigate("/compose=new")}
+              isActive={false}
+              onClick={() => { 
+                const params = new URLSearchParams(location.search);
+                params.set("compose", "new");
+                navigate(`${currentPath}?${params.toString()}`);
+              }}
             />
             <SideBarOptions
               icon="inbox"

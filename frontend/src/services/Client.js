@@ -43,8 +43,8 @@ const searchMails = async (query) => {
     const response = await fetch(url, {headers: defaultHeaders()});
     return handleResponse(response);
 }
-const sendMail = async (mailData) => {
-    const url = `${API_URL}/mails`;
+const sendMail = async (mailId, mailData) => {
+    const url = `${API_URL}/mails/${mailId}`;
     const response = await fetch(url, {
         method: 'POST',
         headers: defaultHeaders(),
@@ -53,7 +53,7 @@ const sendMail = async (mailData) => {
     return handleResponse(response);
 }
 
-const updateMail = async (id,updatedData) => {
+const updateMail = async (id ,updatedData) => {
     const url = `${API_URL}/mails/${id}`;
     const response = await fetch(url, {
         method: 'PATCH',
@@ -144,6 +144,15 @@ const addLabelToMail = async (labelName, mailId) => {
     });
     return handleResponse(response);
 }
+const createDraft = async (draftData) => {
+    const url = `${API_URL}/mails`;
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: defaultHeaders(),
+        body: JSON.stringify(draftData),
+    });
+    return handleResponse(response);
+}
 
 export default {
     getAllMails,
@@ -160,4 +169,5 @@ export default {
     getLabelByName,
     addLabelToMail,
     removeLabelFromMail,
+    createDraft,
 };

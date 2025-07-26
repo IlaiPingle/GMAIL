@@ -4,8 +4,8 @@ import MainLayout from './pages/MainLayout';
 import MailPage from './pages/mailPage';
 import Compose from './components/compose/Compose';
 import CreateLabel from './components/createLabel/CreateLabel';
-import './App.css';
 import MailList from './components/MailList';
+import './App.css';
 
 class App extends Component {
   constructor(props) {
@@ -19,15 +19,10 @@ class App extends Component {
       <Router>
         <Routes>
           <Route path="/" element={<MainLayout />}> 
-            <Route path="inbox" element={<MailList label="inbox" />} />
-            <Route path="sent" element={<MailList label="sent" />} />
-            <Route path="drafts" element={<MailList label="drafts" />} />
-            <Route path="bin" element={<MailList label="bin" />} />
-            <Route path="archive" element={<MailList label="archive" />} />
-            <Route path="starred" element={<MailList label="starred" />} />
-            <Route path="label/:labelName" element={<MailList />} />
-            <Route path="/mail/:id" element={<MailPage />} />              
-            <Route path="/compose=new" element={<Compose />} />
+            <Route index element={<MailList label="inbox" />} />
+            <Route path=":boxType" element={<MailList />} />
+            <Route path=":boxType/:mailId" element={<MailPage />} />
+            <Route path="/compose" element={<Compose />} />
             <Route path="/create-label" element={<CreateLabel />} />
           </Route>
         </Routes>

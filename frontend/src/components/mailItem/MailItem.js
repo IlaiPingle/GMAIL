@@ -27,11 +27,14 @@ class MailItem extends Component {
         const currentLabel = currentPath.split('/')[1]; 
         try {
             if (currentLabel === "bin") {
-                 await Client.deleteMail(mail.id);
+                const warn = window.confirm("Are you sure you want to permanently delete this mail?");
+                if (!warn) return;
+                await Client.deleteMail(mail.id);
+            } else {
+                await Client.removeLabelFromMail(currentLabel, mail.id);
+                console.log('Mail moved to trash:', mail.id);
+                await Client.addLabelToMail("bin", mail.id);
             }
-            await Client.removeLabelFromMail(currentLabel,mail.id); // Assuming 'trash' is the label for deleted mails
-            console.log('Mail moved to trash:', mail.id);
-            await Client.addLabelToMail("bin", mail.id);
             if (onDeleted) {
                 onDeleted(mail);
             }
@@ -41,12 +44,15 @@ class MailItem extends Component {
     };
 
     handleClick = () => {
-        const { mail, navigate } = this.props;
-        navigate(`/mail/${mail.id}`);
-        
+        const { mail, navigate, location } = this.props;
+        const { pathname } = location;
+        if (mail.labels.includes('drafts')) {
+            navigate(`${pathname}?compose=${mail.id}`);
+            return;
+        }
+        navigate(`${pathname}/${mail.id}`);
     };
 
-    // פונקציה לעיצוב התאריך
     formatDate = (dateString) => {
         const date = new Date(dateString);
         const now = new Date();

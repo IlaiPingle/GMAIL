@@ -1,5 +1,4 @@
 const EmailService = require('../services/emailService');
-
 /**
 * Send a new email
 * @param {*} req - The request object containing user ID, receiver, subject, and body.
@@ -9,12 +8,13 @@ const EmailService = require('../services/emailService');
 async function sendNewMail(req, res) {
     try{
         const userId = Number(req.header("user-id"));
+        const mailId = Number(req.params.id);
         const {receiver, subject, body} = req.body;
         
-        if (!userId || !receiver ) {
+        if (!userId || !receiver || !mailId ) {
             return  res.status(400).json({ message: 'missing required fields' });
         }
-        const newMail = await EmailService.sendNewMail(userId, receiver, subject, body);
+        const newMail = await EmailService.sendNewMail(userId, mailId, receiver, subject, body);
         res.set('Location', `/api/mails/${newMail.id}`);
         return res.status(201).json(newMail);
     }
@@ -31,11 +31,10 @@ async function sendNewMail(req, res) {
 function getMails(req, res) {
     try{
         const userId = Number(req.header("user-id"));
-        const type = req.query.type;
         if (!userId) {
             return res.status(400).json({ message: 'User ID is required' });
         }
-        const mails = EmailService.getUserMails(userId, type);
+        const mails = EmailService.getUserMails(userId);
         return res.status(200).json(mails);
     } catch (error) {
         return res.status(error.status || 500).json({ message: error.message });
@@ -109,21 +108,42 @@ function updatemail(req, res) {
     try {
         const userId = Number(req.header("user-id"));
         const mailId = Number(req.params.id); 
-        const { subject, body } = req.body;
+        const { receiver , subject, body } = req.body;
 
         if (!userId || !mailId) {
             return res.status(400).json({ message: 'User ID and Mail ID are required' });
         }
-        EmailService.updateMail(userId, mailId, subject, body);
+        EmailService.updateMail(userId,  mailId, receiver ,subject, body);
         return res.status(204).end();
     } catch (error) {
         return res.status(error.status || 500).json({ message: error.message });
     }
 }
+
+function createNewDraft(req, res) {
+    try {
+        const userId = Number(req.header("user-id"));
+        const { subject, body, receiver } = req.body;
+
+        if (!userId) {
+            return res.status(400).json({ message: 'User ID is required' });
+        }
+        const user = EmailService.getUserOrThrow(userId);
+        const newDraft = EmailService.createNewMail(user.username, receiver, subject, body);
+        user.mails.push(newDraft);
+        newDraft.labels.push('drafts');
+        user.labels.get('drafts').mailIds.add(newDraft.id);
+        return res.status(201).json(newDraft);
+    } catch (error) {
+        return res.status(error.status || 500).json({ message: error.message });
+    }
+}
+
 module.exports = {
     sendNewMail,
     updatemail,
     getMails,
+    createNewDraft,
     getMailById,
     removeMail,
     findInMails

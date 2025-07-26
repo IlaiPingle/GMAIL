@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { useParams } from 'react-router-dom';
 import './mailPage.css';
+import Client from '../services/Client';
 
 // HOC to get params in class component
 function withParams(Component) {
@@ -22,16 +23,8 @@ class MailPage extends Component {
   fetchMail = async () => {
     const { id } = this.props.params;
     try {
-      const response = await fetch(`http://localhost:8080/api/mails/${id}`, {
-        headers: {
-          'user-id': '2', // use the correct user ID for Alice
-        },
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch mail');
-      }
-      const data = await response.json();
-      this.setState({ mail: data });
+      const response = await Client.getMailById(id);
+      this.setState({ mail: response });
     } catch (err) {
       this.setState({ error: err.message });
     }

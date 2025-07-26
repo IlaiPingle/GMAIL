@@ -97,16 +97,13 @@ function addLabelToMail(userId, mailId, labelName) {
         error.status = 404;         
         throw error;
     }
-    if(!mail.labels.includes(labelName)) {
-        mail.labels.push(labelName);
+    if (!user.labels.has(labelName)) {
+        const error = new Error('Label not found');
+        error.status = 404;
+        throw error;
     }
-    // If the label is not a system label, add it to user's labels
-    if (!Users.isSystemLabel(labelName)) {
-        if(!user.labels.has(labelName)){
-            user.labels.Set(labelName,{
-                mailIds:new Set()
-            });
-        }
+    if (!mail.labels.includes(labelName)) {
+        mail.labels.push(labelName);
         user.labels.get(labelName).mailIds.add(mailId);
     }
     return true;
@@ -115,14 +112,14 @@ function removeLabelfromMail(userId,mailId,labelName){
     const user = getUserOrThrow(userId);
     const mail = user.mails.find (mail => mail.id === mailId)
     if(!mail){
-        const error = new error('Mail not found');
+        const error = new Error('Mail not found');
         error.status = 404;
         throw error;    
     }
     mail.labels = mail.labels.filter(label => label !== labelName);
 
     if(user.labels.has(labelName)){
-        Users.users.labels?.get(labelName)?.mailIds.delete(mailId);
+        user.labels.get(labelName).mailIds.delete(mailId);
     }
 }
 function getMailsByLabel(userId, labelName) {
@@ -136,7 +133,8 @@ function getMailsByLabel(userId, labelName) {
         throw error;
     }
     
-    // Filter mails that have this label
+    // Filter mails that have this label #
+    // ## can be optimized by MAP later ###
     return user.mails.filter(mail => mail.labels.includes(labelName));
 }
 
