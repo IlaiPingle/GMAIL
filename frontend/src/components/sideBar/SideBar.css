@@ -2,7 +2,7 @@
     width: 60px;
     min-height: 100vh;
     background-color: #F8FAFD;
-    padding: 8px 0;
+    padding: auto;
     overflow-y: auto;
     overflow-x: visible;
     transition: width 0.3s ease;
@@ -10,6 +10,10 @@
 
 .sideBar:hover {
     width: 256px; 
+}
+.sideBar:hover .sideBaroptions {
+    padding: 8px 16px;
+
 }
 
 .sideBar::-webkit-scrollbar {
@@ -31,10 +35,9 @@
 
 .LabelsHeader {
     display: flex;
-    align-items: center;
+    text-align: center;
     justify-content: space-between;
-    padding: 8px 16px;
-    margin-top: 16px;
+    margin: 0 ;
     transition: 0s;
 }
 
@@ -44,11 +47,12 @@
 }
 
 .LabelsHeaderText {
-    font-size: 14px;
-    color: #3c4043;
+    font-size: 18px;
+    color: #131414;
     font-weight: 500;
     opacity: 0;
     width: 0;
+    padding-left: 10%;
     overflow: hidden;
     transition: 0s;
 }

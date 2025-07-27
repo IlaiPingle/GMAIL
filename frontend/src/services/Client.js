@@ -5,11 +5,18 @@ const defaultHeaders = () => ({
 });
 
 const handleResponse = async (response) => {
-	if (!response.ok) {
-		const errorData = await response.json();
-		throw new Error(errorData.message || 'Request failed');
-	}
-	return response.json();
+    if (!response.ok) {
+        let errorMessage = 'Request failed';
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+        } catch (e) {}
+        throw new Error(errorMessage);    
+    }
+    if (response.status === 204) {
+        return null; // No content
+    }
+    return response.json();
 }
 
 const getAllMails = async () => {
@@ -33,24 +40,24 @@ const searchMails = async (query) => {
 	const response = await fetch(url, { headers: defaultHeaders(), credentials: 'include' }); // Include cookies for session management
 	return handleResponse(response);
 }
-const sendMail = async (mailData) => {
-	const url = `${API_URL}/mails`;
-	const response = await fetch(url, {
-		method: 'POST',
-		headers: defaultHeaders(),
-		body: JSON.stringify(mailData),
-	});
-	return handleResponse(response);
+const sendMail = async (mailId, mailData) => {
+    const url = `${API_URL}/mails/${mailId}`;
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: defaultHeaders(),
+        body: JSON.stringify(mailData),
+    });
+    return handleResponse(response);
 }
 
-const updateMail = async (id, updatedData) => {
-	const url = `${API_URL}/mails/${id}`;
-	const response = await fetch(url, {
-		method: 'PATCH',
-		headers: defaultHeaders(),
-		body: JSON.stringify(updatedData),
-	});
-	return handleResponse(response);
+const updateMail = async (id ,updatedData) => {
+    const url = `${API_URL}/mails/${id}`;
+    const response = await fetch(url, {
+        method: 'PATCH',
+        headers: defaultHeaders(),
+        body: JSON.stringify(updatedData),
+    });
+    return handleResponse(response);
 }
 
 const deleteMail = async (id) => {
@@ -101,32 +108,54 @@ const getLabelByName = async (labelName) => {
 	const response = await fetch(url, { headers: defaultHeaders() });
 	return handleResponse(response);
 }
-const reportSpam = async (sender, subject, body) => {
-	const url = `${API_URL}/blacklist`;
-	const response = await fetch(url, {
-		method: 'POST',
-		headers: defaultHeaders(),
-		body: JSON.stringify({ sender, subject, body }),
-	});
-	return handleResponse(response);
+const reportSpam = async ({mailData}) => {
+    const { sender, subject, body } = mailData;
+    const url = `${API_URL}/blacklist`;
+    const text = `${subject || ''} ${body || ''} sender: ${sender || ''}`;
+    const urlRegex = /^https?:\/\/[^\s]+$/;
+    const words = text.split(/\s+/);
+    for (const word of words) {
+        if (!urlRegex.test(word)) continue;
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: defaultHeaders(),
+            body: JSON.stringify({url: word}),
+        });
+        await handleResponse(response);
+    }
 }
 const removeLabelFromMail = async (labelName, mailId) => {
-	const url = `${API_URL}/labels/mails/${mailId}`;
-	const response = await fetch(url, {
-		method: 'DELETE',
-		headers: defaultHeaders(),
-		body: JSON.stringify({ labelName }),
-	});
-	return handleResponse(response);
+    if (!mailId) {
+      throw new Error("Mail ID is missing");
+    }
+    const url = `${API_URL}/labels/mails/${mailId}`;
+    const response = await fetch(url, {
+        method: 'DELETE',
+        headers: defaultHeaders(),
+        body: JSON.stringify({ labelName }),
+    });
+    return handleResponse(response);
 }
 const addLabelToMail = async (labelName, mailId) => {
-	const url = `${API_URL}/labels/mails/${mailId}`;
-	const response = await fetch(url, {
-		method: 'POST',
-		headers: defaultHeaders(),
-		body: JSON.stringify({ labelName }),
-	});
-	return handleResponse(response);
+    if (!mailId) {
+      throw new Error("Mail ID is missing");
+    }
+    const url = `${API_URL}/labels/mails/${mailId}`;
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: defaultHeaders(),
+        body: JSON.stringify({ labelName }),
+    });
+    return handleResponse(response);
+}
+const createDraft = async (draftData) => {
+    const url = `${API_URL}/mails`;
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: defaultHeaders(),
+        body: JSON.stringify(draftData),
+    });
+    return handleResponse(response);
 }
 
 const login = async (username, password) => {

@@ -4,7 +4,6 @@ const usersRoutes = require('./Routes/userRoutes')
 const blacklistRoutes = require('./Routes/blacklistRoutes')
 const emailRoutes = require('./Routes/emailRoutes')
 const labelRoutes = require('./Routes/labelRoutes')
-const path = require('path') // Importing the path module to handle file paths
 const app = express()
 const cors = require("cors");
 const cookieParser = require('cookie-parser')
@@ -17,7 +16,6 @@ app.use(cookieParser());
 app.use(bodyparser.json());
 app.set('json spaces', 2);
 
-app.use(express.static(path.join(__dirname, 'public'))) // Serve static files from the 'public' directory
 // Public routes (no authentication required)
 app.use('/api/tokens', usersRoutes); // Login route
 // Protected routes (auth required)

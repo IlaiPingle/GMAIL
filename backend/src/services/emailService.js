@@ -6,35 +6,42 @@ let nextEmailId = 1;
 * Send a new email with security validation
 */
 
-async function sendNewMail(userId, receiver, subject, body) {
-	const user = Users.findUserById(userId);
-    
+async function sendNewMail(userId, mailId, receiver, subject, body) {
+	const user = getUserOrThrow(userId);
+
     const receiverUser = Users.findUserByUsername(receiver);
     if (!receiverUser) {
         const error = new Error('Receiver not found');
         error.status = 404;
         throw error;
     }
-    
-    // Security check
-    const isBlacklisted = await validateEmailSecurity(subject, body);
-    if (isBlacklisted) {
-        const error = new Error('Mail contains blacklisted content');
-        error.status = 400;
+        // Create mail for Sender:
+    const senderMail = getMailById(userId, mailId);
+    if (!senderMail) {
+        const error = new Error('Draft mail not found');
+        error.status = 404;
         throw error;
     }
-    
-    // Crete mail for Sender:
-    const senderMail = createNewMail(user.username, receiver, subject, body);
-    senderMail.labels.push('sent');
-    user.mails.push(senderMail);
-    user.labels.get('sent').mailIds.add(senderMail.id);
+    senderMail.sender = user.username;
+    senderMail.receiver = receiver;
+    senderMail.subject = subject;
+    senderMail.body = body;
+    senderMail.dateCreated = new Date().toISOString();
+    senderMail.unread = true;
 
+    senderMail.labels.push('sent');
+    user.labels.get('sent').mailIds.add(senderMail.id);
+    
     // Create mail for Receiver:
+    console.log('Creating new mail for receiver:', receiver, subject, body);
     const receiverMail = createNewMail(user.username, receiver, subject, body);
-    receiverMail.labels.push('inbox');
+    // Security check
+    const isBlacklisted = await validateEmailSecurity(user.username, subject, body);
+
+    receiverMail.labels.push(isBlacklisted ? 'spam': 'inbox');
     receiverUser.mails.push(receiverMail);
-    receiverUser.labels.get('inbox').mailIds.add(receiverMail.id);
+    // Add mail to system labels
+    receiverUser.labels.get(isBlacklisted ? 'spam': 'inbox').mailIds.add(receiverMail.id);
     return senderMail;
 }
 
@@ -77,7 +84,7 @@ function removeMail(userId, mailId) {
         throw error;
     }
     
-    user.inbox.splice(mailIndex, 1);
+    user.mails.splice(mailIndex, 1);
     return true;
 }
 
@@ -97,16 +104,16 @@ function searchMails(userId, searchTerm) {
 /**
 * Update email content
 */
-function updateMail(userId, mailId, subject, body) {
-    const user = Users.findUserById(userId);
-    
+function updateMail(userId, mailId ,receiver, subject, body) {
+    const user = getUserOrThrow(userId);
+
     const mail = user.mails.find(mail => mail.id === mailId);
     if (!mail) {
         const error = new Error('Mail not found');
         error.status = 404;
         throw error;
     }
-    
+    if (receiver !== undefined) mail.receiver = receiver;
     if (subject !== undefined) mail.subject = subject;
     if (body !== undefined) mail.body = body;
     
@@ -116,8 +123,8 @@ function updateMail(userId, mailId, subject, body) {
 /**
 * Validate email security (internal helper)
 */
-async function validateEmailSecurity(subject, body) {
-    const text = `${subject || ''} ${body || ''}`;
+async function validateEmailSecurity(sender, subject, body) {
+    const text = `${sender || ''} ${subject || ''} ${body || ''}`;
     const urlRegex = /^https?:\/\/[^\s]+$/;
     const words = text.split(/\s+/);
     
@@ -142,9 +149,9 @@ function createNewMail(sender, receiver, subject, body) {
     const newMail = {
         id: nextEmailId++,
         sender,
-        receiver,
-        subject,
-        body,
+        receiver: receiver || '',
+        subject: subject || '',
+        body: body || '',
         dateCreated: new Date().toISOString(),
         unread : true,
         labels: []
@@ -168,5 +175,7 @@ module.exports = {
     getMailById,
     removeMail,
     searchMails,
-    updateMail
+    updateMail,
+    createNewMail,
+    getUserOrThrow,
 };

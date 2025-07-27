@@ -1,44 +1,106 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Compose.css';
 import Client from '../../services/Client';
 
-// HOC for navigation hooks in class component
-function withNavigation(Component) {
-    return function ComponentWithNavigation(props) {
-        const navigate = useNavigate();
-        return <Component {...props} navigate={navigate} />;
-    };
-}
+function Compose({ draftId }) {
+    const [receiver, setReceiver] = useState('');
+    const [subject, setSubject] = useState('');
+    const [body, setBody] = useState('');
+    const [isDrafted, setIsDrafted] = useState(false);
+    const [error, setError] = useState(null);
+    const mailIdRef = useRef(null);
+    const navigate = useNavigate();
 
-class Compose extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            receiver: '',
-            subject: '',
-            body: '',
-            error: null
+    /**
+     * Fetches the draft mail if a draftId is provided in the props.
+     * this can only happen when the user clicks on a draft mail to edit it.
+     */
+    useEffect(() => {
+        const loadDraft = async () => {
+            if (draftId) {
+                try {
+                    const draft = await Client.getMailById(draftId);
+                    setReceiver(draft.receiver || '');
+                    setSubject(draft.subject || '');
+                    setBody(draft.body || '');
+                    setIsDrafted(true);
+                    mailIdRef.current = draft.id;
+                } catch (error) {
+                    setError('Failed to load draft');
+                }
+            }
         };
-    }
+        
+        loadDraft();
+    }, [draftId]);
 
-    handleSubmit = async (e) => {
+    /**
+    * Handles changes to the input fields and saves the draft if necessary.
+    * this function is called and updates the state with the new value,
+    * at the first change of any field.
+    */
+    const handleFieldChange = async (field, value) => {
+        // Update the appropriate state
+        if (field === 'receiver') setReceiver(value);
+        else if (field === 'subject') setSubject(value);
+        else if (field === 'body') setBody(value);
+
+        if (!isDrafted && (receiver || subject || body || value)) {
+            try {
+                const response = await Client.createDraft({
+                    receiver: field === 'receiver' ? value : receiver,
+                    subject: field === 'subject' ? value : subject,
+                    body: field === 'body' ? value : body
+                });
+                setIsDrafted(true);
+                mailIdRef.current = response.id;
+                console.log('Draft created successfully:', response.id);
+            } catch (error) {
+                setError('Failed to create draft');
+            }
+        }
+    };
+
+    /**
+     * Saves the draft mail if it exists.
+     * this function is called when the user closes the compose window.
+     */
+    const saveDraft = async () => {
+        if (isDrafted && mailIdRef.current) {
+            try {
+                console.log('Updating draft:', mailIdRef.current);
+                await Client.updateMail(mailIdRef.current, {
+                    receiver,
+                    subject,
+                    body
+                });
+            } catch (error) {
+                setError('Failed to save draft');
+            }
+        }
+    };
+
+    /**
+     * Handles the form submission to send the email.
+     * Validates the receiver field and sends the email using the Client service.
+     */
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const { receiver, subject, body } = this.state;
-        const { navigate } = this.props;
         
         // Validation
         if (!receiver.trim()) {
-            this.setState({ error: 'Receiver email is required' });
+            setError('Receiver email is required');
             return;
         }
         
         try {
-            this.setState({ error: null }); // Clear previous errors
+            setError(null); // Clear previous errors
             
             console.log('Sending email with data:', { receiver, subject, body });
-            
-            const response = await Client.sendMail({
+            await Client.removeLabelFromMail('drafts', mailIdRef.current);
+
+            const response = await Client.sendMail(mailIdRef.current, {
                 receiver,
                 subject,
                 body
@@ -46,50 +108,46 @@ class Compose extends Component {
             
             console.log('Email sent successfully:', response);
             
-            // If successful, navigate back to inbox
-            navigate('/');
+            navigate(window.location.pathname);
         } catch (error) {
             console.error('Error sending email:', error);
-            this.setState({ error: error.message || 'Failed to send email' });
+            setError(error.message || 'Failed to send email');
         }
     };
 
-
-    render() {
-        const { receiver, subject, body, error } = this.state;
-        const { navigate } = this.props;
-        
-        return (
-            <div className="compose-container">
-                <div className="compose-header">
-                    <span>New Message</span>
-                    <button className="close-btn" onClick={() => navigate('/')}>×</button>
-                </div>
-                <form className="compose-form" onSubmit={this.handleSubmit}>
-                    <input
-                        type="text"
-                        placeholder="To"
-                        value={receiver}
-                        onChange={(e) => this.setState({ receiver: e.target.value })}
-                        required
-                    />
-                    <input
-                        type="text"
-                        placeholder="Subject"
-                        value={subject}
-                        onChange={(e) => this.setState({ subject: e.target.value })}
-                    />
-                    <textarea
-                        placeholder="Message"
-                        value={body}
-                        onChange={(e) => this.setState({ body: e.target.value })}
-                    />
-                    {error && <div className="error">{error}</div>}
-                    <button type="submit" className="send-btn">Send</button>
-                </form>
+    return (
+        <div className="compose-container">
+            <div className="compose-header">
+                <span>New Message</span>
+                <button className="close-btn" onClick={async () => {
+                    await saveDraft();
+                    navigate(window.location.pathname);
+                }}>×</button>
             </div>
-        );
-    }
+            <form className="compose-form" onSubmit={handleSubmit}>
+                <input
+                    type="text"
+                    placeholder="To"
+                    value={receiver}
+                    onChange={(e) => handleFieldChange('receiver', e.target.value)}
+                    required
+                />
+                <input
+                    type="text"
+                    placeholder="Subject"
+                    value={subject}
+                    onChange={(e) => handleFieldChange('subject', e.target.value)}
+                />
+                <textarea
+                    placeholder="Message"
+                    value={body}
+                    onChange={(e) => handleFieldChange('body', e.target.value)}
+                />
+                {error && <div className="error">{error}</div>}
+                <button type="submit" className="send-btn">Send</button>
+            </form>
+        </div>
+    );
 }
 
-export default withNavigation(Compose);
+export default Compose;

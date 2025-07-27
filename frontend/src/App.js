@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './pages/MainLayout';
 import MailPage from './pages/mailPage';
@@ -8,38 +8,26 @@ import Registration from './components/registration/registration';
 import Login from './components/login/login';
 import './App.css';
 import MailList from './components/MailList';
+import './App.css';
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      searchResults: null,
-    };
-  }
-  render() {
-    return (
-      <Router>
-        <Routes>
-		  <Route path="/" element={<Navigate to="/login" replace />} />
-		  <Route path="/register" element={<Registration />} />
-		  <Route path="/login" element={<Login />} />
-
-          <Route path="/" element={<MainLayout />}> 
-            <Route path="inbox" element={<MailList label="inbox" />} />
-            <Route path="sent" element={<MailList label="sent" />} />
-            <Route path="drafts" element={<MailList label="drafts" />} />
-            <Route path="bin" element={<MailList label="bin" />} />
-            <Route path="archive" element={<MailList label="archive" />} />
-            <Route path="starred" element={<MailList label="starred" />} />
-            <Route path="label/:labelName" element={<MailList />} />
-            <Route path="/mail/:id" element={<MailPage />} />              
-            <Route path="/compose=new" element={<Compose />} />
-            <Route path="/create-label" element={<CreateLabel />} />
-          </Route>
-        </Routes>
-      </Router>
-    );
-  }
+function App() {
+  return (
+    <Router>
+      <Routes>
+          <Route path="/" element={<Navigate to="/login" replace />} /> 
+          <Route path="/register" element={<Registration />} />
+          <Route path="/login" element={<Login />} />
+          <Route index element={<MailList label="inbox" />} />
+          <Route path=":boxType" element={<MailList />} />
+          <Route path="label/:boxType" element={<MailList />} />
+          <Route path=":boxType/:mailId" element={<MailPage />} />
+          <Route path="label/:boxType/:mailId" element={<MailPage />} />
+          <Route path="/search" element={<MailList />} />
+          <Route path="/compose" element={<Compose />} />
+          <Route path="/create-label" element={<CreateLabel />} />
+      </Routes>
+    </Router>
+  );
 }
 
 export default App;

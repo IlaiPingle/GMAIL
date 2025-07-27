@@ -1,7 +1,8 @@
 .main-layout {
-  display: flex;
+  display: static;
   flex-wrap: nowrap;
   flex-direction: column;
+  flex-shrink: 0;
   height: 100vh;
   width: 100%;
 }
@@ -9,11 +10,20 @@
 .main-layout-body {
   display: flex;
   flex: 1;
-  overflow: hidden;
+  overflow: hidden ;
 }
 
-/* .main-content {
+.content {
   flex: 1;
-  overflow-y: auto;
-  padding: 0;
-} */
+  overflow-y: scroll;
+  overflow-x: hidden;
+  padding-right: 12px;
+  padding-bottom: 12px;
+  min-width: 600px;
+  max-height: 710px;
+  max-width: 90%;
+  background-color: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+

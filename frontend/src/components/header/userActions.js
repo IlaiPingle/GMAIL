@@ -1,51 +1,47 @@
-import React, { Component } from 'react';
+import React from 'react';
 import IconButton from '../common/IconButton';
 import './userActions.css';
 
-class UserActions extends Component {
-  handleHelpClick = () => {
+function UserActions({ userName, userImage }) {
+  const handleHelpClick = () => {
     console.log("Help-clicked");
   };
 
-  handleSettingsClick = () => {
+  const handleSettingsClick = () => {
     console.log("settings-clicked");
   };
 
-  handleAppsClick = () => {
+  const handleAppsClick = () => {
     console.log("apps-clicked");
   };
 
-  render() {
-    const { userName, userImage } = this.props;
-    
-    return (
-      <div className="userActions">
-        <IconButton 
-          iconType="material"
-          onClick={this.handleHelpClick}>
-          help
-        </IconButton>
-        <IconButton 
-          iconType='material' 
-          onClick={this.handleSettingsClick}>
-          settings
-        </IconButton>
-        <IconButton 
-          iconType="material"
-          onClick={this.handleAppsClick}>
-          apps
-        </IconButton>
-        <button id="userImage" title={`${userName}@gmail.com`}>
-          <img
-            id="Avatar"
-            src={userImage}
-            alt={`${userName}@gmail.com`}
-            className="userImage"
-          />
-        </button>
-      </div>
-    );
-  }
+  return (
+    <div className="userActions">
+      <IconButton 
+        iconType="material"
+        onClick={handleHelpClick}>
+        help
+      </IconButton>
+      <IconButton 
+        iconType='material' 
+        onClick={handleSettingsClick}>
+        settings
+      </IconButton>
+      <IconButton 
+        iconType="material"
+        onClick={handleAppsClick}>
+        apps
+      </IconButton>
+      <button id="userImage" title={`${userName}@gmail.com`}>
+        <img
+          id="Avatar"
+          src={userImage}
+          alt={`${userName}@gmail.com`}
+          className="userImage"
+        />
+      </button>
+    </div>
+  );
 }
 
 export default UserActions;
