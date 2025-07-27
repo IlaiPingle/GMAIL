@@ -5,6 +5,7 @@ import MailPage from './pages/mailPage';
 import Compose from './components/compose/Compose';
 import CreateLabel from './components/createLabel/CreateLabel';
 import Registration from './components/registration/registration';
+import Login from './components/login/login';
 import './App.css';
 import MailList from './components/MailList';
 
@@ -19,9 +20,9 @@ class App extends Component {
     return (
       <Router>
         <Routes>
-		  <Route path="/" element={<Navigate to="/register" replace />} />
-
+		  <Route path="/" element={<Navigate to="/login" replace />} />
 		  <Route path="/register" element={<Registration />} />
+		  <Route path="/login" element={<Login />} />
 
           <Route path="/" element={<MainLayout />}> 
             <Route path="inbox" element={<MailList label="inbox" />} />

@@ -23,9 +23,7 @@ class MailPage extends Component {
     const { id } = this.props.params;
     try {
       const response = await fetch(`http://localhost:8080/api/mails/${id}`, {
-        headers: {
-          'user-id': '2', // use the correct user ID for Alice
-        },
+        credentials: 'include', // Include cookies for session management
       });
       if (!response.ok) {
         throw new Error('Failed to fetch mail');
