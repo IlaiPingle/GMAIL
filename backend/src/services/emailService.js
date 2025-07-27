@@ -15,23 +15,13 @@ async function sendNewMail(userId, mailId, receiver, subject, body) {
         error.status = 404;
         throw error;
     }
-    
-    // Security check
-    const isBlacklisted = await validateEmailSecurity(subject, body);
-    if (isBlacklisted) {
-        const error = new Error('Mail contains blacklisted content');
-        error.status = 400;
-        throw error;
-    }
-
-    // Create mail for Sender:
+        // Create mail for Sender:
     const senderMail = getMailById(userId, mailId);
     if (!senderMail) {
         const error = new Error('Draft mail not found');
         error.status = 404;
         throw error;
     }
-
     senderMail.sender = user.username;
     senderMail.receiver = receiver;
     senderMail.subject = subject;
@@ -41,14 +31,17 @@ async function sendNewMail(userId, mailId, receiver, subject, body) {
 
     senderMail.labels.push('sent');
     user.labels.get('sent').mailIds.add(senderMail.id);
-
-
+    
     // Create mail for Receiver:
+    console.log('Creating new mail for receiver:', receiver, subject, body);
     const receiverMail = createNewMail(user.username, receiver, subject, body);
-    receiverMail.labels.push('inbox');
+    // Security check
+    const isBlacklisted = await validateEmailSecurity(user.username, subject, body);
+
+    receiverMail.labels.push(isBlacklisted ? 'spam': 'inbox');
     receiverUser.mails.push(receiverMail);
     // Add mail to system labels
-    receiverUser.labels.get('inbox').mailIds.add(receiverMail.id);
+    receiverUser.labels.get(isBlacklisted ? 'spam': 'inbox').mailIds.add(receiverMail.id);
     return senderMail;
 }
 
@@ -130,8 +123,8 @@ function updateMail(userId, mailId ,receiver, subject, body) {
 /**
 * Validate email security (internal helper)
 */
-async function validateEmailSecurity(subject, body) {
-    const text = `${subject || ''} ${body || ''}`;
+async function validateEmailSecurity(sender, subject, body) {
+    const text = `${sender || ''} ${subject || ''} ${body || ''}`;
     const urlRegex = /^https?:\/\/[^\s]+$/;
     const words = text.split(/\s+/);
     
@@ -156,9 +149,9 @@ function createNewMail(sender, receiver, subject, body) {
     const newMail = {
         id: nextEmailId++,
         sender,
-        receiver: '',
-        subject: '',
-        body: '',
+        receiver: receiver || '',
+        subject: subject || '',
+        body: body || '',
         dateCreated: new Date().toISOString(),
         unread : true,
         labels: []

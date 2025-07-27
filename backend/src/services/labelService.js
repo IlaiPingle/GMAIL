@@ -125,7 +125,6 @@ function removeLabelfromMail(userId,mailId,labelName){
 function getMailsByLabel(userId, labelName) {
     const user = getUserOrThrow(userId);
     
-    // For system labels, check if label exists
     const label = user.labels.get(labelName);
     if (!label) {
         const error = new Error('Label not found');

@@ -111,14 +111,21 @@ const getLabelByName = async (labelName) => {
     const response = await fetch(url, {headers: defaultHeaders()});
     return handleResponse(response);
 }
-const reportSpam = async (sender , subject , body) => {
+const reportSpam = async ({mailData}) => {
+    const { sender, subject, body } = mailData;
     const url = `${API_URL}/blacklist`;
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: defaultHeaders(),
-        body: JSON.stringify({ sender, subject, body }),
-    });
-    return handleResponse(response);
+    const text = `${subject || ''} ${body || ''} sender: ${sender || ''}`;
+    const urlRegex = /^https?:\/\/[^\s]+$/;
+    const words = text.split(/\s+/);
+    for (const word of words) {
+        if (!urlRegex.test(word)) continue;
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: defaultHeaders(),
+            body: JSON.stringify({url: word}),
+        });
+        await handleResponse(response);
+    }
 }
 const removeLabelFromMail = async (labelName, mailId) => {
     if (!mailId) {
@@ -170,4 +177,5 @@ export default {
     addLabelToMail,
     removeLabelFromMail,
     createDraft,
+    reportSpam,
 };

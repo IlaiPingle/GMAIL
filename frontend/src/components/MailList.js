@@ -1,66 +1,61 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 
 import MailItem from "../components/mailItem/MailItem";
 import Client from "../services/Client";
 import "./MailList.css";
-class MailList extends React.Component {
-        state = {
-            mails: [],
-            loading: true,
-        };
 
-    componentDidMount() {
-        this.fetchMails();
-    }
+function MailList() {
+    const [mails, setMails] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const { boxType } = useParams();
 
-    componentDidUpdate(prevProps) {
-        if (prevProps.label !== this.props.label) {
-            this.fetchMails();
-        }
-    }
-
-    fetchMails = () => {
-        const { label } = this.props;
-        this.setState({ loading: true });
+    const fetchMails = () => {
+        setLoading(true);
         
-        console.log('MailList - Fetching mails for label:', label);
-        
-        Client.getMailsByLabel(label)
+        console.log('MailList - Fetching mails for label:', boxType);
+
+        Client.getMailsByLabel(boxType)
             .then(mails => {
                 console.log('MailList - Received mails:', mails);
-                this.setState({ mails, loading: false });
+                setMails(mails);
+                setLoading(false);
             })
             .catch(error => {
                 console.error("Error loading mails:", error);
-                this.setState({ mails: [], loading: false });
+                setMails([]);
+                setLoading(false);
             });
-    }
-     render(){
-        const { mails, loading } = this.state;
-        if (loading) {
-            return <p>Loading...</p>
+    };
+
+    useEffect(() => {
+        if (boxType) {
+            fetchMails();
         }
-        if(!mails.length) {
-            return <p>No mails found.</p>
-        }
-        return (
-          <div className="mail-list">
-            <div className="mail-list-header">
-              <h2>{this.props.label}</h2>
-            </div>
-            {mails.map((mail) => (
-              <MailItem
-                key={mail.id}
-                mail={mail}
-                onDeleted={() => {
-                  this.setState((prev) => ({
-                    mails: prev.mails.filter((m) => m.id !== mail.id),
-                  }));
-                }}
-              />
-            ))}
-          </div>
-        );
+    }, [boxType]);
+
+    if (loading) {
+        return <p>Loading...</p>
     }
+    if(!mails.length) {
+        return <p>No mails found.</p>
+    }
+    return (
+      <div className="mail-list">
+        <div className="mail-list-header">
+          <h2>{boxType}</h2>
+        </div>
+        {mails.map((mail) => (
+          <MailItem
+            key={mail.id}
+            mail={mail}
+            onDeleted={() => {
+              setMails(prev => prev.filter((m) => m.id !== mail.id));
+            }}
+          />
+        ))}
+      </div>
+    );
 }
+
 export default MailList;

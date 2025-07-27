@@ -1,26 +1,14 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './SearchBar.css';
 import IconButton from '../common/IconButton';
 
-// HOC for navigation hooks in class component
-function withNavigation(Component) {
-    return function ComponentWithNavigation(props) {
-        const navigate = useNavigate();
-        const location = useLocation();
-        return <Component {...props} navigate={navigate} location={location} />;
-    };
-}
+function SearchBar({ onSearch }) {
+    const [searchTerm, setSearchTerm] = useState('');
+    const navigate = useNavigate();
+    const location = useLocation();
 
-class SearchBar extends Component {
-    state = {
-        searchTerm: ''
-    };
-
-    handleSearch = async () => {
-        const { searchTerm } = this.state;
-        const { onSearch, navigate } = this.props;
-        
+    const handleSearch = async () => {
         if (!searchTerm.trim()) {
             // If search is empty, navigate to inbox without search param
             navigate('/');
@@ -64,38 +52,34 @@ class SearchBar extends Component {
         }
     };
 
-    handleKeyPress = (e) => {
+    const handleKeyPress = (e) => {
         if (e.key === 'Enter') {
-            this.handleSearch();
+            handleSearch();
         }
     };
 
-    handleOptions = () => {
+    const handleOptions = () => {
         console.log("Options clicked");
     };
 
-    render() {
-        const { searchTerm } = this.state;
-        
-        return (
-            <div className="searchBar">
-                <IconButton
-                    iconType='material' 
-                    onClick={this.handleSearch}>search</IconButton>
-                <input
-                    type="text"
-                    placeholder="Search mail"
-                    className="searchInput"
-                    value={searchTerm}
-                    onChange={(e) => this.setState({ searchTerm: e.target.value })}
-                    onKeyPress={this.handleKeyPress}
-                />
-                <IconButton iconType="material" onClick={this.handleOptions}>
-                    tune
-                </IconButton>
-            </div>
-        );
-    }
+    return (
+        <div className="searchBar">
+            <IconButton
+                iconType='material' 
+                onClick={handleSearch}>search</IconButton>
+            <input
+                type="text"
+                placeholder="Search mail"
+                className="searchInput"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyPress={handleKeyPress}
+            />
+            <IconButton iconType="material" onClick={handleOptions}>
+                tune
+            </IconButton>
+        </div>
+    );
 }
 
-export default withNavigation(SearchBar);
+export default SearchBar;

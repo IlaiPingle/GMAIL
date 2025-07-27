@@ -5,7 +5,7 @@
     border-bottom: 1px solid #dddddd;
     cursor: pointer;
     background-color: #F2F6FC;
-    width: 100%;
+    max-width: 100%;
     box-sizing: border-box;
     
 }
@@ -64,11 +64,12 @@
 
 .mail-content {
     flex: 1;
-    margin-right: 16px;
+    margin-right: 20px;
     overflow: hidden;
     display: flex;
     align-items: center;
     min-width: 0;
+    max-width: 20%;
 }
 
 .mail-subject {
@@ -100,43 +101,21 @@
     width: 80px;
     text-align: right;
 }
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .mail-sender {
-        width: 120px;
-    }
-    
-    .mail-preview {
-        display: none;
-    }
-    
-    .mail-date {
-        width: 60px;
-    }
-}
-
 .select-all {
     cursor: pointer;
 }
-
-
 .star-button {
     background: none;
     border: none;
     cursor: pointer;
     padding: 4px;
     margin-right: 8px;
-
+    text-align: center;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    min-width: 32px;
-    height: 32px;
     position: relative;
 }
-.star-button:hover {
+.star-button:hover .material-symbols-outlined {
+    border-radius: 100%;
     background-color: rgba(0, 0, 0, 0.1);
 }
 .star-icon {
@@ -144,13 +123,7 @@
     font-size: 20px;
     line-height: 1;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    font-variation-settings: 
-      'FILL' 0,
-      'wght' 300,
-      'GRAD' 0,
-      'opsz' 48;
+    text-align: center;
 }
 
 .starred {
@@ -161,8 +134,14 @@
       'opsz' 48;
     color: #fbb034;
 }
+
 .star-button:hover .star-icon {
     color: #fbb034;
+    font-variation-settings: 
+      'FILL' 1,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 48;
 }
 
 
@@ -177,25 +156,4 @@
 
 .error {
     color: #d93025;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .email-sender {
-        width: 120px;
-    }
-    
-    .email-preview {
-        display: none;
-    }
-}
-
-@media (max-width: 480px) {
-    .email-sender {
-        width: 80px;
-    }
-    
-    .email-date {
-        width: 60px;
-    }
 }

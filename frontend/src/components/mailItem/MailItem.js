@@ -1,28 +1,16 @@
-import React, { Component } from "react";
-import { useNavigate , useLocation} from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./MailItem.css";
 import IconButton from "../common/IconButton";
-import Client from "../../services/Client"; 
-// HOC for navigation hooks in class component
-function withNavigation(Component) {
-    return function ComponentWithNavigation(props) {
-        const navigate = useNavigate();
-        const location = useLocation();
-        return <Component {...props} navigate={navigate} location={location} />;
-    };
-}
+import Client from "../../services/Client";
 
-class MailItem extends Component {
-    constructor(props) {
-        super(props);
-        const isStarred = props.mail.labels.includes('starred');
-        this.state = {
-            isStarred
-        };
-    }
-    moveToTrash = async (e) => {
+function MailItem({ mail, onDeleted }) {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [isStarred, setIsStarred] = useState(mail.labels.includes('starred'));
+
+    const moveToTrash = async (e) => {
         e.stopPropagation(); // Prevent the click from navigating to the mail detail
-        const { mail, location ,onDeleted} = this.props;
         const currentPath = location.pathname;
         const currentLabel = currentPath.split('/')[1]; 
         try {
@@ -43,8 +31,7 @@ class MailItem extends Component {
         }
     };
 
-    handleClick = () => {
-        const { mail, navigate, location } = this.props;
+    const handleClick = () => {
         const { pathname } = location;
         if (mail.labels.includes('drafts')) {
             navigate(`${pathname}?compose=${mail.id}`);
@@ -53,7 +40,7 @@ class MailItem extends Component {
         navigate(`${pathname}/${mail.id}`);
     };
 
-    formatDate = (dateString) => {
+    const formatDate = (dateString) => {
         const date = new Date(dateString);
         const now = new Date();
         const diffTime = Math.abs(now - date);
@@ -67,53 +54,51 @@ class MailItem extends Component {
             return date.toLocaleDateString('he-IL', { day: 'numeric', month: 'short' });
         }
     };
-    handleStarClicked = async (e) => {
+
+    const handleStarClicked = async (e) => {
         e.stopPropagation(); // Prevent the click from navigating to the mail detail
-        const { mail } = this.props;
         try {
-            if (this.state.isStarred) {
+            if (isStarred) {
                 await Client.removeLabelFromMail('starred', mail.id);
                 mail.labels = mail.labels.filter(label => label !== 'starred');
             } else {
                 await Client.addLabelToMail("starred", mail.id);
                 mail.labels.push('starred');
             }
-            this.setState(prevState => ({isStarred : !prevState.isStarred}));       
+            setIsStarred(!isStarred);       
         } catch (error) {
             console.error('Error updating star status:', error);
         }
     };
-    render() {
-        const { mail } = this.props;
-        return (
-          <div
-            className={`mail-item ${mail.unread ? "unread" : "read"}`}
-            onClick={this.handleClick}
-          >
-            <div className="mail-checkbox">
-              <input type="checkbox" onClick={(e) => e.stopPropagation()} />
-            </div>
-            <button className="star-button" onClick={this.handleStarClicked}>
-                <span className={`material-symbols-outlined star-icon ${this.state.isStarred ? 'starred' : ''}`}>
-                    star
-                </span>
-            </button>
-            <div className="mail-sender">{mail.sender}</div>
 
-            <div className="mail-content">
-              <span className="mail-subject">{mail.subject}</span>
-              <span className="mail-preview">
-                {mail.body ? ` - ${mail.body.substring(0, 100)}...` : ""}
-              </span>
-            </div>
-            <IconButton onClick={this.moveToTrash}>Delete</IconButton>
+    return (
+      <div
+        className={`mail-item ${mail.unread ? "unread" : "read"}`}
+        onClick={handleClick}
+      >
+        <div className="mail-checkbox">
+          <input type="checkbox" onClick={(e) => e.stopPropagation()} />
+        </div>
+        <button className="star-button" onClick={handleStarClicked}>
+            <span className={`material-symbols-outlined star-icon ${isStarred ? 'starred' : ''}`}>
+                star
+            </span>
+        </button>
+        <div className="mail-sender">{mail.sender}</div>
 
-            <div className="mail-date">
-              {this.formatDate(mail.date || new Date())}
-            </div>
-          </div>
-        );
-    }
+        <div className="mail-content">
+          <span className="mail-subject">{mail.subject}</span>
+          <span className="mail-preview">
+            {mail.body ? ` - ${mail.body.substring(0, 100)}...` : ""}
+          </span>
+        </div>
+        <IconButton onClick={moveToTrash}>Delete</IconButton>
+
+        <div className="mail-date">
+          {formatDate(mail.date || new Date())}
+        </div>
+      </div>
+    );
 }
 
-export default withNavigation(MailItem);
+export default MailItem;

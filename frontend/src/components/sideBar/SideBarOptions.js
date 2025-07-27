@@ -1,23 +1,19 @@
-import React, { Component } from "react";
+import React from "react";
 import "./SideBarOptions.css";
 
-class SideBarOptions extends Component {
-    handleClick = () => {
-        const { onClick } = this.props;
+function SideBarOptions({ text, icon, isActive, id, onClick }) {
+    const handleClick = () => {
         if (onClick) {
             onClick();
         }
     };
 
-    render() {
-        const { text, icon, isActive, id } = this.props;
-        return (
-            <button className={`sideBarOption ${isActive ? 'selected' : ''}`} onClick={this.handleClick} id={id}>
-                <span className="material-symbols-outlined">{icon}</span>
-                <span className="sideBarText">{text}</span>
-            </button>
-        );
-    }
+    return (
+        <button className={`sideBarOption ${isActive ? 'selected' : ''}`} onClick={handleClick} id={id}>
+            <span className="material-symbols-outlined">{icon}</span>
+            <span className="sideBarText">{text}</span>
+        </button>
+    );
 }
 
 export default SideBarOptions;
