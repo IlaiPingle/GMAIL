@@ -7,7 +7,7 @@ const EmailService = require('../services/emailService');
 */
 async function sendNewMail(req, res) {
     try{
-        const userId = Number(req.header("user-id"));
+        const userId = req.userId; 
         const mailId = Number(req.params.id);
         const {receiver, subject, body} = req.body;
         
@@ -30,7 +30,7 @@ async function sendNewMail(req, res) {
 */
 function getMails(req, res) {
     try{
-        const userId = Number(req.header("user-id"));
+        const userId = req.userId;
         if (!userId) {
             return res.status(400).json({ message: 'User ID is required' });
         }
@@ -49,7 +49,7 @@ function getMails(req, res) {
 */
 function getMailById(req, res) {
     try {
-        const userId = Number(req.header("user-id"));
+        const userId = req.userId;
         const mailId = Number(req.params.id);
         if (!userId || !mailId) {
             return res.status(400).json({ message: 'User ID and Mail ID are required' });
@@ -68,7 +68,7 @@ function getMailById(req, res) {
 */
 function removeMail(req, res) {
     try {
-        const userId = Number(req.header("user-id"));
+        const userId = req.userId;
         const mailId = Number(req.params.id);
         if (!userId || !mailId) {
             return res.status(400).json({ message: 'User ID and Mail ID are required' });
@@ -87,7 +87,7 @@ function removeMail(req, res) {
 */
 function findInMails(req, res) {
     try {
-        const userId = Number(req.header("user-id"));
+        const userId = req.userId;
         const searchTerm = req.query.q;
         if (!userId || !searchTerm) {
             return res.status(400).json({ message: 'User ID and search term are required' });
@@ -106,7 +106,7 @@ function findInMails(req, res) {
 */
 function updatemail(req, res) {
     try {
-        const userId = Number(req.header("user-id"));
+        const userId = req.userId;
         const mailId = Number(req.params.id); 
         const { receiver , subject, body } = req.body;
 
@@ -122,7 +122,7 @@ function updatemail(req, res) {
 
 function createNewDraft(req, res) {
     try {
-        const userId = Number(req.header("user-id"));
+        const userId = req.userId;
         const { subject, body, receiver } = req.body;
 
         if (!userId) {

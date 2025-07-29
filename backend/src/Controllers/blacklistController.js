@@ -10,7 +10,7 @@ const { findUserById} = require('../Models/userModel');
  */
 async function addURL(req, res) {
     try {
-        const userId = req.header('user-id');
+        const userId = req.userId;
         if (findUserById(Number(userId)) === undefined) {
             return res.status(404).json({ error: 'User not found' });
         }
@@ -44,7 +44,7 @@ async function addURL(req, res) {
  */
 async function removeURL(req, res) {
     try {
-        const userId = req.header("user-id");
+        const userId = req.userId;
         if (findUserById(Number(userId)) === undefined) {
             return res.status(404).json({ error: "User not found" });
         }

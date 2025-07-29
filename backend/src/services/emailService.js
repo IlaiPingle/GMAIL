@@ -33,7 +33,6 @@ async function sendNewMail(userId, mailId, receiver, subject, body) {
     user.labels.get('sent').mailIds.add(senderMail.id);
     
     // Create mail for Receiver:
-    console.log('Creating new mail for receiver:', receiver, subject, body);
     const receiverMail = createNewMail(user.username, receiver, subject, body);
     // Security check
     const isBlacklisted = await validateEmailSecurity(user.username, subject, body);

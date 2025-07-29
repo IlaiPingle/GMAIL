@@ -4,9 +4,12 @@ const usersRoutes = require('./Routes/userRoutes')
 const blacklistRoutes = require('./Routes/blacklistRoutes')
 const emailRoutes = require('./Routes/emailRoutes')
 const labelRoutes = require('./Routes/labelRoutes')
+const authMiddleware = require('./Middleware/authMiddleware');
+
 const app = express()
 const cors = require("cors");
 const cookieParser = require('cookie-parser')
+
 app.use(cors({
   origin: 'http://localhost:3000', // Adjust this to your frontend URL
   credentials: true // Allow credentials (cookies) to be sent
@@ -17,11 +20,10 @@ app.use(bodyparser.json());
 app.set('json spaces', 2);
 
 // Public routes (no authentication required)
-app.use('/api/tokens', usersRoutes); // Login route
+app.use(usersRoutes); // Login route
 // Protected routes (auth required)
-const authMiddleware = require('./middleware/authMiddleware');
-app.use('/api/mails', authMiddleware, emailRoutes);
-app.use('/api/labels', authMiddleware, labelRoutes);
-app.use('/api/blacklist', authMiddleware, blacklistRoutes);
+app.use(blacklistRoutes);
+app.use(emailRoutes);
+app.use(labelRoutes);
 
 module.exports = app

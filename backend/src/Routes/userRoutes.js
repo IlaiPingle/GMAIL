@@ -1,10 +1,11 @@
 const express = require('express')
 var router = express.Router()
+const authMiddleware = require('../Middleware/authMiddleware');
 
 const userController = require('../Controllers/userController')
 
-router.post('/api/users', userController.registerUser)
-router.get('/api/users/:id', userController.getUser)
-router.post('/api/tokens', userController.loginUser)
-
-module.exports = router
+router.get('/api/users/me', authMiddleware, userController.isSignedIn);
+router.post('/api/users', userController.registerUser);
+router.get('/api/users/:id', userController.getUser);
+router.post('/api/tokens', userController.loginUser);
+module.exports = router;

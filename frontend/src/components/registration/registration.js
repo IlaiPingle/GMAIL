@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './registration.css';
-
+import Client from '../../services/Client';
 const Registration = () => {
 	const navigate = useNavigate();
 
@@ -75,22 +75,9 @@ const Registration = () => {
 		}
 
 		try {
-			const response = await fetch('http://localhost:8080/api/users', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(formData)
-			});
-
-			const data = await response.json();
-
-			if (!response.ok) {
-				throw new Error(data.message || 'Registration failed');
-			}
-
-			// Success - redirect to login/inbox
+			await Client.register(formData);
 			alert('Registration successful! You can now log in.');
-			navigate('/inbox');
-
+			navigate('/login');
 		} catch (error) {
 			setError(error.message);
 		}

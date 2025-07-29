@@ -15,5 +15,7 @@ services:
       dockerfile: docker/Dockerfile
     ports:
       - "8080:8080"
+    env_file:
+      - ./backend/src/.env
     depends_on:
       - bloom-server

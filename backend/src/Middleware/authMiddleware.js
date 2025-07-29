@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
  * If the token is missing or invalid, it responds with a 401 Unauthorized status.
  */
 const authMiddleware = (req, res, next) => {
-    const token = req.cookies.authToken;
+    const token = req.cookies.token;
     
     if (!token) {
         return res.status(401).json({ message: 'Authentication required' });
@@ -19,9 +19,10 @@ const authMiddleware = (req, res, next) => {
         }
         
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = { id: decoded.id };
+        req.userId = decoded.id;
         next();
     } catch (error) {
+        console.error('Token verification failed:', error);
         return res.status(401).json({ message: 'Invalid or expired token' });
     }
 };

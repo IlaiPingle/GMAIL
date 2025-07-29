@@ -6,25 +6,31 @@ import Compose from './components/compose/Compose';
 import CreateLabel from './components/createLabel/CreateLabel';
 import Registration from './components/registration/registration';
 import Login from './components/login/login';
-import './App.css';
 import MailList from './components/MailList';
+import ProtectedRoute from './services/ProtectedRoute';
 import './App.css';
+
 
 function App() {
   return (
     <Router>
       <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} /> 
-          <Route path="/register" element={<Registration />} />
           <Route path="/login" element={<Login />} />
-          <Route index element={<MailList label="inbox" />} />
-          <Route path=":boxType" element={<MailList />} />
-          <Route path="label/:boxType" element={<MailList />} />
-          <Route path=":boxType/:mailId" element={<MailPage />} />
-          <Route path="label/:boxType/:mailId" element={<MailPage />} />
-          <Route path="/search" element={<MailList />} />
-          <Route path="/compose" element={<Compose />} />
-          <Route path="/create-label" element={<CreateLabel />} />
+          <Route path="/register" element={<Registration />} />
+          <Route path="/" element={
+            <ProtectedRoute>
+              <MainLayout />
+            </ProtectedRoute>
+          }>
+            <Route index element={<MailList label="inbox" />} />
+            <Route path=":boxType" element={<MailList />} />
+            <Route path="label/:boxType" element={<MailList />} />
+            <Route path=":boxType/:mailId" element={<MailPage />} />
+            <Route path="label/:boxType/:mailId" element={<MailPage />} />
+            <Route path="search" element={<MailList />} />
+            <Route path="compose" element={<Compose />} />
+            <Route path="create-label" element={<CreateLabel />} />
+          </Route>
       </Routes>
     </Router>
   );

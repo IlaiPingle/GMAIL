@@ -43,11 +43,9 @@ exports.registerUser = async (req, res) => {
 
 	const existingUser = User.findUserByUsername(username)
 	if (existingUser) {
-		return res.status(400).json({ message: 'Username already exists' })
+		return res.status(400).json({ message: 'Invalid username or password' })
 	}
-	const saltRounds = 10;
-	const hashedPassword = await bcrypt.hash(password, saltRounds);
-	const newUser = User.createUser(username, hashedPassword, first_name, sur_name, picture)
+	const newUser = User.createUser(username, password, first_name, sur_name, picture)
 	res.set('Location', `/api/users/${newUser.id}`);
 	res.status(201).json({
 		id: newUser.id,
@@ -74,7 +72,7 @@ exports.loginUser = async (req, res) => {
 	if (!user) {
 		return res.status(401).json({ message: 'Invalid username or password' });
 	}
-	const passwordMatch = await bcrypt.compare(password, user.password);
+	const passwordMatch = user.password === password;
 	if (!passwordMatch) {
 		return res.status(401).json({ message: 'Invalid username or password' });
 	}
@@ -83,18 +81,15 @@ exports.loginUser = async (req, res) => {
 		console.error('JWT_SECRET is not set in environment variables');
 		return res.status(500).json({ message: 'Server configuration error' });
 	}
-	const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '24h' })
-	res.cookie('authToken', token, {
+	const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' })
+	res.cookie('token', token, {
 		httpOnly: true,
 		secure: process.env.NODE_ENV === 'production',
 		sameSite: 'Strict',
-		maxAge: 24 * 60 * 60 * 1000 // 24 hours
+		maxAge: 60 * 60 * 1000 // 1 hour
 	})
 
-	res.status(200).json({
-		id: user.id,
-		username: user.username,
-	})
+	res.status(200).json({ message: 'Login successful' })
 }
 
 exports.logoutUser = (req, res) => {
@@ -117,4 +112,12 @@ exports.getUser = (req, res) => {
 		inbox: user.inbox,
 		labels: Array.from(user.labels.keys())
 	})
+}
+exports.isSignedIn = (req, res) => {
+	const user = User.findUserById(req.userId);
+	console.log('User ID from token:', req.userId);
+	if (!user) {
+		return res.status(404).json({ message: 'User not found' });
+	}
+	res.status(200).json({ message: 'User is signed in' });
 }

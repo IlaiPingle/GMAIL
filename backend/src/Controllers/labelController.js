@@ -5,7 +5,7 @@ const LabelService = require('../services/labelService');
 */
 function createLabel(req, res) {
     try {
-        const userId = req.user.id;  
+        const userId = req.userId 
         const {labelName} = req.body;
         
         if (!userId || !labelName) {
@@ -25,8 +25,8 @@ function createLabel(req, res) {
 */
 function getUserLabels(req, res) {
     try {
-        const userId = req.user.id; // Get user ID from JWT token
-        
+        const userId = req.userId; // Get user ID from JWT token
+
         const labels = LabelService.getUserLabels(userId);
         return res.status(200).json(labels);
     } catch (error) {
@@ -39,7 +39,7 @@ function getUserLabels(req, res) {
 */
 function getLabelById(req, res) {
     try {
-        const userId = req.user.id;
+        const userId = req.userId;
         const labelName = req.params.id;
         
         if (!userId || !labelName) {
@@ -58,7 +58,7 @@ function getLabelById(req, res) {
 */
 function updateLabel(req, res) {
     try {
-        const userId = req.user.id;
+        const userId = req.userId;
         const labelName = req.params.id;
         const {newName} = req.body;
         
@@ -78,7 +78,7 @@ function updateLabel(req, res) {
 */
 function deleteLabel(req, res) {
     try {
-        const userId = req.user.id;
+        const userId = req.userId;
         const labelName = req.params.id;
         
         if (!userId || !labelName) {
@@ -94,7 +94,7 @@ function deleteLabel(req, res) {
 
 function getMailsByLabel(req, res) {
     try {
-        const userId = req.user.id;
+        const userId = req.userId;
         const labelName = req.query.label;
         if (!userId || !labelName) {
             return res.status(400).json({ message: 'User ID and label name are required' });
@@ -107,7 +107,7 @@ function getMailsByLabel(req, res) {
 }
  function removeLabelFromMail(req, res) {
     try {
-        const userId = parseInt(req.header("user-id"), 10);
+        const userId = req.userId;
         const mailId = parseInt(req.params.id , 10);
         const labelName = req.body.labelName;
 
@@ -123,7 +123,7 @@ function getMailsByLabel(req, res) {
 };
 function addLabelToMail(req, res) {
     try {
-        const userId = parseInt(req.header("user-id"), 10);
+        const userId = req.userId;
         const mailId = parseInt(req.params.id, 10);
         const labelName = req.body.labelName;
 
