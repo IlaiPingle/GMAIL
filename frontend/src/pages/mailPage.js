@@ -24,6 +24,17 @@ function MailPage() {
       setMail(null);
     }
   };
+  const moveToTrash = async () => {
+    const previousPath = window.location.pathname.split('/')[1]; // Extract label from URL path
+    console.log('Previous path:', previousPath); // Debug log
+    if (previousPath === 'bin' || previousPath === 'spam') {
+      await Client.deleteMail(mail.id);
+    } else {
+      await Client.removeLabelFromMail(previousPath, mail.id);
+      await Client.addLabelToMail('bin', mail.id);
+    }
+    window.history.back();
+  };
 
   const toggleLabelMenu = () => {
     setShowLabelMenu(!showLabelMenu);
@@ -71,7 +82,7 @@ function MailPage() {
         <div className="mail-header-left">
           <IconButton children="arrow_back" onClick={() => window.history.back()} />
           <IconButton children="report" onClick={reportSpam} />
-          <IconButton children="delete" onClick={() => Client.deleteMail(mail.id).then(() => window.history.back())} />
+          <IconButton children="delete" onClick={moveToTrash} />
         </div>
         <div className='mail-header-middle'>
           <IconButton children="mark_email_unread" onClick={() => Client.addLabelToMail('unread', mail.id).then(() => fetchMail(mail.id))} />
