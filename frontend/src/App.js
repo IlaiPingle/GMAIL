@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import MainLayout from './pages/MainLayout';
 import MailPage from './pages/mailPage';
 import Compose from './components/compose/Compose';

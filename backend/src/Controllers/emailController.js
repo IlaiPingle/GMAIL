@@ -130,9 +130,10 @@ function createNewDraft(req, res) {
         }
         const user = EmailService.getUserOrThrow(userId);
         const newDraft = EmailService.createNewMail(user.username, receiver, subject, body);
-        user.mails.push(newDraft);
-        newDraft.labels.push('drafts');
+        user.mails.set(newDraft.id, newDraft);
+        newDraft.labels.push('drafts', 'all');
         user.labels.get('drafts').mailIds.add(newDraft.id);
+        user.labels.get('all').mailIds.add(newDraft.id);
         return res.status(201).json(newDraft);
     } catch (error) {
         return res.status(error.status || 500).json({ message: error.message });

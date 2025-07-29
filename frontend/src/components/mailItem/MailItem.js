@@ -73,7 +73,7 @@ function MailItem({ mail, onDeleted }) {
 
     return (
       <div
-        className={`mail-item ${mail.unread ? "unread" : "read"}`}
+        className={`mail-item ${mail.labels.includes("unread") ? "unread" : "read"}`}
         onClick={handleClick}
       >
         <div className="mail-checkbox">

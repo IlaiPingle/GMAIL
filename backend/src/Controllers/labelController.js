@@ -115,7 +115,7 @@ function getMailsByLabel(req, res) {
             return res.status(400).json({ message: 'User ID, mail ID, and label name are required' });
         }
 
-        LabelService.removeLabelfromMail(userId, mailId, labelName);
+        LabelService.removeLabelFromMail(userId, mailId, labelName);
         return res.status(204).end();
     } catch (error) {
         return res.status(error.status || 500).json({ message: error.message || 'An error occurred while removing the label from mails' });

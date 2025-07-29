@@ -11,46 +11,13 @@ function SearchBar({ onSearch }) {
     const handleSearch = async () => {
         if (!searchTerm.trim()) {
             // If search is empty, navigate to inbox without search param
-            navigate('/');
-            onSearch(null);
+            navigate('/inbox');
             return;
         }
         
         // Navigate to search results URL
-        navigate(`/?search=${encodeURIComponent(searchTerm)}`);
-        
-        try {
-            const response = await fetch(`http://localhost:8080/api/mails/search?q=${encodeURIComponent(searchTerm)}`, {
-                headers: {
-                    'user-id': '2', // Replace with dynamic user ID
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Search failed');
-            }
-
-            const searchResults = await response.json();
-            
-            // Adapt the results to match the expected format
-            const adaptedResults = searchResults.map(mail => ({
-                id: mail.id,
-                from: mail.sender,
-                to: mail.receiver,
-                subject: mail.subject,
-                body: mail.body,
-                date: mail.dateCreated,
-                isRead: Math.random() > 0.5,
-                isStarred: Math.random() > 0.7
-            }));
-
-            console.log('Search results:', adaptedResults);
-            onSearch(adaptedResults);
-        } catch (err) {
-            console.error('Search error:', err);
-            onSearch([]);
-        }
-    };
+        navigate(`/inbox?search=${encodeURIComponent(searchTerm)}`);
+    };  
 
     const handleKeyPress = (e) => {
         if (e.key === 'Enter') {
@@ -73,7 +40,7 @@ function SearchBar({ onSearch }) {
                 className="searchInput"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyPress={handleKeyPress}
+                onKeyDown={handleKeyPress}
             />
             <IconButton iconType="material" onClick={handleOptions}>
                 tune

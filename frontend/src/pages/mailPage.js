@@ -58,6 +58,16 @@ function MailPage() {
       alert('Failed to report spam');
     }
   };
+  const markAsUnread = async () => {
+    try {
+      await Client.addLabelToMail('unread', mail.id);
+      // Refresh mail data to show the updated labels
+      fetchMail(mail.id);
+    } catch (error) {
+      console.error('Error marking mail as unread:', error);
+      alert('Failed to mark mail as unread');
+    }
+  };
 
   useEffect(() => {
     if (mailId) {
@@ -85,7 +95,7 @@ function MailPage() {
           <IconButton children="delete" onClick={moveToTrash} />
         </div>
         <div className='mail-header-middle'>
-          <IconButton children="mark_email_unread" onClick={() => Client.addLabelToMail('unread', mail.id).then(() => fetchMail(mail.id))} />
+          <IconButton children="mark_email_unread" onClick={markAsUnread} />
           <div className="label-menu-container">
             <IconButton children="label" onClick={toggleLabelMenu} />
             <LabelMenu 

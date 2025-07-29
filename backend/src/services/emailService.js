@@ -29,18 +29,21 @@ async function sendNewMail(userId, mailId, receiver, subject, body) {
     senderMail.dateCreated = new Date().toISOString();
     senderMail.unread = true;
 
-    senderMail.labels.push('sent');
+    senderMail.labels.push('sent', 'all');
     user.labels.get('sent').mailIds.add(senderMail.id);
-    
+    user.labels.get('unread').mailIds.add(senderMail.id);
+    user.labels.get('all').mailIds.add(senderMail.id);
     // Create mail for Receiver:
     const receiverMail = createNewMail(user.username, receiver, subject, body);
     // Security check
     const isBlacklisted = await validateEmailSecurity(user.username, subject, body);
 
-    receiverMail.labels.push(isBlacklisted ? 'spam': 'inbox');
-    receiverUser.mails.push(receiverMail);
+    receiverMail.labels.push(isBlacklisted ? 'spam': 'inbox', 'all');
+    receiverUser.mails.set(receiverMail.id, receiverMail);
     // Add mail to system labels
     receiverUser.labels.get(isBlacklisted ? 'spam': 'inbox').mailIds.add(receiverMail.id);
+    receiverUser.labels.get('unread').mailIds.add(receiverMail.id);
+    receiverUser.labels.get('all').mailIds.add(receiverMail.id);
     return senderMail;
 }
 
@@ -48,9 +51,9 @@ async function sendNewMail(userId, mailId, receiver, subject, body) {
 * Get user's emails sorted by date
 */
 function getUserMails(userId) {
-    const user = Users.findUserById(userId);
-    
-    const lastMails = user.mails.slice();
+    const user = getUserOrThrow(userId);
+
+    const lastMails = Array.from(user.mails.values()).slice()
     lastMails.sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
     return lastMails.slice(0, 50);
 }
@@ -59,14 +62,15 @@ function getUserMails(userId) {
 * Get specific email by ID
 */
 function getMailById(userId, mailId) {
-    const user = Users.findUserById(userId);
-    const mail = user.mails.find(mail => mail.id === mailId);
+    const user = getUserOrThrow(userId);
+    const mail = user.mails.get(mailId);
     if (!mail){
         const error = new Error('Mail not found');
         error.status = 404;        
         throw error;
     }
-    mail.unread = false; // Mark mail as read
+    mail.labels = mail.labels.filter(label => label !== 'unread');
+    user.labels.get('unread').mailIds.delete(mailId);
     return mail;
 }
 
@@ -74,16 +78,19 @@ function getMailById(userId, mailId) {
 * Remove email by ID
 */
 function removeMail(userId, mailId) {
-    const user = Users.findUserById(userId);
+    const user = getUserOrThrow(userId);
+    const mail = user.mails.get(mailId);
     
-    const mailIndex = user.mails.findIndex(mail => mail.id === mailId);
-    if (mailIndex === -1) {
-        const error = new Error('Mail not found');
-        error.status = 404;
-        throw error;
+    if (mail) {
+        // Remove mail from all labels
+        mail.labels.forEach(labelName => {
+            if (user.labels.has(labelName)) {
+                user.labels.get(labelName).mailIds.delete(mailId);
+            }
+        });
     }
     
-    user.mails.splice(mailIndex, 1);
+    user.mails.delete(mailId);
     return true;
 }
 
@@ -91,9 +98,9 @@ function removeMail(userId, mailId) {
 * Search emails by term
 */
 function searchMails(userId, searchTerm) {
-    const user = Users.findUserById(userId);
-    
-    return user.mails.filter(mail =>
+    const user = getUserOrThrow(userId);
+
+    return Array.from(user.mails.values()).filter(mail =>
         Object.values(mail).some(value =>
             value.toString().toLowerCase().includes(searchTerm.toLowerCase())
         )
@@ -106,7 +113,7 @@ function searchMails(userId, searchTerm) {
 function updateMail(userId, mailId ,receiver, subject, body) {
     const user = getUserOrThrow(userId);
 
-    const mail = user.mails.find(mail => mail.id === mailId);
+    const mail = user.mails.get(mailId);
     if (!mail) {
         const error = new Error('Mail not found');
         error.status = 404;
@@ -152,13 +159,17 @@ function createNewMail(sender, receiver, subject, body) {
         subject: subject || '',
         body: body || '',
         dateCreated: new Date().toISOString(),
-        unread : true,
-        labels: []
+        labels: ['unread']
     };
     return newMail;
 }
 
 function getUserOrThrow(userId) {
+    if (!userId) {
+        const error = new Error('User ID is required');
+        error.status = 400;
+        throw error;
+    }
 	const user = Users.findUserById(userId);
 	if (!user) {
 		const error = new Error('User not found');

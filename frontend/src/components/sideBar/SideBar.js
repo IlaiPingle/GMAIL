@@ -6,6 +6,17 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Client from "../../services/Client";
 
 const SYSTEM_LABELS = ['inbox','starred', 'sent', 'drafts','all mail','spam', 'bin'];
+const boxMap = new Map([
+      ["compose", "edit"],
+      ["inbox", "inbox"],
+      ["starred", "star_border"],
+      ["sent", "send"],
+      ["drafts", "draft"],
+      ["all mail", "stacked_email"],
+      ["spam", "report"],
+      ["bin", "delete"],
+      ["compose", "edit"],
+    ]); 
 
 function SideBar() {
     const [labels, setLabels] = useState([]);
@@ -41,48 +52,16 @@ function SideBar() {
             navigate(`${currentPath}?${params.toString()}`);
           }}
         />
-        <SideBarOptions
-          icon="inbox"
-          text="Inbox"
-          isActive={currentPath === "/inbox"}
-          onClick={() => navigate("/inbox")}
-        />
-        <SideBarOptions
-          icon="star_border"
-          text="Starred"
-          isActive={currentPath === "/starred"}
-          onClick={() => navigate("/starred")}
-        />
-        <SideBarOptions
-          icon="send"
-          text="Sent"
-          isActive={currentPath === "/sent"}
-          onClick={() => navigate("/sent")}
-        />
-        <SideBarOptions
-          icon="draft"
-          text="Drafts"
-          isActive={currentPath === "/drafts"}
-          onClick={() => navigate("/drafts")}
-        />
-          <SideBarOptions
-            icon="stacked_email"
-            text="all mail"
-            isActive={currentPath === "/all"}
-            onClick={() =>navigate("/all")}
-          />
-          <SideBarOptions
-            icon="report"
-            text="Spam"
-            isActive={currentPath === "/spam"}
-            onClick={() => navigate("/spam")}
-          />
-        <SideBarOptions
-          icon="delete"
-          text="Bin"
-          isActive={currentPath === "/bin"}
-          onClick={() => navigate("/bin")}
-        />
+        <div className="systemLabels">
+          {SYSTEM_LABELS.map((label) => (
+            <SideBarOptions
+              icon={boxMap.get(label)}
+              text={label.charAt(0).toUpperCase() + label.slice(1)}
+              isActive={currentPath === `/${label.split(' ')[0]}`}
+              onClick={() => navigate(`/${label.split(' ')[0]}`)}
+            />
+          ))}
+        </div>
         <div className="LabelsHeader">
           <span className="LabelsHeaderText">Labels</span>
           <IconButton onClick={() => navigate("/create-label")}>

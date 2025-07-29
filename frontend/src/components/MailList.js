@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 
 import MailItem from "../components/mailItem/MailItem";
 import Client from "../services/Client";
@@ -9,30 +9,40 @@ function MailList() {
     const [mails, setMails] = useState([]);
     const [loading, setLoading] = useState(true);
     const { boxType } = useParams();
+    const location = useLocation();
+    
+    // Extract search parameter from URL
+    const searchParams = new URLSearchParams(location.search);
+    const searchQuery = searchParams.get('search');
 
-    const fetchMails = () => {
+    const fetchMails = async () => {
         setLoading(true);
         
-        console.log('MailList - Fetching mails for label:', boxType);
-
-        Client.getMailsByLabel(boxType)
-            .then(mails => {
-                console.log('MailList - Received mails:', mails);
-                setMails(mails);
-                setLoading(false);
-            })
-            .catch(error => {
-                console.error("Error loading mails:", error);
-                setMails([]);
-                setLoading(false);
-            });
+        try {
+            let mails;
+            if (searchQuery) {
+                console.log('MailList - Searching for:', searchQuery);
+                mails = await Client.searchMails(searchQuery);
+            } else {
+                console.log('MailList - Fetching mails for label:', boxType);
+                mails = await Client.getMailsByLabel(boxType);
+            }
+            
+            console.log('MailList - Received mails:', mails);
+            setMails(mails);
+        } catch(error) {
+            console.error("Error loading mails:", error);
+            setMails([]);
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
-        if (boxType) {
+        if (boxType || searchQuery) {
             fetchMails();
         }
-    }, [boxType]);
+    }, [boxType, searchQuery]);
 
     if (loading) {
         return <p>Loading...</p>
@@ -40,10 +50,14 @@ function MailList() {
     if(!mails.length) {
         return <p>No mails found.</p>
     }
+    
+    // Determine header title
+    const headerTitle = searchQuery ? `Search Results for: "${searchQuery}"` : boxType;
+    
     return (
       <div className="mail-list">
         <div className="mail-list-header">
-          <h2>{boxType}</h2>
+          <h2>{headerTitle}</h2>
         </div>
         {mails.map((mail) => (
           <MailItem

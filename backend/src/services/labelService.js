@@ -58,10 +58,11 @@ function updateLabel(userId, labelName, newName) {
     const labelData = user.labels.get(labelName);
     user.labels.set(newName, labelData);
     user.labels.delete(labelName);
-    for (const mail of user.mails){
-        const index = mail.labels.indexOf(labelName);
-        if (index !== -1) {
-            mail.labels[index] = newName; 
+    const mailsIds = labelData.mailIds;
+    for (const mailId of mailsIds) {
+        const mail = user.mails.get(mailId);
+        if (mail) {
+            mail.labels = mail.labels.map(label => label === labelName ? newName : label);
         }
     }
     return true;
@@ -78,12 +79,12 @@ function deleteLabel(userId, labelName) {
         error.status = 404;
         throw error;
     }
-    
+    const mailIds = user.labels.get(labelName).mailIds;
     user.labels.delete(labelName);
-    for (const mail of user.mails) {
-        const index = mail.labels.indexOf(labelName);
-        if (index !== -1) {
-            mail.labels.splice(index, 1); // Remove label from mail
+    for (const mailId of mailIds) {
+        const mail = user.mails.get(mailId);
+        if (mail) {
+            mail.labels = mail.labels.filter(label => label !== labelName);
         }
     }
     return true;
@@ -91,7 +92,7 @@ function deleteLabel(userId, labelName) {
 
 function addLabelToMail(userId, mailId, labelName) {
     const user = getUserOrThrow(userId);
-    const mail = user.mails.find(mail => mail.id === mailId);
+    const mail = user.mails.get(mailId);
     if (!mail) {
         const error = new Error('Mail not found');
         error.status = 404;         
@@ -108,9 +109,9 @@ function addLabelToMail(userId, mailId, labelName) {
     }
     return true;
 }
-function removeLabelfromMail(userId,mailId,labelName){
+function removeLabelFromMail(userId,mailId,labelName){
     const user = getUserOrThrow(userId);
-    const mail = user.mails.find (mail => mail.id === mailId)
+    const mail = user.mails.get(mailId);
     if(!mail){
         const error = new Error('Mail not found');
         error.status = 404;
@@ -131,10 +132,10 @@ function getMailsByLabel(userId, labelName) {
         error.status = 404;
         throw error;
     }
-    
-    // Filter mails that have this label #
-    // ## can be optimized by MAP later ###
-    return user.mails.filter(mail => mail.labels.includes(labelName));
+    if (label.mailIds.size === 0) {
+        return []; // Return empty array if no mails are associated with the label
+    }
+    return Array.from(label.mailIds).map(mailId => user.mails.get(mailId));
 }
 
 
@@ -146,6 +147,12 @@ function getMailsByLabel(userId, labelName) {
 * Helper function to get a user or throw an error
 */
 function getUserOrThrow(userId) {
+    if (!userId) {
+        const error = new Error('User ID is required');
+        error.status = 400;
+        throw error;
+    }
+    
     const user = Users.findUserById(userId);
     if (!user) {
         const error = new Error('User not found');
@@ -164,7 +171,6 @@ module.exports = {
     updateLabel,
     deleteLabel,
     addLabelToMail,
-    removeLabelfromMail,
     getMailsByLabel,
-    removeLabelfromMail
+    removeLabelFromMail,
 };

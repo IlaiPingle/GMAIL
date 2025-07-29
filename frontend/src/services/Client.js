@@ -45,7 +45,7 @@ const getMailById = async (id) => {
 	return handleResponse(response);
 }
 const searchMails = async (query) => {
-	const url = `${API_URL}/mails/search/${encodeURIComponent(query)}`;
+	const url = `${API_URL}/mails/search?q=${encodeURIComponent(query)}`;
 	const response = await fetch(url, {
 		headers: defaultHeaders(),
 		credentials: 'include'
@@ -220,7 +220,7 @@ const logout = async () => {
 	});
 }
 
-export default {
+const Client = {
 	getAllMails,
 	getMailsByLabel,
 	getMailById,
@@ -242,3 +242,5 @@ export default {
 	logout,
 	checkLoginStatus,
 };
+
+export default Client;
