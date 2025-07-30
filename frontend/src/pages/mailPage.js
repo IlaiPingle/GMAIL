@@ -61,8 +61,6 @@ function MailPage() {
   const markAsUnread = async () => {
     try {
       await Client.addLabelToMail('unread', mail.id);
-      // Refresh mail data to show the updated labels
-      fetchMail(mail.id);
     } catch (error) {
       console.error('Error marking mail as unread:', error);
       alert('Failed to mark mail as unread');

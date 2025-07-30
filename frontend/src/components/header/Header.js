@@ -5,10 +5,9 @@ import SearchBar from "./SearchBar";
 import UserActions from "./userActions";
 import "./Header.css";
 
-function Header({ onSearch }) {
+function Header({ onSearch, onMenuClick }) {
   const handleMenuClick = () => {
-    console.log("Menu clicked");
-    // כאן אפשר להוסيף לוגיקה לפתיחת sidebar
+    onMenuClick();
   };
 
   const handleSearch = (searchResults) => {

@@ -1,4 +1,4 @@
-.sideBar {
+.sideBar ,.sideBar.closed {
     width: 60px;
     min-height: 100vh;
     background-color: #F8FAFD;
@@ -7,6 +7,13 @@
     overflow-x: visible;
     transition: width 0.3s ease;
 }
+.sideBar.open {
+    width: 256px;
+}
+.sideBar.open .sideBaroptions {
+    padding: 8px 16px;
+}
+
 
 .sideBar:hover {
     width: 256px; 
@@ -36,14 +43,9 @@
 .LabelsHeader {
     display: flex;
     text-align: center;
-    justify-content: space-between;
-    margin: 0 ;
-    transition: 0s;
-}
-
-
-.LabelsHeader {
     justify-content: center;
+    margin: 0;
+    transition: 0s;
 }
 
 .LabelsHeaderText {
@@ -59,6 +61,11 @@
 
 .sideBar:hover .LabelsHeader {
     justify-content: space-between;
+}
+.sideBar.open .LabelsHeaderText {
+    opacity: 1;
+    width: auto;
+    transition: width 0.3s ease, opacity 0.3s ease;
 }
 
 .sidebar:hover #compose {

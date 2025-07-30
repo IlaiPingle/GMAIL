@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Header from "../components/header/Header";
 import SideBar from "../components/sideBar/SideBar";
 import "./MainLayout.css";
@@ -9,12 +9,17 @@ function MainLayout() {
     const location = useLocation();
     const params = new URLSearchParams(location.search);
     const composeParam = params.get("compose");
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+    const toggleSidebar = () => {
+        setIsSidebarOpen(!isSidebarOpen);
+    };
     
     return (
         <div className="main-layout">
-            <Header/>
+            <Header onMenuClick={toggleSidebar}/>
             <div className="main-layout-body">
-                <SideBar/>
+                <SideBar isOpen={isSidebarOpen}/>
                 <div className="content">
                     <Outlet/>
                 </div>

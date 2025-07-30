@@ -4,6 +4,7 @@ import "./MailItem.css";
 import IconButton from "../common/IconButton";
 import Client from "../../services/Client";
 
+
 function MailItem({ mail, onDeleted }) {
     const navigate = useNavigate();
     const location = useLocation();
@@ -30,6 +31,20 @@ function MailItem({ mail, onDeleted }) {
             console.error('Error moving mail to trash:', error);
         }
     };
+    const markAsUnread = async (e) => {
+        e.stopPropagation(); // Prevent the click from navigating to the mail detail
+        try {
+            if (mail.labels.includes('unread')) {
+                return; // Already marked as unread
+            }
+            await Client.addLabelToMail('unread', mail.id);
+            mail.labels.push('unread');
+            alert('Mail marked as unread');
+        } catch (error) {
+            console.error('Error marking mail as unread:', error);
+            alert('Failed to mark mail as unread');
+        }
+    }; 
 
     const handleClick = () => {
         const { pathname } = location;
@@ -93,7 +108,7 @@ function MailItem({ mail, onDeleted }) {
           </span>
         </div>
         <IconButton onClick={moveToTrash}>Delete</IconButton>
-
+        <IconButton onClick={markAsUnread} children={"mark_email_unread"} />
         <div className="mail-date">
           {formatDate(mail.date || new Date())}
         </div>

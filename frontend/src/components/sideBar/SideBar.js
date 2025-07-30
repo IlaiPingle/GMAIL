@@ -18,7 +18,7 @@ const boxMap = new Map([
       ["compose", "edit"],
     ]); 
 
-function SideBar() {
+function SideBar({ isOpen }) {
     const [labels, setLabels] = useState([]);
     const navigate = useNavigate();
     const location = useLocation();
@@ -40,7 +40,7 @@ function SideBar() {
     const currentPath = location.pathname;
 
     return (
-      <div className="sideBar">
+      <div className={`sideBar ${isOpen ? "open" : "closed"}`}>
         <SideBarOptions
           id="compose"
           icon="edit"
@@ -55,6 +55,7 @@ function SideBar() {
         <div className="systemLabels">
           {SYSTEM_LABELS.map((label) => (
             <SideBarOptions
+              key={label}
               icon={boxMap.get(label)}
               text={label.charAt(0).toUpperCase() + label.slice(1)}
               isActive={currentPath === `/${label.split(' ')[0]}`}
