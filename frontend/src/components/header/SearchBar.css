@@ -9,38 +9,27 @@
 .searchInput:focus{
     outline: none;
 }
-
-.searchIcon {
-    border: none;
-    background-color: transparent;
-    cursor: pointer;
-}
-.searchIcon:hover {
-    background-color: rgb(172, 172, 172);
-    border-radius: 50%;
-}
-
 .searchBar{
     align-items: center;
     display: flex;
-    background-color: lightgrey;
+    background-color: #E9EEF6;
     border-radius: 20px;
-    width: 50%;
+    width: 100%;
     padding: 1px;
 }
-.searchBar:focus{
-    background-color: white;
+body.dark .searchBar {
+    background-color: #3C4043;
 }
 
-.optionsButton {
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 10px;
+body.dark .searchInput:focus {
+    outline: none;
 }
-.optionsButton:hover {
-    background-color: rgb(172, 172, 172);
-    border-radius: 50%;
+
+
+body.dark .searchInput {
+    background-color: #3C4043;
+    color: #E0E0E0;
 }
+
 
 

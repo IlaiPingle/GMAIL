@@ -1,68 +1,36 @@
-.header-navbar {
-  background-color: #F8FAFD;
-  min-height: 64px;
-  padding: 8px 16px;
-}
-
-.header-container {
+.header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: nowrap; 
-  min-width: 0; 
+  flex-wrap: nowrap;
+  flex-direction: row;
+  background-color: transparent;
+  min-height: 64px;
+  padding: 0 16px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  flex-shrink: 0; /* לא מתכווץ */
-  margin-right: 16px;
+  flex-shrink: 0; 
+  gap: 8px;
+  margin-right: 70px;
 }
-
 .header-center {
-  flex: 1; /* תופס את כל המקום הפנוי */
-  max-width: 720px;
-  margin: 0 16px;
-  min-width: 200px; /* רוחב מינימלי */
+  display: flex;
+  align-items: center;
+  flex: 1;
+  flex-shrink: 0;
+  gap: 8px;
+  margin-right: 20px;
+  min-width: 150px;
 }
 
 .header-right {
-  flex-wrap: nowrap;
-
-  margin-left: 16px;
-}
-
-
-@media (max-width: 768px) {
-  .header-center {
-    min-width: 150px;
-    margin: 0 8px;
-  }
-  
-  .header-left {
-    margin-right: 8px;
-  }
-  
-  .header-right {
-    margin-left: 8px;
-  }
-}
-
-@media (max-width: 480px) {
-  .header-navbar {
-    padding: 8px 8px;
-  }
-  
-  .header-center {
-    min-width: 100px;
-    margin: 0 4px;
-  }
-  
-  .header-left {
-    margin-right: 4px;
-  }
-  
-  .header-right {
-    margin-left: 4px;
-  }
+display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 8px;
 }

@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Client from '../../services/Client';
+import Client from '../../../services/Client';
 import './login.css';
+import { useUser } from '../../../contexts/UserContext';
 
 const Login = () => {
+	const { setUser, user } = useUser(); 
 	const navigate = useNavigate();
 	const [formData, setFormData] = useState({
 		username: '',
@@ -63,6 +65,8 @@ const Login = () => {
 		}
 		try {
 			await Client.login(formData.username, formData.password);
+			const currentUser = await Client.getCurrentUser();
+			setUser(currentUser);
 			navigate('/inbox');
 		} catch (error) {
 			setErrors({
@@ -71,6 +75,12 @@ const Login = () => {
 			});
 		}
 	};
+
+	useEffect(() => {
+		if (user) {
+			navigate('/inbox');
+		}
+	}, [user]);
 
 	return (
 		<div className="login-container">

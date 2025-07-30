@@ -23,3 +23,7 @@ body {
   margin: 0;
   padding: 0;
 }
+body.dark {
+  background-color: #111111;
+  color: #e0e0e0;
+}

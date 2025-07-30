@@ -7,7 +7,6 @@
     background-color: #F2F6FC;
     max-width: 100%;
     box-sizing: border-box;
-    
 }
 
 .mail-item:hover {
@@ -146,6 +145,29 @@
 
 
 
+body.dark .mail-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    border-bottom: 1px solid #333333;
+    cursor: pointer;
+    background-color: #161616;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+body.dark .mail-item:hover {
+    background-color: #202124;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    border:2px solid #333333;
+}
+body.dark .mail-item.unread {
+    background-color: #42444b;
+    font-weight: 600;
+}
+body.dark .mail-checkbox , .mail-content , .mail-sender,
+.mail-subject, .mail-preview, .mail-date {
+    color: #e0e0e0;
+}
 
 .loading, .error, .no-emails {
     text-align: center;

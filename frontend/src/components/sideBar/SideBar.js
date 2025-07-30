@@ -15,7 +15,6 @@ const boxMap = new Map([
       ["all mail", "stacked_email"],
       ["spam", "report"],
       ["bin", "delete"],
-      ["compose", "edit"],
     ]); 
 
 function SideBar({ isOpen }) {
@@ -41,18 +40,19 @@ function SideBar({ isOpen }) {
 
     return (
       <div className={`sideBar ${isOpen ? "open" : "closed"}`}>
-        <SideBarOptions
+        <button
           id="compose"
-          icon="edit"
           text="Compose"
           isActive={false}
           onClick={() => { 
             const params = new URLSearchParams(location.search);
             params.set("compose", "new");
             navigate(`${currentPath}?${params.toString()}`);
-          }}
-        />
+          }}>
+          <span className="material-symbols-outlined compose">edit</span>Compose
+        </button>
         <div className="systemLabels">
+          
           {SYSTEM_LABELS.map((label) => (
             <SideBarOptions
               key={label}

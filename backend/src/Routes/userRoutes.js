@@ -8,4 +8,5 @@ router.get('/api/users/me', authMiddleware, userController.isSignedIn);
 router.post('/api/users', userController.registerUser);
 router.get('/api/users/:id', userController.getUser);
 router.post('/api/tokens', userController.loginUser);
+router.delete('/api/tokens', authMiddleware, userController.logoutUser);
 module.exports = router;

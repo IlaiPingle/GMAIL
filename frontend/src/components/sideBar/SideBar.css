@@ -1,7 +1,7 @@
 .sideBar ,.sideBar.closed {
     width: 60px;
     min-height: 100vh;
-    background-color: #F8FAFD;
+    background-color: transparent;
     padding: auto;
     overflow-y: auto;
     overflow-x: visible;
@@ -14,7 +14,6 @@
     padding: 8px 16px;
 }
 
-
 .sideBar:hover {
     width: 256px; 
 }
@@ -22,24 +21,6 @@
     padding: 8px 16px;
 
 }
-
-.sideBar::-webkit-scrollbar {
-    width: 6px;
-}
-
-.sideBar::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.sideBar::-webkit-scrollbar-thumb {
-    background: #dadce0;
-    border-radius: 3px;
-}
-
-.sideBar::-webkit-scrollbar-thumb:hover {
-    background: #bdc1c6;
-}
-
 .LabelsHeader {
     display: flex;
     text-align: center;
@@ -67,7 +48,34 @@
     width: auto;
     transition: width 0.3s ease, opacity 0.3s ease;
 }
-
+#compose {
+    width: 100%;
+    flex-direction: row;
+    padding: 2px 8px;
+    background-color: #c2e7ff;
+    border-radius: 20px;
+    border:none ;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    transition: all 0.2s ease;
+    color: #001d35;
+    font-weight: 500;
+    box-shadow: 0 1px 2px 0 rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
+    margin: 8px;
+    padding: 12px 24px;
+    text-align: left;
+    width: calc(100% - 16px);
+    overflow: hidden;
+}
+#compose:hover {
+    background-color: #a8dadc;
+    box-shadow: 0 1px 3px 0 rgba(60,64,67,.3), 0 4px 8px 3px rgba(60,64,67,.15);
+}
+#compose .sideBarText {
+    color: #001d35;
+    font-weight: 500;
+}
 .sidebar:hover #compose {
     border-radius: 100%;
 }

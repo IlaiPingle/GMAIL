@@ -1,11 +1,14 @@
 import React from "react";
 import IconButton from "../common/IconButton";
-import GmailLogo from "./GmailLogo";
 import SearchBar from "./SearchBar";
 import UserActions from "./userActions";
+import {useUser} from "../../contexts/UserContext";
+import { useTheme } from "../../contexts/ThemeContext";
 import "./Header.css";
 
 function Header({ onSearch, onMenuClick }) {
+  const { user } = useUser();
+  const {darkMode} = useTheme();
   const handleMenuClick = () => {
     onMenuClick();
   };
@@ -18,33 +21,29 @@ function Header({ onSearch, onMenuClick }) {
   };
 
   return (
-    <nav
-      className="navbar navbar-expand-lg bg-body-tertiary"
-      style={{ backgroundColor: "#f1f3f4" }}
-    >
-      <div className="container-fluid">
+    <div className="header">
         {/* Left Side - Menu + Logo */}
         <div className="header-left">
-          <IconButton 
-            iconType="material"
-          onClick={handleMenuClick}>
+          <IconButton iconType="material" onClick={handleMenuClick}>
             menu
           </IconButton>
-          <GmailLogo />
+          <picture className="gmail-logo">
+            <img
+              src={darkMode ? "https://ssl.gstatic.com/ui/v1/icons/mail/rfr/logo_gmail_lockup_dark_2x_r5.png" : "https://ssl.gstatic.com/ui/v1/icons/mail/rfr/logo_gmail_lockup_default_2x_r5.png"}
+              alt="Gmail"
+              style={{ height: "40px" }}
+            />
+          </picture>
         </div>
-        <div className="header-center">
-        {/* Center - Search */}
-        <SearchBar onSearch={handleSearch} />
-        </div>
+          <SearchBar className="header-center" onSearch={handleSearch} />
         <div className="header-right">
-        {/* Right Side - User Actions */}
-        <UserActions
-          userName="John Doe"
-          userImage="https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg?20200418092106"
-        />
+          {/* Right Side - User Actions */}
+          <UserActions
+            userName={user.username}
+            userImage={user?.picture || "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg?20200418092106"}
+          />
         </div>
-      </div>
-    </nav>
+    </div>
   );
 }
 

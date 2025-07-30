@@ -93,7 +93,7 @@ exports.loginUser = async (req, res) => {
 }
 
 exports.logoutUser = (req, res) => {
-	res.clearCookie('authToken');
+	res.clearCookie('token');
 	res.status(200).json({ message: 'Logged out successfully' });
 }
 
@@ -109,7 +109,6 @@ exports.getUser = (req, res) => {
 		first_name: user.first_name,
 		sur_name: user.sur_name,
 		picture: user.picture,
-		inbox: user.inbox,
 		labels: Array.from(user.labels.keys())
 	})
 }
@@ -119,5 +118,10 @@ exports.isSignedIn = (req, res) => {
 	if (!user) {
 		return res.status(404).json({ message: 'User not found' });
 	}
-	res.status(200).json({ message: 'User is signed in' });
+	res.status(200).json({
+		username: user.username,
+		first_name: user.first_name,
+		sur_name: user.sur_name,
+		picture: user.picture
+	});
 }

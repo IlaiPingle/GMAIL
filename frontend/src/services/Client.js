@@ -195,29 +195,26 @@ const register = async (userData) => {
 	const response = await fetch(url, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
-		credentials: 'include',
 		body: JSON.stringify(userData),
 	});
 	return await handleResponse(response);
 }
-const checkLoginStatus = async () => {
+const getCurrentUser = async () => {
 	const url = `${API_URL}/users/me`;
 	const response = await fetch(url, {
 		headers: defaultHeaders(),
 		credentials: 'include',
 	});
-	if (response.status === 200) {
-		return true;
-	}
-	return false;
+	return handleResponse(response);
 }
 
 const logout = async () => {
-	const url = `${API_URL}/tokens/`;
-	await fetch(url, {
+	const url = `${API_URL}/tokens`;
+	const response = await fetch(url, {
 		method: 'DELETE',
 		credentials: 'include',
 	});
+	return handleResponse(response);
 }
 
 const Client = {
@@ -240,7 +237,7 @@ const Client = {
 	login,
 	register,
 	logout,
-	checkLoginStatus,
+	getCurrentUser,
 };
 
 export default Client;

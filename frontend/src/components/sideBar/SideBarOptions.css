@@ -38,8 +38,7 @@
     font-weight: 200;
 }
 
-/* Default material symbols settings */
-.material-symbols-outlined {
+.sideBarOption .material-symbols-outlined {
     font-size: 20px;
     color: #5f6368;
     margin-right: 12px;
@@ -63,33 +62,6 @@
     transition: none;
 }
 
-
-/* compose button style */
-#compose {
-    background-color: #c2e7ff;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    color: #001d35;
-    font-weight: 500;
-    box-shadow: 0 1px 2px 0 rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
-    margin: 8px;
-    padding: 12px 24px;
-}
-#compose:hover {
-    background-color: #a8dadc;
-    box-shadow: 0 1px 3px 0 rgba(60,64,67,.3), 0 4px 8px 3px rgba(60,64,67,.15);
-}
-
-#compose i {
-    color: #001d35;
-}
-
-#compose .sideBarText {
-    color: #001d35;
-    font-weight: 500;
-}
-
 /* Selected state styles */
 .sideBarOption.selected {
     background-color: rgb(211,227,254);
@@ -106,4 +78,29 @@
 .sideBarOption.selected .sideBarText {
     color: #000000;
     font-weight: 600;
+}
+body.dark #compose {
+    background-color: #FFFFFF;
+    color: #5F6369;
+}
+body.dark #compose .sideBarText {
+    color: #5F6369  !important;
+}
+
+body.dark .sideBarOption:hover {
+    background-color:#414141
+}
+body.dark .sideBarText , body.dark .material-symbols-outlined{
+    color: white;
+}
+body.dark .sideBarOption.selected {
+    background-color: #595959;
+    color: white;
+}
+body.dark #compose .material-symbols-outlined {
+    color: #5F6369;
+}
+
+body.dark .sideBarOption.selected .material-symbols-outlined {
+    color: white;
 }
