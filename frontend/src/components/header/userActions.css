@@ -1,17 +1,21 @@
 .userActions {
   display: flex;
   align-items: center;
+  gap: 0;
 }
 
 
 #userImage{
-  width: 50px;
-  height: 50px;
   border-radius: 50%;
-  border: 2px solid rgb(48, 163, 3);
-  background: none;
+  background: conic-gradient(
+    #4285f4 60deg 150deg, 
+    #34a853 150deg 250deg, 
+    #fbbc05 250deg 310deg, 
+    #ea4335 310deg 60deg
+  );
+  border: none;
   cursor: pointer;
-  padding: 0;
+  padding: 3px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -22,8 +26,8 @@
 }
 
 #Avatar {
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
     border-radius: 50%;
 }
 
@@ -71,11 +75,17 @@
   }
   
   .userImageDetails img {
-    width: 80px;
-    height: 80px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
+    background: conic-gradient(
+    #4285f4 60deg 150deg, 
+    #34a853 150deg 250deg, 
+    #fbbc05 250deg 310deg, 
+    #ea4335 310deg 60deg
+  );
+    padding: 4px;
     margin-bottom: 12px;
-    border: 3px solid #f1f3f4;
 }
 
 .user-name {

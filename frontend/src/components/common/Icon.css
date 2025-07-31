@@ -1,0 +1,26 @@
+.material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
+    font-style: normal;
+    line-height: 1;
+    color:rgb(95, 99, 104);
+}
+
+
+.icon-sidebar {
+    font-size: 20px;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    flex-shrink: 0;
+}
+
+.icon-header {
+    font-size: 24px;
+    border-radius: 100%;
+    padding: 8px;
+    font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 40;
+      
+}
+
+body.dark .icon-sidebar,
+body.dark .icon-header {
+    color: white;
+}

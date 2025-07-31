@@ -1,36 +1,50 @@
 .header {
   display: flex;
   align-items: center;
+  min-width: 160px;
   justify-content: space-between;
-  flex-wrap: nowrap;
-  flex-direction: row;
-  background-color: transparent;
-  min-height: 64px;
-  padding: 0 16px;
+  position: relative;
   width: 100%;
-  box-sizing: border-box;
+  padding: 6px 8px;
 }
 
 .header-left {
   display: flex;
+  vertical-align: middle;
+  white-space: nowrap;
   align-items: center;
-  flex-shrink: 0; 
-  gap: 8px;
-  margin-right: 70px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  height: 48px;
+  padding-right: 30px;
+  flex:1 0 auto;
 }
 .header-center {
   display: flex;
   align-items: center;
-  flex: 1;
-  flex-shrink: 0;
+  vertical-align: middle;
+  justify-content: flex-end;
+  white-space: nowrap;
+  flex: 1 1 100%;
+  height: 48px;
   gap: 8px;
   margin-right: 20px;
   min-width: 150px;
 }
 
 .header-right {
-display: flex;
+  display: flex;
   align-items: center;
-  flex-shrink: 0;
+  line-height: normal;
+  height: 48px;
+  padding: 0 4px;
+  flex : 0 0 auto;
+  justify-content: flex-end;
   gap: 8px;
+}
+.gmail-logo {    
+  position: relative;
+  overflow: hidden;
+  top: 2px;
+  align-items: center;
 }

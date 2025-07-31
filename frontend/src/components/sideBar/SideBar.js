@@ -39,18 +39,18 @@ function SideBar({ isOpen }) {
     const currentPath = location.pathname;
 
     return (
-      <div className={`sideBar ${isOpen ? "open" : "closed"}`}>
-        <button
-          id="compose"
+      <div className={`sideBar ${isOpen ? "open" : ""}`}>
+        <SideBarOptions
+          icon="edit"
           text="Compose"
           isActive={false}
+          isCompose={true}
           onClick={() => { 
             const params = new URLSearchParams(location.search);
             params.set("compose", "new");
             navigate(`${currentPath}?${params.toString()}`);
           }}>
-          <span className="material-symbols-outlined compose">edit</span>Compose
-        </button>
+        </SideBarOptions>
         <div className="systemLabels">
           
           {SYSTEM_LABELS.map((label) => (
@@ -59,6 +59,7 @@ function SideBar({ isOpen }) {
               icon={boxMap.get(label)}
               text={label.charAt(0).toUpperCase() + label.slice(1)}
               isActive={currentPath === `/${label.split(' ')[0]}`}
+              isCompose={false}
               onClick={() => navigate(`/${label.split(' ')[0]}`)}
             />
           ))}
@@ -76,6 +77,7 @@ function SideBar({ isOpen }) {
             icon="label"
             text={label}
             isActive={currentPath === `/label/${encodeURIComponent(label)}`}
+            isCompose={false}
             onClick={() => navigate(`/label/${encodeURIComponent(label)}`)}
           />
         ))}

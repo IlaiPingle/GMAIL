@@ -23,10 +23,10 @@ function Header({ onSearch, onMenuClick }) {
   return (
     <div className="header">
         {/* Left Side - Menu + Logo */}
-        <div className="header-left">
-          <IconButton iconType="material" onClick={handleMenuClick}>
-            menu
-          </IconButton>
+      <div className="header-left">
+        <IconButton iconType="material" onClick={handleMenuClick}>
+          menu
+        </IconButton>
           <picture className="gmail-logo">
             <img
               src={darkMode ? "https://ssl.gstatic.com/ui/v1/icons/mail/rfr/logo_gmail_lockup_dark_2x_r5.png" : "https://ssl.gstatic.com/ui/v1/icons/mail/rfr/logo_gmail_lockup_default_2x_r5.png"}
@@ -34,15 +34,13 @@ function Header({ onSearch, onMenuClick }) {
               style={{ height: "40px" }}
             />
           </picture>
-        </div>
-          <SearchBar className="header-center" onSearch={handleSearch} />
-        <div className="header-right">
+      </div>
+        <SearchBar className="header-center" onSearch={handleSearch} />
           {/* Right Side - User Actions */}
-          <UserActions
-            userName={user.username}
-            userImage={user?.picture || "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg?20200418092106"}
-          />
-        </div>
+        <UserActions
+          userName={user.username}
+          userImage={user?.picture || "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg?20200418092106"}
+        />
     </div>
   );
 }

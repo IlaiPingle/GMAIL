@@ -1,90 +1,47 @@
-.sideBar ,.sideBar.closed {
-    width: 60px;
-    min-height: 100vh;
-    background-color: transparent;
-    padding: auto;
-    overflow-y: auto;
-    overflow-x: visible;
+/* SideBar.css */
+
+.sideBar {
+    width: 72px;
+    display: grid;
     transition: width 0.3s ease;
 }
-.sideBar.open {
+
+.sideBar.open,
+.sideBar:hover {
     width: 256px;
 }
-.sideBar.open .sideBaroptions {
-    padding: 8px 16px;
-}
 
-.sideBar:hover {
-    width: 256px; 
-}
-.sideBar:hover .sideBaroptions {
-    padding: 8px 16px;
-
-}
+/* כותרת Labels */
 .LabelsHeader {
     display: flex;
-    text-align: center;
+    align-items: center;
     justify-content: center;
-    margin: 0;
-    transition: 0s;
+    width: 100%;
+    padding: 8px 11px;
 }
 
 .LabelsHeaderText {
-    font-size: 18px;
-    color: #131414;
+    font-size: 14px;
     font-weight: 500;
+    color: #5f6368;
     opacity: 0;
     width: 0;
-    padding-left: 10%;
     overflow: hidden;
-    transition: 0s;
+    white-space: nowrap;
 }
 
+.sideBar.open .LabelsHeaderText,
+.sideBar:hover .LabelsHeaderText {
+    margin-left: 16px; 
+    width: auto;
+    opacity: 1;
+}
+.sideBar.open .LabelsHeader,
 .sideBar:hover .LabelsHeader {
     justify-content: space-between;
-}
-.sideBar.open .LabelsHeaderText {
-    opacity: 1;
-    width: auto;
-    transition: width 0.3s ease, opacity 0.3s ease;
-}
-#compose {
-    width: 100%;
-    flex-direction: row;
-    padding: 2px 8px;
-    background-color: #c2e7ff;
-    border-radius: 20px;
-    border:none ;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    transition: all 0.2s ease;
-    color: #001d35;
-    font-weight: 500;
-    box-shadow: 0 1px 2px 0 rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
-    margin: 8px;
-    padding: 12px 24px;
-    text-align: left;
-    width: calc(100% - 16px);
-    overflow: hidden;
-}
-#compose:hover {
-    background-color: #a8dadc;
-    box-shadow: 0 1px 3px 0 rgba(60,64,67,.3), 0 4px 8px 3px rgba(60,64,67,.15);
-}
-#compose .sideBarText {
-    color: #001d35;
-    font-weight: 500;
-}
-.sidebar:hover #compose {
-    border-radius: 100%;
-}
-.sideBar:hover .LabelsHeaderText {
-    opacity: 1;
-    width: auto;
-    transition-delay: 0.3s;
+
 }
 
-.LabelsHeader .iconButton {
-    flex-shrink: 0;
+body.dark .LabelsHeaderText {
+    color: #e0e0e0;
 }

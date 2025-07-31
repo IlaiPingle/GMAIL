@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import './CreateLabel.css';
-
+import Client from '../../services/Client'; 
 function CreateLabel() {
     const [labelName, setLabelName] = useState("");
     const [error, setError] = useState("");
@@ -11,19 +11,8 @@ function CreateLabel() {
         e.preventDefault();
         
         try {
-            const response = await fetch('http://localhost:8080/api/labels', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'user-id': '2', // Replace with dynamic user ID as needed
-                },
-                body: JSON.stringify({ labelName }),
-            });
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to create label');
-            }
-            navigate('/'); // Redirect to inbox after creation
+            await Client.createLabel(`${labelName}`);
+            navigate('/'); 
         } catch (err) {
             setError(err.message);
         }
