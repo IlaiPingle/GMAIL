@@ -1,11 +1,11 @@
 .iconButton {
+    border-radius: 100%;
     background-color: transparent;
     border: none;
     cursor: pointer;
     margin-top: 2px;
 }                                                                                                                                                                                  
 
-.iconButton:hover .icon-header {
-    border-radius: 100%;
+.iconButton:hover .icon-header , .iconButton:hover .icon-mail-list , .iconButton:hover .icon-mail-item {
     background-color: rgba(0, 0, 0, 0.05);
 }

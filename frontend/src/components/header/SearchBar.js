@@ -32,7 +32,7 @@ function SearchBar({ onSearch }) {
     return (
         <div className="searchBar">
             <IconButton
-                iconType='material' 
+                className="icon-header"
                 onClick={handleSearch}>search</IconButton>
             <input
                 type="text"
@@ -42,7 +42,7 @@ function SearchBar({ onSearch }) {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={handleKeyPress}
             />
-            <IconButton iconType="material" onClick={handleOptions}>
+            <IconButton className="icon-header" onClick={handleOptions}>
                 tune
             </IconButton>
         </div>

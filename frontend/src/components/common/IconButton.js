@@ -1,9 +1,9 @@
 import React from "react";
 import "./IconButton.css";
 import "./Icon.css"; 
-function IconButton({ children, onClick }) {
+function IconButton({className, children, onClick }) {
     const renderIcon = () => {
-        return <span className="material-symbols-outlined icon-header">{children}</span>;
+        return <span className={`material-symbols-outlined ${className}`}>{children}</span>;
     };
 
     return (

@@ -1,6 +1,5 @@
 import { createContext,useContext,useState ,useEffect } from "react";
 import Client from "../services/Client";
-
 const UserContext = createContext();
 
 export const useUser = () => useContext(UserContext);
@@ -17,6 +16,7 @@ export function UserProvider({ children }) {
                 setUser(response);
             } catch (error) {
                 console.error("Error fetching user:", error);
+
             } finally {
                 setLoading(false);
             }

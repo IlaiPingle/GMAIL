@@ -34,11 +34,17 @@
 
 .mail-checkbox {
     margin-right: 12px;
-    opacity: 0;
     transition: opacity 0.2s;
 }
-
-.mail-item:hover .mail-checkbox {
+.mail-item-actions{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+.mail-item:hover .mail-item-actions{
     opacity: 1;
 }
 
@@ -103,28 +109,6 @@
 .select-all {
     cursor: pointer;
 }
-.star-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-    margin-right: 8px;
-    text-align: center;
-    display: flex;
-    position: relative;
-}
-.star-button:hover .material-symbols-outlined {
-    border-radius: 100%;
-    background-color: rgba(0, 0, 0, 0.1);
-}
-.star-icon {
-    color: #5f6368;
-    font-size: 20px;
-    line-height: 1;
-    display: flex;
-    text-align: center;
-}
-
 .starred {
     font-variation-settings: 
       'FILL' 1,
@@ -134,13 +118,10 @@
     color: #fbb034;
 }
 
-.star-button:hover .star-icon {
+.icon-mail-item.unstarred:hover {
     color: #fbb034;
     font-variation-settings: 
-      'FILL' 1,
-      'wght' 400,
-      'GRAD' 0,
-      'opsz' 48;
+      'FILL' 1
 }
 
 

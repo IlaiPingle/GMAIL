@@ -24,7 +24,7 @@ function Header({ onSearch, onMenuClick }) {
     <div className="header">
         {/* Left Side - Menu + Logo */}
       <div className="header-left">
-        <IconButton iconType="material" onClick={handleMenuClick}>
+        <IconButton className="icon-header" onClick={handleMenuClick}>
           menu
         </IconButton>
           <picture className="gmail-logo">

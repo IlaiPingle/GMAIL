@@ -42,10 +42,10 @@ function UserActions({ userName, userImage }) {
 
   return (
     <div className="userActions">
-      <IconButton iconType="material" onClick={handleHelpClick}>
+      <IconButton className="icon-header" onClick={handleHelpClick}>
         help
       </IconButton>
-      <IconButton iconType="material" onClick={handleSettingsClick}>
+      <IconButton className="icon-header" onClick={handleSettingsClick}>
         settings
       </IconButton>
       {toggleSettings && (
@@ -58,7 +58,7 @@ function UserActions({ userName, userImage }) {
           </div>
         </div>
       )}
-      <IconButton iconType="material" onClick={handleAppsClick}>
+      <IconButton className="icon-header" onClick={handleAppsClick}>
         apps
       </IconButton>
       <button

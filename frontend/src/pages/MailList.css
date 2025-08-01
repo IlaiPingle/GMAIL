@@ -3,15 +3,43 @@
     grid-template-columns: 1fr;
     border-radius: 10px;
 }
-h2{
+.mail-list-header h2{
     margin: 0;
     padding-left: 15px;
     text-align: center;
     color: #202124;
 }
-p {
+.mail-list p {
     margin: 0;
     padding-left: 15px;
     color: #5f6368;
     font-size: 14px;
+}
+.mail-list-header {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: white;
+    border-radius: 10px 10px 0 0;
+}
+.mail-list-header-left {
+    display: flex;
+    align-items: center;
+    border-right: 1px solid #E0E0E0;
+    height: 100%;
+}
+.mail-list-header-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    bottom: none;
+}
+
+
+body.dark .mail-list-header {
+    background-color: #2C2C2C;
+}
+body.dark .mail-list-body p {
+    color: #E0E0E0;
 }

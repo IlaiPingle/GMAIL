@@ -5,10 +5,11 @@ import IconButton from "../common/IconButton";
 import Client from "../../services/Client";
 
 
-function MailItem({ mail, onDeleted }) {
+function MailItem({ mail, checked, onToggleSelect, onDeleted }) {
     const navigate = useNavigate();
     const location = useLocation();
     const [isStarred, setIsStarred] = useState(mail.labels.includes('starred'));
+    
 
     const moveToTrash = async (e) => {
         e.stopPropagation(); // Prevent the click from navigating to the mail detail
@@ -91,14 +92,14 @@ function MailItem({ mail, onDeleted }) {
         className={`mail-item ${mail.labels.includes("unread") ? "unread" : "read"}`}
         onClick={handleClick}
       >
-        <div className="mail-checkbox">
-          <input type="checkbox" onClick={(e) => e.stopPropagation()} />
+        <div className="mail-checkbox" onClick={(e) => e.stopPropagation()}>
+          <input type="checkbox" checked={checked} onChange={onToggleSelect} />
         </div>
-        <button className="star-button" onClick={handleStarClicked}>
-            <span className={`material-symbols-outlined star-icon ${isStarred ? 'starred' : ''}`}>
-                star
-            </span>
-        </button>
+        <IconButton
+          className={`icon-mail-item ${isStarred ? "starred" : "unstarred"}`}
+          onClick={handleStarClicked}
+          children={isStarred ? "star" : "star_border"}
+        />
         <div className="mail-sender">{mail.sender}</div>
 
         <div className="mail-content">
@@ -107,8 +108,10 @@ function MailItem({ mail, onDeleted }) {
             {mail.body ? ` - ${mail.body.substring(0, 100)}...` : ""}
           </span>
         </div>
-        <IconButton onClick={moveToTrash}>Delete</IconButton>
-        <IconButton onClick={markAsUnread} children={"mark_email_unread"} />
+        <div className="mail-item-actions">
+        <IconButton className="icon-mail-item" onClick={moveToTrash} children={"delete"} />
+        <IconButton className="icon-mail-item" onClick={markAsUnread} children={"mark_email_unread"} />
+        </div>
         <div className="mail-date">
           {formatDate(mail.date || new Date())}
         </div>
