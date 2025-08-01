@@ -14,13 +14,6 @@
   box-sizing: border-box;
 }
 
-body {
-  font-family: 'Google Sans', Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: #F8FAFD;
-  color: #202124;
-  margin: 0;
-  padding: 0;
-}
 
 body.dark {
   background-color: #111111;
@@ -45,4 +38,10 @@ body.dark ::-webkit-scrollbar-thumb:hover {
   --sb-bg: #111111;
   --sb-thumb-bg: #555;
   --sb-thumb-bg-hover: #777;
+}
+/* Error message */
+.error {
+  color: #d93025;
+  font-size: 12px;
+  margin-bottom: 8px;
 }

@@ -13,7 +13,7 @@ function createLabel(req, res) {
         }
         
         const newLabel = LabelService.createLabel(userId, labelName);
-        res.set('Location', `/api/labels/${labelName}`);
+        res.set('Location', `/api/labels/${encodeURIComponent(labelName)}`);
         return res.status(201).end();
     } catch (error) {
         return res.status(error.status || 500).json({ message: error.message || 'An error occurred while creating the label' });
@@ -26,7 +26,6 @@ function createLabel(req, res) {
 function getUserLabels(req, res) {
     try {
         const userId = req.userId; // Get user ID from JWT token
-
         const labels = LabelService.getUserLabels(userId);
         return res.status(200).json(labels);
     } catch (error) {

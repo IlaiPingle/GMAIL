@@ -31,5 +31,5 @@
 
 body.dark .icon-sidebar,
 body.dark .icon-header {
-    color: white;
+    color: rgba(255, 255, 255, 0);
 }

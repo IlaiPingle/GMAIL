@@ -17,7 +17,7 @@ const boxMap = new Map([
       ["bin", "delete"],
     ]); 
 
-function SideBar({ isOpen }) {
+function SideBar({ isOpen , onOpenCreateLabel }) {
     const [labels, setLabels] = useState([]);
     const navigate = useNavigate();
     const location = useLocation();
@@ -66,7 +66,7 @@ function SideBar({ isOpen }) {
         </div>
         <div className="LabelsHeader">
           <span className="LabelsHeaderText">Labels</span>
-          <IconButton onClick={() => navigate("/create-label")}>
+          <IconButton onClick={onOpenCreateLabel}>
             add
           </IconButton>
         </div>

@@ -66,10 +66,17 @@
 
 .create-btn:disabled {
   opacity: 0.6;
+  cursor: default;
 }
 
 .error {
   color: #d93025;
   font-size: 12px;
   margin-bottom: 8px;
+}
+body.dark .create-label-container h2{
+ color : #202124
+}
+body.dark .create-label-container p{
+ color : #5f6368
 }

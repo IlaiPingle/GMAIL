@@ -4,12 +4,13 @@ import SideBar from "../components/sideBar/SideBar";
 import "./MainLayout.css";
 import { useLocation, Outlet } from 'react-router-dom';
 import Compose from "../components/compose/Compose";
-
+import CreateLabel from "../components/createLabel/CreateLabel";
 function MainLayout() {
     const location = useLocation();
     const params = new URLSearchParams(location.search);
     const composeParam = params.get("compose");
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [showCreateLabel, setShowCreateLabel] = useState(false);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -19,13 +20,20 @@ function MainLayout() {
         <div className="main-layout">
             <Header onMenuClick={toggleSidebar}/>
             <div className="main-layout-body">
-                <SideBar isOpen={isSidebarOpen}/>
+                <SideBar isOpen={isSidebarOpen}
+                onOpenCreateLabel={() => setShowCreateLabel(true)} 
+                />
                 <div className="content">
                     <Outlet/>
                 </div>
                 {composeParam && (<div className="compose-overlay">
                     <Compose draftId={composeParam !== "new" ? composeParam : null} />
                 </div>)}
+                {showCreateLabel && (
+                    <div className="create-label-overlay">
+                        <CreateLabel onClose={() => setShowCreateLabel(false)} />
+                    </div>
+                )}
             </div>
         </div>
     );

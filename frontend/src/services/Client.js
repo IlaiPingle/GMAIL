@@ -6,18 +6,26 @@ const defaultHeaders = () => ({
 });
 
 const handleResponse = async (response) => {
+	const contentType = response.headers.get('Content-Type');
+	const text = await response.text();
+
+	const parseBody = () => {
+		if(!text) 	return null;
+		if (contentType && contentType.includes('application/json')) {
+			try {
+				return JSON.parse(text);
+			} catch (e) {
+				return null;
+			}
+		}
+		return text; 
+	};
+	const data = parseBody();
 	if (!response.ok) {
-		let errorMessage = 'Request failed';
-		try {
-			const errorData = await response.json();
-			errorMessage = errorData.message || errorMessage;
-		} catch (e) {}
-		throw new Error(errorMessage);    
+		const message = (data && data.message) || response.statusText || 'request failed';
+		throw new Error(message);
 	}
-	if (response.status === 204) {
-		return null; // No content
-	}
-	return response.json();
+	return data;
 }
 
 const getAllMails = async () => {
