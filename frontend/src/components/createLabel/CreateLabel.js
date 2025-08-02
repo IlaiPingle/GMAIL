@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import './CreateLabel.css';
 import Client from '../../services/Client'; 
 
-function CreateLabel({ onClose }) {
+function CreateLabel({ onClose, onCreate }) {
     const [labelName, setLabelName] = useState("");
     const [error, setError] = useState("");
     const navigate = useNavigate();
@@ -13,6 +13,7 @@ function CreateLabel({ onClose }) {
         try {
             await Client.createLabel(`${labelName}`);
             navigate(`/label/${encodeURIComponent(labelName)}`);
+            onCreate();
         } catch (err) {
             setError(err.message);
             console.error("Error creating label:", err);

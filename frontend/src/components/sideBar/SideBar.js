@@ -17,7 +17,7 @@ const boxMap = new Map([
       ["bin", "delete"],
     ]); 
 
-function SideBar({ isOpen , onOpenCreateLabel }) {
+function SideBar({ isOpen , onOpenCreateLabel, onLabelCreated ,resetLabelCreated }) {
     const [labels, setLabels] = useState([]);
     const navigate = useNavigate();
     const location = useLocation();
@@ -27,6 +27,14 @@ function SideBar({ isOpen , onOpenCreateLabel }) {
         fetchLabels();
     }, []);
 
+    useEffect(() => {
+      if (onLabelCreated) {
+         fetchLabels();
+        resetLabelCreated(false);
+      }
+    }, [onLabelCreated, resetLabelCreated]);
+
+    
     const fetchLabels = async () => {
         try {
             const data = await Client.getLabels();

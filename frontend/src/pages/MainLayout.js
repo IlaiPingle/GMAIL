@@ -11,6 +11,7 @@ function MainLayout() {
     const composeParam = params.get("compose");
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [showCreateLabel, setShowCreateLabel] = useState(false);
+    const [labelCreated, setLabelCreated] = useState(false);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -22,6 +23,8 @@ function MainLayout() {
             <div className="main-layout-body">
                 <SideBar isOpen={isSidebarOpen}
                 onOpenCreateLabel={() => setShowCreateLabel(true)} 
+                onLabelCreated={labelCreated}
+                resetLabelCreated={setLabelCreated}
                 />
                 <div className="content">
                     <Outlet/>
@@ -31,7 +34,7 @@ function MainLayout() {
                 </div>)}
                 {showCreateLabel && (
                     <div className="create-label-overlay">
-                        <CreateLabel onClose={() => setShowCreateLabel(false)} />
+                        <CreateLabel onClose={() => setShowCreateLabel(false)} onCreate={() => setLabelCreated(true)} />
                     </div>
                 )}
             </div>

@@ -4,7 +4,6 @@ const usersRoutes = require('./Routes/userRoutes')
 const blacklistRoutes = require('./Routes/blacklistRoutes')
 const emailRoutes = require('./Routes/emailRoutes')
 const labelRoutes = require('./Routes/labelRoutes')
-const authMiddleware = require('./Middleware/authMiddleware');
 
 const app = express()
 const cors = require("cors");

@@ -69,11 +69,6 @@
   cursor: default;
 }
 
-.error {
-  color: #d93025;
-  font-size: 12px;
-  margin-bottom: 8px;
-}
 body.dark .create-label-container h2{
  color : #202124
 }
