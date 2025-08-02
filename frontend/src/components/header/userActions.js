@@ -11,7 +11,6 @@ function UserActions({ userName, userImage }) {
   const [toggleSettings, setToggleSettings] = useState(false);
   const [toggleImage, setToggleImage] = useState(false);
   const { setUser } = useUser();
-  const { darkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const handleToggleImage = () => {

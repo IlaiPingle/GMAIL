@@ -104,18 +104,20 @@ function MailPage() {
           </div>
         </div>
       </div>
-      {isSpam && (
-        <div className="spam-warning">
-          <span className="material-symbols-outlined">warning</span>
-          <span>This message has been identified as spam</span>
+      <div className='mail-page-content'>
+        {isSpam && (
+          <div className="spam-warning">
+            <span className="material-symbols-outlined">warning</span>
+            <span>This message has been identified as spam</span>
+          </div>
+        )}
+        <h1>{mail.subject || 'No Subject'}</h1>
+        <p><strong>From:</strong> {mail.sender || 'Unknown Sender'}</p>
+        <p><strong>To:</strong> {mail.receiver || 'Unknown Recipient'}</p>
+        <p><strong>Date:</strong> {new Date(mail.dateCreated || mail.date || mail.Date || mail.timestamp).toLocaleString()}</p>
+        <div className="mail-body">
+          {mail.body || 'No content'}
         </div>
-      )}
-      <h1>{mail.subject || 'No Subject'}</h1>
-      <p><strong>From:</strong> {mail.sender || 'Unknown Sender'}</p>
-      <p><strong>To:</strong> {mail.receiver || 'Unknown Recipient'}</p>
-      <p><strong>Date:</strong> {new Date(mail.dateCreated || mail.date || mail.Date || mail.timestamp).toLocaleString()}</p>
-      <div className="mail-body">
-        {mail.body || 'No content'}
       </div>
     </div>
   );

@@ -47,4 +47,5 @@
   overflow: hidden;
   top: 2px;
   align-items: center;
+  cursor: pointer;
 }

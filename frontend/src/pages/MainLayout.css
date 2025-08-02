@@ -15,7 +15,6 @@
 
 .content {
   flex: 1;
-  overflow-y: scroll;
   overflow-x: hidden;
   height: 100vh;
   padding-right: 12px;

@@ -42,7 +42,7 @@
 }
 
 .sideBar:hover .sideBarText ,
- .sideBar.open .sideBarText{
+.sideBar.open .sideBarText{
     opacity: 1;
     width: auto;
     padding-left: 8px;
@@ -81,24 +81,20 @@
     font-size: 24px;
 }
 .sideBarOption.compose .sideBarText {
-  position: absolute;
-  left: 55px;
-  white-space: nowrap;
-  transition: opacity 0.2s ease;
-  color: #001d35;
-  font-weight: 500;
+    position: absolute;
+    left: 55px;
+    white-space: nowrap;
+    transition: opacity 0.2s ease;
+    color: #001d35;
+    font-weight: 500;
 }
-
-
-
-
 
 body.dark .sideBarOption:hover {
     background-color:#414141
 }
 
 body.dark .sideBarText ,
- body.dark .material-symbols-outlined {
+body.dark .material-symbols-outlined {
     color: white;
 }
 body.dark .sideBarOption.selected {

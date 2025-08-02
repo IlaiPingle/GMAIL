@@ -16,3 +16,30 @@ code {
 button,input,select,textarea {
   font: inherit;
 }
+:root{
+  --sb-track: #f1f3f4;
+  --sb-thumb: #aeb0b4;
+  --sb-thumb-hover: #8d9298;
+}
+body.dark{
+  --sb-track: #202124;
+  --sb-thumb: #5f6368;
+  --sb-thumb-hover: #80868b;
+}
+
+/* Firefox */
+html, body{
+  scrollbar-width: thin;
+  scrollbar-color: var(--sb-thumb) var(--sb-track);
+}
+
+/* Chrome/Edge/Safari */
+html::-webkit-scrollbar{ width: 12px; }
+html::-webkit-scrollbar-track{ background: var(--sb-track); }
+html::-webkit-scrollbar-thumb{
+  border-radius: none; 
+  background: var(--sb-thumb);
+  border: 3px solid var(--sb-track);
+}
+html::-webkit-scrollbar-thumb:hover{ background: var(--sb-thumb-hover); }
+

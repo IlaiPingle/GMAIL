@@ -26,19 +26,6 @@ body.dark p {
     color: #E0E0E0;
 }
 
-body.dark ::-webkit-scrollbar-thumb {
-  background-color: #555;
-  border-radius: 4px;
-}
-
-body.dark ::-webkit-scrollbar-thumb:hover {
-  background-color: #777;
-}
-:root {
-  --sb-bg: #111111;
-  --sb-thumb-bg: #555;
-  --sb-thumb-bg-hover: #777;
-}
 /* Error message */
 .error {
   color: #d93025;

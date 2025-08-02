@@ -1,7 +1,6 @@
 /* Container for the mail detail page */
 .mail-page {
   flex: 1;
-  padding: 24px;
   background-color: #ffffff;
   height: 100vh;
   overflow-y: auto;
@@ -14,8 +13,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
+  padding: 10px;
   border-bottom: 1px solid #e0e0e0;
 }
 .mail-header-left {
@@ -57,6 +55,11 @@
   line-height: 1.5;
   color: #202124;
   font-size: 16px;
+  min-height: 300px;
+}
+.mail-page-content {
+  padding: 16px;
+  background-color: #ffffff;
 }
 
 /* Loading and error states */
@@ -70,6 +73,9 @@
   font-size: 16px;
 }
 
-.error {
-  color: #d93025;
+body.dark .mail-page {
+  background-color: #2c2c2c;
+}
+body.dark .mail-page p {
+  color: #2c2c2c;
 }

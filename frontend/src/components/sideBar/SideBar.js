@@ -19,8 +19,21 @@ const boxMap = new Map([
 
 function SideBar({ isOpen , onOpenCreateLabel, onLabelCreated ,resetLabelCreated }) {
     const [labels, setLabels] = useState([]);
+    const [toggleLabelOptions, setToggleLabelOptions] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
+    const [labelToChange, setLabelToChange] = useState(null);
+
+    const deleteLabel = async (label) => {
+      if (!label) {
+        return;
+      }
+      try {
+          await Client.deleteLabel(label);
+      } catch (err) {
+          console.error('Error deleting label', err);
+      }
+    };
 
     // Fetch labels on mount
     useEffect(() => {
@@ -34,7 +47,6 @@ function SideBar({ isOpen , onOpenCreateLabel, onLabelCreated ,resetLabelCreated
       }
     }, [onLabelCreated, resetLabelCreated]);
 
-    
     const fetchLabels = async () => {
         try {
             const data = await Client.getLabels();
@@ -87,8 +99,25 @@ function SideBar({ isOpen , onOpenCreateLabel, onLabelCreated ,resetLabelCreated
             isActive={currentPath === `/label/${encodeURIComponent(label)}`}
             isCompose={false}
             onClick={() => navigate(`/label/${encodeURIComponent(label)}`)}
+            onOptionClick={() => { setToggleLabelOptions(!toggleLabelOptions)
+              setLabelToChange(label);
+            }}
           />
         ))}
+        {toggleLabelOptions && (
+          <div className="label-options">
+            <IconButton onClick={() => {
+              setToggleLabelOptions(false);
+              // Add logic to handle label options here
+            }} children="close">
+            </IconButton>
+            <IconButton onClick={() => {
+              setToggleLabelOptions(false);
+              deleteLabel(labelToChange);
+            }} children="delete">
+            </IconButton>
+          </div>
+        )}
       </div>
     );
 }

@@ -5,10 +5,12 @@ import UserActions from "./userActions";
 import {useUser} from "../../contexts/UserContext";
 import { useTheme } from "../../contexts/ThemeContext";
 import "./Header.css";
+import { useNavigate } from "react-router-dom";
 
 function Header({ onSearch, onMenuClick }) {
   const { user } = useUser();
   const {darkMode} = useTheme();
+  const navigate = useNavigate();
   const handleMenuClick = () => {
     onMenuClick();
   };
@@ -27,7 +29,7 @@ function Header({ onSearch, onMenuClick }) {
         <IconButton className="icon-header" onClick={handleMenuClick}>
           menu
         </IconButton>
-          <picture className="gmail-logo">
+          <picture className="gmail-logo" onClick={() => navigate('/inbox')}>
             <img
               src={darkMode ? "https://ssl.gstatic.com/ui/v1/icons/mail/rfr/logo_gmail_lockup_dark_2x_r5.png" : "https://ssl.gstatic.com/ui/v1/icons/mail/rfr/logo_gmail_lockup_default_2x_r5.png"}
               alt="Gmail"

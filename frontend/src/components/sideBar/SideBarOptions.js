@@ -1,18 +1,20 @@
 import React from "react";
 import "./SideBarOptions.css";
+import IconButton from "../common/IconButton";
 
 
-function SideBarOptions({ text, icon, isActive, isCompose, onClick }) {
+function SideBarOptions({ text, icon, isActive, isCompose, onClick,onOptionClick }) {
     const handleClick = () => {
         if (onClick) {
             onClick();
         }
     };
     return (
-        <button className={`sideBarOption ${isActive ? 'selected' : ''} ${isCompose ? "compose" : ""}`} onClick={handleClick}>
+        <div className={`sideBarOption ${isActive ? 'selected' : ''} ${isCompose ? "compose" : ""}`} onClick={handleClick}>
             <span className={"material-symbols-outlined icon-sidebar"}>{icon}</span>
             <span className="sideBarText">{text}</span>
-        </button>
+            {icon ==='label' && <IconButton className="icon-more" onClick={(e) => { e.stopPropagation(); onOptionClick(); }} children="more_vert" />}
+        </div>
     );
 }
 
