@@ -275,3 +275,49 @@
 .password-requirements .invalid::before {
   content: "✗ ";
 }
+
+/* Dark mode styles for registration page */
+.registration-container.dark {
+  background-color: #111111;
+}
+
+.registration-content.dark {
+  background-color: #2C2C2C;
+  border-color: #444444;
+}
+
+.registration-content.dark h1,
+.registration-content.dark .registration-title {
+  color: #E0E0E0;
+}
+
+.registration-content.dark .registration-subtitle,
+.registration-content.dark .form-group label,
+.registration-content.dark .show-password label,
+.registration-content.dark .input-hint {
+  color: #AAAAAA;
+}
+
+.registration-content.dark .form-group input {
+  background-color: #3C4043;
+  color: #E0E0E0;
+  border-color: #5F6368;
+}
+
+.registration-content.dark .form-group input:focus,
+.registration-content.dark .form-group input:not(:placeholder-shown) {
+  border-color: #8AB4F8;
+}
+
+.registration-content.dark .form-group input:focus + label,
+.registration-content.dark .form-group input:not(:placeholder-shown) + label {
+  color: #8AB4F8;
+}
+
+.registration-content.dark .signin-link {
+  color: #8AB4F8;
+}
+
+.registration-content.dark .password-requirements {
+  background-color: #35363A;
+}

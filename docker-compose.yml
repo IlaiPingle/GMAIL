@@ -16,6 +16,17 @@ services:
     ports:
       - "8080:8080"
     env_file:
-      - ./backend/src/.env
+      - ./backend/.env
     depends_on:
       - bloom-server
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: docker/dockerfile
+    ports:
+      - "3000:80"
+    env_file:
+      - ./frontend/.env
+    depends_on:
+      - web-server

@@ -1,26 +1,33 @@
-# Email Server with Bloom Filter Security
+# Email Application with Security Filtering
 
 https://github.com/matanshaul7/EX1.git
 
 ## Overview
 
-This project is a simple email server system with integrated URL security filtering. It consists of two main components:
+This project is a complete email application with an integrated security system. It consists of three main components:
 
-1. **Internet Server (Node.js)** - Handles user management, emails, and labels
-2. **Bloom Filter Server (C++)** - Security service that filters malicious URLs
+1. **Frontend (React)** - User interface for email management
+2. **Backend Server (Node.js)** - API handling user management, emails, and labels
+3. **Bloom Filter Server (C++)** - Security service that filters malicious URLs
 
-The system allows users to register, send emails, manage labels, and automatically checks email content for malicious URLs before delivery.
+The system provides a Gmail-like interface where users can:
+- Register and login
+- Send and receive emails
+- Organize emails with custom labels
+- Search for emails
+- Filter malicious content automatically before delivery
 
 ## Project Structure
 
 ```
 EX1/
-├── Internet_server/     # Node.js email server
-├── Bloom_Filter_Server/ # C++ security filter
-└── docker-compose.yml   # Container orchestration
+├── frontend/             # React user interface
+├── backend/     		  # Node.js API server
+├── Bloom_Filter_Server/  # C++ security filter
+└── docker-compose.yml    # Container orchestration
 ```
 
-## Running the Program
+## Running the Application
 
 ### Prerequisites
 - Docker
@@ -34,9 +41,11 @@ docker-compose up --build
 ```
 
 This will:
-- Build and start both the Internet Server and Bloom Filter Server
-- Make the email server available on port 8080
+- Build and start the Frontend, Backend, and Bloom Filter Server
+- Make the frontend available at http://localhost:3000
+- Make the backend API available at http://localhost:8080
 - Make the security filter available on port 4000
+To see the webpage itself, go to http://localhost:3000 in your web browser
 
 ### Stop the System
 
@@ -47,144 +56,120 @@ or: `ctrl+c` at the same terminal
 
 ## Usage Examples
 
-### Create two Users
+### User Registration & Login
 
-```bash
-curl -i -X POST http://localhost:8080/api/users -H 'Content-Type: application/json' -d '{
-  "username": "alice",
-  "password": "1234",
-  "first_name": "Alice",
-  "sur_name": "Wonder",
-  "picture": "https://example.com/alice.jpg"
-}'  
+1. Creating a New Account
+- Navigate to http://localhost:3000/register
+- Fill in your desired username
+- Upload or link a profile picture (optional)
+- Click "Sign up" to create your account
 
 ![User Registration Screen](Images/1.png)
-curl -i -X POST http://localhost:8080/api/users -H 'Content-Type: application/json' -d '{
-  "username": "bob",
-  "password": "abcd",
-  "first_name": "Bob",
-  "sur_name": "Builder",
-  "picture": "https://example.com/bob.jpg"
-}'
-```
-![User Registration Screen](Images/1.png)
-![Second User Created](Images/2.png)
 
+2. Logging In
+- Navigate to http://localhost:3000/login
+- Enter your username and password
+- Click "Sign in" to access your account
 
-### 🔐 Login 
+![Login Screen](Images/2.png) 
 
-```bash
-curl -i -X POST http://localhost:8080/api/tokens -H 'Content-Type: application/json' -d '{"username": "alice", "password": "1234"}'
-```
-![Login Screen](Images/3.png)  
+### Email Management
 
-### 📄 Get User's information
+3. Viewing Your Inbox
+- After logging in, you'll see your inbox with all received emails
+- Emails are sorted by date, with newest at the top
+- Unread emails appear in bold
 
-```bash
-curl -i -X GET http://localhost:8080/api/users/1  
-```
+![Inbox View](Images/3.png)
 
-![User Information Screen](Images/4.png)
+4. Composing a New Email
+- Click the "Compose" button in the sidebar
+- Enter recipient's username in the "To:" field
+- Add a subject line
+- Type your message in the body
+- Click "Send" to deliver your email
 
-### 📬 Send Email 
+![Compose Email](Images/4.png)
 
-```bash
-curl -i -X POST http://localhost:8080/api/mails -H 'Content-Type: application/json' -H 'user-id: 1' -d '{
-  "sender": "alice",
-  "receiver": "bob",
-  "subject": "Meeting",
-  "body": "Can we meet tomorrow at 10?"
-}'  
-```
-![Email Compose Screen](Images/5.png)
+5. Reading an Email
+- Click on any email in your inbox to open and read it
+- The full email content appears in the right panel
+- Sender information and timestamp are displayed at the top
 
-### 📥 Get last 50 Emails
+![Email Reading View](Images/5.png)
 
-```bash
-curl -i http://localhost:8080/api/mails -H 'user-id: 1'  
-```
-![Inbox Screen](Images/6.png)
+### Organization Features
 
-### 📄 Get Email by ID
+6. Creating a Custom Label
+- Click the "+" icon next to "Labels" in the sidebar
+- Enter a label name (e.g., "Work", "Personal")
+- Click "Create" to add the new label
 
-```bash
-curl -i http://localhost:8080/api/mails/1 -H 'user-id: 1'  
-```
-![Email By ID Screen](Images/7.png)
+![Creating Label](Images/6.png)
 
-### 🔍 Search Emails
+7. Applying Labels to Emails
+- Open an email or select it from the list
+- Click "Labels" dropdown
+- Check the labels you want to apply
 
-```bash
-curl -i http://localhost:8080/api/mails/search?q=meeting -H 'user-id: 1'  
-```
-![Email Search Screen](Images/8.png)
+![Applying Labels](Images/7.png)
 
-### 📝 Update Email
+8. Filtering by Label
+- Click on any label name in the sidebar
+- The email list will show only emails with that label
 
-```bash
-curl -i -X PATCH http://localhost:8080/api/mails/1 \
--H "Content-Type: application/json" \
--H "user-id: 1" \
--d '{
-  "subject": "Updated Subject",
-  "body": "Updated body"
-}'  
-```
-![Email Update Screen](Images/9.png)
+![Label Filtering](Images/8.png)
 
-### 🗑️ Delete Email
+### Security Features
 
-```bash
-curl -i -X DELETE http://localhost:8080/api/mails/1 \
--H "user-id: 1"  
-```
-![Email Deletion Confirmation](Images/10.png)
+9. Security Warning for Malicious URLs
+- When composing an email with a suspicious URL
+- The system shows a warning before sending
+- You can choose to remove the URL or send anyway
 
-### 🏷️ Create Label
+![Security Warning](Images/9.png)
 
-```bash
-curl -i -X POST http://localhost:8080/api/labels -H 'Content-Type: application/json' -H 'user-id: 1' -d '{"labelName": "Work"}'  
-```
-![Label Creation Screen](Images/11.png)
+10. Reporting Spam
+- Open an unwanted email
+- Click "Report Spam" button
+- The email is moved to spam folder and its sender patterns are recorded
 
-### 🏷️ Get All Labels
+![Report Spam](Images/10.png)
 
-```bash
-curl -i http://localhost:8080/api/labels -H 'user-id: 1'  
-```
-![Labels List View](Images/12.png)
+### Advanced Features
 
-### 🏷️ Get Label by Name
+11. Searching Emails
+- Type keywords in the search bar at the top
+- Results update when you click the enter button, or the "search" icon
+- Click on any result to open that email
 
-```bash
-curl -i -X GET http://localhost:8080/api/labels/Work -H 'user-id: 1'  
-```
-![Single Label View](Images/13.png)
+![Email Search](Images/11.png)
 
-### 🏷️ Update Label
+12. Email Actions
+Each email has quick action buttons for:
+- Back to the previous screen
+- Report as Spam
+- Delete
+- Mark as unread
+- Move to label
 
-```bash
-curl -i -X PATCH http://localhost:8080/api/labels/Work -H 'Content-Type: application/json' -H 'user-id: 1' -d '{"newName": "Work-Updated"}'  
-```
-![Label Update Screen](Images/14.png)
+![Email Actions](Images/12.png)
 
-### 🗑️ Delete Label
+#13. Email Thread View
+- When multiple emails share the same subject
+- They appear grouped as a conversation thread
+- Click to expand and see the full conversation
 
-```bash
-curl -i -X DELETE http://localhost:8080/api/labels/Work-Updated -H 'user-id: 1'  
-```
-![Label Deletion Confirmation](Images/15.png)
+![Thread View](Images/13.png)
 
-### 🚫 Add URL to Blacklist
+14. Mobile Responsive Design
+- The application adapts to different screen sizes
+- Sidebar collapses to icons on smaller screens
 
-```bash
-curl -i -X POST http://localhost:8080/api/blacklist -H 'Content-Type: application/json' -H 'user-id: 1' -d '{"url": "http://malicious.com"}'  
-```
-![Blacklist Addition Screen](Images/16.png)
+![Mobile View](Images/14.png)
 
-### 🗑️ Remove URL from Blacklist
+15. Theme Customization
+- Click on the settings icon
+- Choose between light and dark themes
 
-```bash
-curl -i -X DELETE "http://localhost:8080/api/blacklist/http%3A%2F%2Fmalicious.com" -H 'user-id: 1'  
-```
-![Blacklist Removal](Images/17.png)
+![Theme Settings](Images/15.png)

@@ -196,3 +196,49 @@
     width: 100%;
   }
 }
+
+/* Dark mode styles for login page */
+.login-container.dark {
+  background-color: #111111;
+}
+
+.login-content.dark {
+  background-color: #2C2C2C;
+  border-color: #444444;
+}
+
+.login-content.dark h1,
+.login-content.dark .login-title {
+  color: #E0E0E0;
+}
+
+.login-content.dark .login-subtitle,
+.login-content.dark .form-group label,
+.login-content.dark .show-password label,
+.login-content.dark .remember-me label {
+  color: #AAAAAA;
+}
+
+.login-content.dark .form-group input {
+  background-color: #3C4043;
+  color: #E0E0E0;
+  border-color: #5F6368;
+}
+
+.login-content.dark .form-group input:focus,
+.login-content.dark .form-group input:not(:placeholder-shown) {
+  border-color: #8AB4F8;
+}
+
+.login-content.dark .form-group input:focus + label,
+.login-content.dark .form-group input:not(:placeholder-shown) + label {
+  color: #8AB4F8;
+}
+
+.login-content.dark .forgot-password a {
+  color: #8AB4F8;
+}
+
+.login-content.dark .create-account-link {
+  color: #8AB4F8;
+}

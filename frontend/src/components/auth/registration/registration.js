@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './registration.css';
 import Client from '../../../services/Client';
+import { useTheme } from '../../../contexts/ThemeContext';
 const Registration = () => {
+	const {darkMode} = useTheme();
 	const navigate = useNavigate();
 
 	const [formData, setFormData] = useState({
@@ -100,8 +102,8 @@ const Registration = () => {
 	};
 
 	return (
-		<div className="registration-container">
-			<div className="registration-content">
+		<div className={`registration-container ${darkMode ? 'dark' : ''}`}>
+			<div className={`registration-content ${darkMode ? 'dark' : ''}`}>
 				{/* Google Logo */}
 				<div className="google-logo">
 					<img

@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import Client from '../../../services/Client';
 import './login.css';
 import { useUser } from '../../../contexts/UserContext';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 const Login = () => {
+	const { darkMode } = useTheme();
 	const { setUser, user } = useUser(); 
 	const navigate = useNavigate();
 	const [formData, setFormData] = useState({
@@ -83,8 +85,8 @@ const Login = () => {
 	}, [user]);
 
 	return (
-		<div className="login-container">
-			<div className="login-content">
+		<div className={`login-container ${darkMode ? 'dark' : ''}`}>
+			<div className={`login-content ${darkMode ? 'dark' : ''}`}>
 				{/* Google Logo */}
 				<div className="google-logo">
 					<img
