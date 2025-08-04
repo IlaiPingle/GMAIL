@@ -157,12 +157,6 @@ Each email has quick action buttons for:
 
 ![Email Actions](Images/12.png)
 
-#13. Email Thread View
-- When multiple emails share the same subject
-- They appear grouped as a conversation thread
-- Click to expand and see the full conversation
-
-![Thread View](Images/13.png)
 
 14. Mobile Responsive Design
 - The application adapts to different screen sizes
