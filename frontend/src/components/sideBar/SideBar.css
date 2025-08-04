@@ -31,24 +31,17 @@
     overflow: hidden;
     white-space: nowrap;
 }
-
 .sideBar.open .LabelsHeaderText,
 .sideBar:hover .LabelsHeaderText {
     margin-left: 16px; 
     width: auto;
     opacity: 1;
 }
-.label-options {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding: 8px 11px;
-}
+
 .sideBar.open .LabelsHeader,
 .sideBar:hover .LabelsHeader {
     justify-content: space-between;
-
+    
 }
 
 body.dark .LabelsHeaderText {

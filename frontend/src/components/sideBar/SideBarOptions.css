@@ -3,7 +3,7 @@
     align-items: center;
     justify-content: center;
     padding: 8px;
-    margin: 0 18px;
+    margin: 0 12px;
     border: none;
     border-radius: 100%;
     background-color: transparent;
@@ -36,6 +36,7 @@
     font-weight: 400;
     opacity: 0;
     width: 0;
+    margin-left: 0;
     overflow: hidden;
     white-space: nowrap;
     transition: none;
@@ -55,6 +56,32 @@
     padding-left: 26px;
     width: 256px;
     border-radius: 0 20px 20px 0;
+}
+.icon-more-container {
+    margin-left: auto;
+    min-width: 32px;
+    display: flex;
+    align-items: center;
+    opacity: 0;
+    display: none;
+}
+.sideBar:hover .icon-more-container,
+.sideBar.open .icon-more-container {
+    opacity: 1;
+    display: flex;
+}
+
+.icon-more{
+    font-size: 20px;
+    padding: none;
+    margin: none;
+    opacity: 0;
+    padding: none;
+}
+.sideBar:hover .icon-more,
+.sideBar.open .icon-more {
+    opacity: 1;
+    padding: none;
 }
 
 

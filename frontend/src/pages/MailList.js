@@ -30,8 +30,8 @@ function MailList() {
                 mails = await Client.getMailsByLabel(boxType);
             }
             console.log('MailList - Received mails:', mails);
-            setMails(mails || []);
-            setSelectedMail(new Set()); 
+            setMails(mails.sort((a, b) => new Date(b.dateCreated).getTime() - new Date(a.dateCreated || 0).getTime()));
+            setSelectedMail(new Set());
         } catch(error) {
             console.error("Error loading mails:", error);
             setMails([]);

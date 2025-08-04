@@ -119,13 +119,13 @@ const deleteLabel = async (labelName) => {
 	});
 	return handleResponse(response);
 }
-const updateLabel = async (labelName, newLabelName) => {
+const updateLabel = async (labelName, newName) => {
 	const url = `${API_URL}/labels/${encodeURIComponent(labelName)}`;
 	const response = await fetch(url, {
 		method: 'PATCH',
 		headers: defaultHeaders(),
 		credentials: 'include',
-		body: JSON.stringify({ newLabelName }),
+		body: JSON.stringify({ newName }),
 	});
 	return handleResponse(response);
 }

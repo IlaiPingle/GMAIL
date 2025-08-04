@@ -3,14 +3,14 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import MainLayout from './pages/MainLayout';
 import MailPage from './pages/mailPage';
 import Compose from './components/compose/Compose';
-import CreateLabel from './components/createLabel/CreateLabel';
 import Registration from './components/auth/registration/registration';
 import Login from './components/auth/login/login';
 import MailList from './pages/MailList';
 import ProtectedRoute from './services/ProtectedRoute';
-import './App.css';
 import { UserProvider } from './contexts/UserContext'; // Assuming you have a UserContext for user state management
 import { ThemeProvider } from './contexts/ThemeContext';
+import ModalProvider from './contexts/ModalContext';
+import './App.css';
 
 function App() {
   return (
@@ -22,7 +22,9 @@ function App() {
             <Route path="/register" element={<Registration />} />
           <Route path="/" element={
             <ProtectedRoute>
-              <MainLayout />
+              <ModalProvider>
+                <MainLayout />
+              </ModalProvider>
             </ProtectedRoute>
           }>
             <Route index element={<Navigate to="/inbox" />} />
@@ -32,7 +34,6 @@ function App() {
             <Route path="label/:boxType/:mailId" element={<MailPage />} />
             <Route path="search" element={<MailList />} />
             <Route path="compose" element={<Compose />} />
-            <Route path="create-label" element={<CreateLabel />} />
           </Route>
         </Routes>
       </Router>
