@@ -122,30 +122,23 @@ or: `ctrl+c` at the same terminal
 
 ### Security Features
 
-9. Security Warning for Malicious URLs
-- When composing an email with a suspicious URL
-- The system shows a warning before sending
-- You can choose to remove the URL or send anyway
-
-![Security Warning](Images/9.png)
-
-10. Reporting Spam
+9. Reporting Spam
 - Open an unwanted email
 - Click "Report Spam" button
 - The email is moved to spam folder and its sender patterns are recorded
 
-![Report Spam](Images/10.png)
+![Report Spam](Images/9.png)
 
 ### Advanced Features
 
-11. Searching Emails
+10. Searching Emails
 - Type keywords in the search bar at the top
 - Results update when you click the enter button, or the "search" icon
 - Click on any result to open that email
 
-![Email Search](Images/11.png)
+![Email Search](Images/10.png)
 
-12. Email Actions
+11. Email Actions
 Each email has quick action buttons for:
 - Back to the previous screen
 - Report as Spam
@@ -153,23 +146,16 @@ Each email has quick action buttons for:
 - Mark as unread
 - Move to label
 
-![Email Actions](Images/12.png)
+![Email Actions](Images/11.png)
 
-#13. Email Thread View
-- When multiple emails share the same subject
-- They appear grouped as a conversation thread
-- Click to expand and see the full conversation
-
-![Thread View](Images/13.png)
-
-14. Mobile Responsive Design
+12. Mobile Responsive Design
 - The application adapts to different screen sizes
 - Sidebar collapses to icons on smaller screens
 
-![Mobile View](Images/14.png)
+![Mobile View](Images/12.png)
 
-15. Theme Customization
+13. Theme Customization
 - Click on the settings icon
 - Choose between light and dark themes
 
-![Theme Settings](Images/15.png)
+![Theme Settings](Images/13.png)
