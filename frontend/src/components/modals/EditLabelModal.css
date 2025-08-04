@@ -1,0 +1,61 @@
+.label-menu-popover {
+    background: #fff;
+    border: 1px solid #dadce0;
+    min-width: 170px;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(60,64,67,.13), 0 1.5px 3px rgba(60,64,67,.11);
+    padding: 6px 0;
+    z-index: 1000;
+    font-family: inherit;
+    font-size: 15px;
+}
+
+
+
+.label-menu-item {
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #222;
+    cursor: pointer;
+    user-select: none;
+}
+
+.label-menu-item:hover {
+    background: #f2f6fc;
+    color: #174ea6;
+}
+
+.label-menu-item .material-symbols-outlined {
+    font-size: 20px;
+    color: #818181;
+}
+
+.label-menu-item:hover .material-symbols-outlined {
+    color: #174ea6;
+}
+
+body.dark .label-menu-popover {
+    background: #282828;
+    border-color: #393939;
+    color: #e6e6e6;
+    box-shadow: 0 8px 32px rgba(0,0,0,.38), 0 1.5px 3px rgba(0,0,0,.22);
+}
+
+body.dark .label-menu-item {
+    color: #e6e6e6;
+}
+
+body.dark .label-menu-item:hover {
+    background: #353945;
+    color: #8ab4f8;
+}
+
+body.dark .label-menu-item .material-symbols-outlined {
+    color: #999;
+}
+
+body.dark .label-menu-item:hover .material-symbols-outlined {
+    color: #8ab4f8;
+}

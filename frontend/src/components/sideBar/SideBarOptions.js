@@ -13,7 +13,9 @@ function SideBarOptions({ text, icon, isActive, isCompose, onClick,onOptionClick
         <div className={`sideBarOption ${isActive ? 'selected' : ''} ${isCompose ? "compose" : ""}`} onClick={handleClick}>
             <span className={"material-symbols-outlined icon-sidebar"}>{icon}</span>
             <span className="sideBarText">{text}</span>
-            {icon ==='label' && <IconButton className="icon-more" onClick={(e) => { e.stopPropagation(); onOptionClick(); }} children="more_vert" />}
+            <div className="icon-more-container">
+            {icon ==='label' && <IconButton className="icon-more" onClick={(e) => { e.stopPropagation(); onOptionClick && onOptionClick(e); }} children="more_vert" />}
+            </div>
         </div>
     );
 }

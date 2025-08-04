@@ -26,6 +26,14 @@ EX1/
 ├── Bloom_Filter_Server/  # C++ security filter
 └── docker-compose.yml    # Container orchestration
 ```
+# ⚠️**Note**:
+You must add a .env file in the backend folder for the system to work.
+At minimum, set a JWT_SECRET variable, for example:
+
+`EX1/backend/.env`
+```
+JWT_SECRET=YourSecretKeyHere
+```
 
 ## Running the Application
 
@@ -39,6 +47,7 @@ EX1/
 # Start both servers
 docker-compose up --build
 ```
+
 
 This will:
 - Build and start the Frontend, Backend, and Bloom Filter Server

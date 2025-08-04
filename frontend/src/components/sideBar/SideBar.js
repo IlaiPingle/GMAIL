@@ -4,6 +4,7 @@ import IconButton from "../common/IconButton";
 import SideBarOptions from "./SideBarOptions";
 import { useNavigate, useLocation } from 'react-router-dom';
 import Client from "../../services/Client";
+import {useModal} from '../../contexts/ModalContext';
 
 const SYSTEM_LABELS = ['inbox','starred', 'sent', 'drafts','all mail','spam', 'bin'];
 const boxMap = new Map([
@@ -17,23 +18,11 @@ const boxMap = new Map([
       ["bin", "delete"],
     ]); 
 
-function SideBar({ isOpen , onOpenCreateLabel, onLabelCreated ,resetLabelCreated }) {
+function SideBar({ isOpen }) {
     const [labels, setLabels] = useState([]);
-    const [toggleLabelOptions, setToggleLabelOptions] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
-    const [labelToChange, setLabelToChange] = useState(null);
-
-    const deleteLabel = async (label) => {
-      if (!label) {
-        return;
-      }
-      try {
-          await Client.deleteLabel(label);
-      } catch (err) {
-          console.error('Error deleting label', err);
-      }
-    };
+    const {open} = useModal();
 
     // Fetch labels on mount
     useEffect(() => {
@@ -41,11 +30,13 @@ function SideBar({ isOpen , onOpenCreateLabel, onLabelCreated ,resetLabelCreated
     }, []);
 
     useEffect(() => {
-      if (onLabelCreated) {
-         fetchLabels();
-        resetLabelCreated(false);
-      }
-    }, [onLabelCreated, resetLabelCreated]);
+        fetchLabels();
+        const update = () => fetchLabels();
+        window.addEventListener('label:created', update);
+        return () => {
+            window.removeEventListener('label:created', update);
+        };
+    }, []);
 
     const fetchLabels = async () => {
         try {
@@ -86,7 +77,7 @@ function SideBar({ isOpen , onOpenCreateLabel, onLabelCreated ,resetLabelCreated
         </div>
         <div className="LabelsHeader">
           <span className="LabelsHeaderText">Labels</span>
-          <IconButton onClick={onOpenCreateLabel}>
+          <IconButton onClick={() => open("createLabel")}>
             add
           </IconButton>
         </div>
@@ -99,25 +90,13 @@ function SideBar({ isOpen , onOpenCreateLabel, onLabelCreated ,resetLabelCreated
             isActive={currentPath === `/label/${encodeURIComponent(label)}`}
             isCompose={false}
             onClick={() => navigate(`/label/${encodeURIComponent(label)}`)}
-            onOptionClick={() => { setToggleLabelOptions(!toggleLabelOptions)
-              setLabelToChange(label);
+            onOptionClick={e =>{
+              e.stopPropagation();
+              const rect = e.currentTarget.getBoundingClientRect();
+              open('labelMenu', { anchorRect: rect, labelName: label });
             }}
           />
         ))}
-        {toggleLabelOptions && (
-          <div className="label-options">
-            <IconButton onClick={() => {
-              setToggleLabelOptions(false);
-              // Add logic to handle label options here
-            }} children="close">
-            </IconButton>
-            <IconButton onClick={() => {
-              setToggleLabelOptions(false);
-              deleteLabel(labelToChange);
-            }} children="delete">
-            </IconButton>
-          </div>
-        )}
       </div>
     );
 }

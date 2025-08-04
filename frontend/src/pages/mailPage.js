@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import './mailPage.css';
 import Client from '../services/Client';
 import IconButton from '../components/common/IconButton';
+import './mailPage.css';
 import LabelMenu from '../components/labelMenu/LabelMenu';
 
 function MailPage() {

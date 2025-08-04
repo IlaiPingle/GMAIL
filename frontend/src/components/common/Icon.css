@@ -5,7 +5,7 @@
     color:rgb(95, 99, 104);
 }
 
-
+.icon-more,
 .icon-sidebar {
     font-size: 20px;
     font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
@@ -30,6 +30,7 @@
 }
 
 body.dark .icon-sidebar,
+body.dark .icon-more,
 body.dark .icon-header {
     color: rgba(255, 255, 255, 0);
 }

@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import './LabelMenu.css';
 import Client from '../../services/Client';
-
-function LabelMenu({ mail, onClose, show }) {
+const {useModal} = require('../../contexts/ModalContext');
+function LabelMenu({ mail, onClose, show ,set}) {
   const [labels, setLabels] = useState([]);
   const [labelSearchTerm, setLabelSearchTerm] = useState('');
   const [mailLabels, setMailLabels] = useState(mail?.labels || []);
-  const navigate = useNavigate();
+  const { open } = useModal();
 
   // Update local state when mail prop changes
   useEffect(() => {
@@ -52,8 +51,11 @@ function LabelMenu({ mail, onClose, show }) {
   );
 
   const handleCreateNewLabel = () => {
+    open("createLabel" ,{ onCreate : (newLabel) => {
+      handleLabelToggle(newLabel);
+      fetchLabels();
+    }});
     onClose();
-    navigate('/create-label');
   };
 
   useEffect(() => {
