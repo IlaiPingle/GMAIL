@@ -26,6 +26,14 @@ EX1/
 ├── Bloom_Filter_Server/  # C++ security filter
 └── docker-compose.yml    # Container orchestration
 ```
+# ⚠️**Note**:
+You must add a .env file in the backend folder for the system to work.
+At minimum, set a JWT_SECRET variable, for example:
+
+`EX1/backend/.env`
+```
+JWT_SECRET=YourSecretKeyHere
+```
 
 ## Running the Application
 
@@ -39,6 +47,7 @@ EX1/
 # Start both servers
 docker-compose up --build
 ```
+
 
 This will:
 - Build and start the Frontend, Backend, and Bloom Filter Server
@@ -121,13 +130,6 @@ or: `ctrl+c` at the same terminal
 ![Label Filtering](Images/8.png)
 
 ### Security Features
-
-9. Security Warning for Malicious URLs
-- When composing an email with a suspicious URL
-- The system shows a warning before sending
-- You can choose to remove the URL or send anyway
-
-![Security Warning](Images/9.png)
 
 10. Reporting Spam
 - Open an unwanted email
