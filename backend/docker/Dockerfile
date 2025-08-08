@@ -11,6 +11,7 @@ RUN npm install
 
 # copying application source code
 COPY ../src ./src
+COPY .env ./
 
 # Exposing the port on which the application will run
 EXPOSE 8080

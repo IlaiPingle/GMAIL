@@ -6,21 +6,21 @@ const EmailService = require('../services/emailService');
 * @returns  {Object} - The created email object or an error message.
 */
 async function sendNewMail(req, res) {
-    try{
-        const userId = req.userId; 
-        const mailId = Number(req.params.id);
-        const {receiver, subject, body} = req.body;
-        
-        if (!userId || !receiver || !mailId ) {
-            return  res.status(400).json({ message: 'missing required fields' });
-        }
-        const newMail = await EmailService.sendNewMail(userId, mailId, receiver, subject, body);
-        res.set('Location', `/api/mails/${newMail.id}`);
-        return res.status(201).json(newMail);
-    }
-    catch (error) {
-        return res.status(error.status || 500).json({ message: error.message  });
-    }
+	try {
+		const userId = req.userId;
+		const mailId = Number(req.params.id);
+		const { receiver, subject, body } = req.body;
+
+		if (!userId || !receiver || !mailId) {
+			return res.status(400).json({ message: 'missing required fields' });
+		}
+		const newMail = await EmailService.sendNewMail(userId, mailId, receiver, subject, body);
+		res.set('Location', `/api/mails/${newMail.id}`);
+		return res.status(201).json(newMail);
+	}
+	catch (error) {
+		return res.status(error.status || 500).json({ message: error.message });
+	}
 }
 /**
 * Get the last 50 mails from the user's inbox
@@ -28,17 +28,17 @@ async function sendNewMail(req, res) {
 * @param {*} res - The response object to send the result.
 * @returns {Object} - An array of the last 50 mails or an error message.
 */
-function getMails(req, res) {
-    try{
-        const userId = req.userId;
-        if (!userId) {
-            return res.status(400).json({ message: 'User ID is required' });
-        }
-        const mails = EmailService.getUserMails(userId);
-        return res.status(200).json(mails);
-    } catch (error) {
-        return res.status(error.status || 500).json({ message: error.message });
-    }
+async function getMails(req, res) {
+	try {
+		const userId = req.userId;
+		if (!userId) {
+			return res.status(400).json({ message: 'User ID is required' });
+		}
+		const mails = await EmailService.getUserMails(userId);
+		return res.status(200).json(mails);
+	} catch (error) {
+		return res.status(error.status || 500).json({ message: error.message });
+	}
 }
 
 /**
@@ -47,18 +47,18 @@ function getMails(req, res) {
 * @param {*} res - The response object to send the result.
 * @returns {Object} - The mail object if found or an error message.
 */
-function getMailById(req, res) {
-    try {
-        const userId = req.userId;
-        const mailId = Number(req.params.id);
-        if (!userId || !mailId) {
-            return res.status(400).json({ message: 'User ID and Mail ID are required' });
-        }
-        const mail = EmailService.getMailById(userId, mailId);
-        return res.status(200).json(mail);
-    } catch (error) {
-        return res.status(error.status || 500).json({ message: error.message });
-    }
+async function getMailById(req, res) {
+	try {
+		const userId = req.userId;
+		const mailId = Number(req.params.id);
+		if (!userId || !mailId) {
+			return res.status(400).json({ message: 'User ID and Mail ID are required' });
+		}
+		const mail = await EmailService.getMailById(userId, mailId);
+		return res.status(200).json(mail);
+	} catch (error) {
+		return res.status(error.status || 500).json({ message: error.message });
+	}
 }
 /**
 * Remove a mail by its ID
@@ -66,18 +66,18 @@ function getMailById(req, res) {
 * @param {*} res - The response object to send the result.
 * @returns {Object} - A success status or an error message.
 */
-function removeMail(req, res) {
-    try {
-        const userId = req.userId;
-        const mailId = Number(req.params.id);
-        if (!userId || !mailId) {
-            return res.status(400).json({ message: 'User ID and Mail ID are required' });
-        }
-        EmailService.removeMail(userId, mailId);
-        return res.status(204).end();
-    } catch (error) {
-        return res.status(error.status || 500).json({ message: error.message });
-    }
+async function removeMail(req, res) {
+	try {
+		const userId = req.userId;
+		const mailId = Number(req.params.id);
+		if (!userId || !mailId) {
+			return res.status(400).json({ message: 'User ID and Mail ID are required' });
+		}
+		await EmailService.removeMail(userId, mailId);
+		return res.status(204).end();
+	} catch (error) {
+		return res.status(error.status || 500).json({ message: error.message });
+	}
 }
 /**
 * Search for mails in the user's inbox based on a search term
@@ -85,18 +85,18 @@ function removeMail(req, res) {
 * @param {*} res - The response object to send the result.
 * @returns {Object} - An array of mails that match the search term or an error message.
 */
-function findInMails(req, res) {
-    try {
-        const userId = req.userId;
-        const searchTerm = req.query.q;
-        if (!userId || !searchTerm) {
-            return res.status(400).json({ message: 'User ID and search term are required' });
-        }
-        const foundMails = EmailService.searchMails(userId, searchTerm);
-        return res.status(200).json(foundMails);
-    } catch (error) {
-        return res.status(error.status || 500).json({ message: error.message });
-    }
+async function findInMails(req, res) {
+	try {
+		const userId = req.userId;
+		const searchTerm = req.query.q;
+		if (!userId || !searchTerm) {
+			return res.status(400).json({ message: 'User ID and search term are required' });
+		}
+		const foundMails = await EmailService.searchMails(userId, searchTerm);
+		return res.status(200).json(foundMails);
+	} catch (error) {
+		return res.status(error.status || 500).json({ message: error.message });
+	}
 }
 /**
 * Update a mail by its ID
@@ -104,48 +104,48 @@ function findInMails(req, res) {
 * @param {*} res - The response object to send the result.
 * @returns {Object} - The updated mail object or an error message.
 */
-function updatemail(req, res) {
-    try {
-        const userId = req.userId;
-        const mailId = Number(req.params.id); 
-        const { receiver , subject, body } = req.body;
+async function updatemail(req, res) {
+	try {
+		const userId = req.userId;
+		const mailId = Number(req.params.id);
+		const { receiver, subject, body } = req.body;
 
-        if (!userId || !mailId) {
-            return res.status(400).json({ message: 'User ID and Mail ID are required' });
-        }
-        EmailService.updateMail(userId,  mailId, receiver ,subject, body);
-        return res.status(204).end();
-    } catch (error) {
-        return res.status(error.status || 500).json({ message: error.message });
-    }
+		if (!userId || !mailId) {
+			return res.status(400).json({ message: 'User ID and Mail ID are required' });
+		}
+		await EmailService.updateMail(userId, mailId, receiver, subject, body);
+		return res.status(204).end();
+	} catch (error) {
+		return res.status(error.status || 500).json({ message: error.message });
+	}
 }
 
-function createNewDraft(req, res) {
-    try {
-        const userId = req.userId;
-        const { subject, body, receiver } = req.body;
+async function createNewDraft(req, res) {
+	try {
+		const userId = req.userId;
+		const { subject, body, receiver } = req.body;
 
-        if (!userId) {
-            return res.status(400).json({ message: 'User ID is required' });
-        }
-        const user = EmailService.getUserOrThrow(userId);
-        const newDraft = EmailService.createNewMail(user.username, receiver, subject, body);
-        user.mails.set(newDraft.id, newDraft);
-        newDraft.labels.push('drafts', 'all');
-        user.labels.get('drafts').mailIds.add(newDraft.id);
-        user.labels.get('all').mailIds.add(newDraft.id);
-        return res.status(201).json(newDraft);
-    } catch (error) {
-        return res.status(error.status || 500).json({ message: error.message });
-    }
+		if (!userId) {
+			return res.status(400).json({ message: 'User ID is required' });
+		}
+		const user = await EmailService.getUserOrThrow(userId);
+		const newDraft = await EmailService.createNewMail(user.username, receiver, subject, body);
+		user.mails.set(newDraft.id, newDraft);
+		newDraft.labels.push('drafts', 'all');
+		user.labels.get('drafts').mailIds.add(newDraft.id);
+		user.labels.get('all').mailIds.add(newDraft.id);
+		return res.status(201).json(newDraft);
+	} catch (error) {
+		return res.status(error.status || 500).json({ message: error.message });
+	}
 }
 
 module.exports = {
-    sendNewMail,
-    updatemail,
-    getMails,
-    createNewDraft,
-    getMailById,
-    removeMail,
-    findInMails
+	sendNewMail,
+	updatemail,
+	getMails,
+	createNewDraft,
+	getMailById,
+	removeMail,
+	findInMails
 }

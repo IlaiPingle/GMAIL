@@ -11,7 +11,8 @@ const { findUserById} = require('../Models/userModel');
 async function addURL(req, res) {
     try {
         const userId = req.userId;
-        if (findUserById(Number(userId)) === undefined) {
+        const user = await findUserById(userId);
+        if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
         const { url } = req.body;

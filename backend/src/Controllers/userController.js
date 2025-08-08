@@ -41,11 +41,11 @@ exports.registerUser = async (req, res) => {
 		return res.status(400).json({ message: validation.message });
 	}
 
-	const existingUser = User.findUserByUsername(username)
+	const existingUser = await User.findUserByUsername(username)
 	if (existingUser) {
 		return res.status(400).json({ message: 'Invalid username or password' })
 	}
-	const newUser = User.createUser(username, password, first_name, sur_name, picture)
+	const newUser = await User.createUser(username, password, first_name, sur_name, picture)
 	res.set('Location', `/api/users/${newUser.id}`);
 	res.status(201).json({
 		id: newUser.id,
@@ -67,12 +67,12 @@ exports.loginUser = async (req, res) => {
 		return res.status(400).json({ message: 'Username and password are required' })
 	}
 
-	const user = User.findUserByUsername(username)
+	const user = await User.findUserByUsername(username)
 
 	if (!user) {
 		return res.status(401).json({ message: 'Invalid username or password' });
 	}
-	const passwordMatch = user.password === password;
+	const passwordMatch = await bcrypt.compare(password, user.password);
 	if (!passwordMatch) {
 		return res.status(401).json({ message: 'Invalid username or password' });
 	}
