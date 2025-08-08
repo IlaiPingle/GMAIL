@@ -31,97 +31,111 @@ function validatePassword(password) {
 
 exports.registerUser = async (req, res) => {
 	try {
-	const { username, password, first_name, sur_name, picture } = req.body;
-	if (!username || !password || !first_name || !sur_name || picture === undefined) {
-		return res.status(400).json({ message: "Missing required fields" });
-	}
+		const { username, password, first_name, sur_name, picture } = req.body;
+		if (!username || !password || !first_name || !sur_name || picture === undefined) {
+			return res.status(400).json({ message: "Missing required fields" });
+		}
 
-	const validation = validatePassword(password);
-	if (!validation.valid) {
-		return res.status(400).json({ message: validation.message });
-	}
+		const validation = validatePassword(password);
+		if (!validation.valid) {
+			return res.status(400).json({ message: validation.message });
+		}
 
-	const existingUser = await User.findUserByUsername(username)
-	if (existingUser) {
-		return res.status(400).json({ message: 'Invalid username or password' })
-	}
-	const newUser = await User.createUser(username, password, first_name, sur_name, picture)
-	res.set('Location', `/api/users/${newUser.id}`);
-	res.status(201).json({
-		id: newUser.id,
-		username: newUser.username,
-		first_name: newUser.first_name,
-		sur_name: newUser.sur_name,
-		picture: newUser.picture
-	})
-} catch (error) {
+		const existingUser = await User.findUserByUsername(username)
+		if (existingUser) {
+			return res.status(400).json({ message: 'User already exists' })
+		}
+		const hashedPassword = await bcrypt.hash(password, 10); // Hash the password
+		const newUser = await User.createUser(username, hashedPassword, first_name, sur_name, picture);
+		res.set('Location', `/api/users/${newUser.id}`);
+		res.status(201).json({
+			id: newUser.id,
+			username: newUser.username,
+			first_name: newUser.first_name,
+			sur_name: newUser.sur_name,
+			picture: newUser.picture
+		})
+	} catch (error) {
 		console.error('Error registering user:', error);
 		res.status(500).json({ message: 'Internal server error' });
 	}
 }
 
 exports.loginUser = async (req, res) => {
-	const { username, password } = req.body
+	try {
+		const { username, password } = req.body
 
-	if (!username || !password) {
-		return res.status(400).json({ message: 'Username and password are required' })
-	}
+		if (!username || !password) {
+			return res.status(400).json({ message: 'Username and password are required' })
+		}
 
-	const user = await User.findUserByUsername(username)
+		const user = await User.findUserByUsername(username)
 
-	if (!user) {
-		return res.status(401).json({ message: 'Invalid username or password' });
-	}
-	const passwordMatch = await bcrypt.compare(password, user.password);
-	if (!passwordMatch) {
-		return res.status(401).json({ message: 'Invalid username or password' });
-	}
-	// Generate JWT token
-	if (!process.env.JWT_SECRET) {
-		console.error('JWT_SECRET is not set in environment variables');
-		return res.status(500).json({ message: 'Server configuration error' });
-	}
-	const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' })
-	res.cookie('token', token, {
-		httpOnly: true,
-		secure: process.env.NODE_ENV === 'production',
-		sameSite: 'Strict',
-		maxAge: 60 * 60 * 1000 // 1 hour
-	})
+		if (!user) {
+			return res.status(401).json({ message: 'Invalid username or password' });
+		}
+		const passwordMatch = await bcrypt.compare(password, user.password);
+		if (!passwordMatch) {
+			return res.status(401).json({ message: 'Invalid username or password' });
+		}
+		// Generate JWT token
+		if (!process.env.JWT_SECRET) {
+			console.error('JWT_SECRET is not set in environment variables');
+			return res.status(500).json({ message: 'Server configuration error' });
+		}
+		const token = jwt.sign({ id: user._id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '24h' });
+		res.cookie('token', token, {
+			httpOnly: true,
+			secure: process.env.NODE_ENV === 'production',
+			sameSite: 'Strict',
+			maxAge: 24 * 60 * 60 * 1000 // 24 hours
+		})
 
-	res.status(200).json({ message: 'Login successful' })
-}
+		res.json({
+			message: 'Login successful',
+			user: {
+				id: user._id,
+				username: user.username,
+				first_name: user.first_name,
+				sur_name: user.sur_name
+			}
+		});
+	} catch (error) {
+		console.error('Error logging in user:', error);
+		res.status(500).json({ message: 'Internal server error' });
+	}
+};
 
 exports.logoutUser = (req, res) => {
-	res.clearCookie('token');
-	res.status(200).json({ message: 'Logged out successfully' });
-}
+		res.clearCookie('token');
+		res.status(200).json({ message: 'Logged out successfully' });
+	}
 
-exports.getUser = (req, res) => {
-	const Id = parseInt(req.params.id, 10)
-	const user = User.findUserById(Id)
-	if (!user) {
-		return res.status(404).json({ message: 'User not found' })
+	exports.getUser = (req, res) => {
+		const Id = parseInt(req.params.id, 10)
+		const user = User.findUserById(Id)
+		if (!user) {
+			return res.status(404).json({ message: 'User not found' })
+		}
+		res.status(200).json({
+			id: user.id,
+			username: user.username,
+			first_name: user.first_name,
+			sur_name: user.sur_name,
+			picture: user.picture,
+			labels: Array.from(user.labels.keys())
+		})
 	}
-	res.status(200).json({
-		id: user.id,
-		username: user.username,
-		first_name: user.first_name,
-		sur_name: user.sur_name,
-		picture: user.picture,
-		labels: Array.from(user.labels.keys())
-	})
-}
-exports.isSignedIn = (req, res) => {
-	const user = User.findUserById(req.userId);
-	console.log('User ID from token:', req.userId);
-	if (!user) {
-		return res.status(404).json({ message: 'User not found' });
+	exports.isSignedIn = (req, res) => {
+		const user = User.findUserById(req.userId);
+		console.log('User ID from token:', req.userId);
+		if (!user) {
+			return res.status(404).json({ message: 'User not found' });
+		}
+		res.status(200).json({
+			username: user.username,
+			first_name: user.first_name,
+			sur_name: user.sur_name,
+			picture: user.picture
+		});
 	}
-	res.status(200).json({
-		username: user.username,
-		first_name: user.first_name,
-		sur_name: user.sur_name,
-		picture: user.picture
-	});
-}
