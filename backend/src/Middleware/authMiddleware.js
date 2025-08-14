@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../Models/userModel'); 
+const {findUserById} = require('../services/userService'); 
 /*
  * Middleware to authenticate requests using JWT tokens stored in cookies.
  * This middleware checks for the presence of a token in the request cookies,
@@ -22,7 +22,7 @@ const authMiddleware = async (req, res, next) => {
 
         const decoded = jwt.verify(token, SECRET);
         req.userId = decoded.id;
-		const user = await User.findUserById(decoded.id);
+		const user = await findUserById(decoded.id);
 		if (!user) {
 			return res.status(404).json({ message: 'User not found' });
 		}

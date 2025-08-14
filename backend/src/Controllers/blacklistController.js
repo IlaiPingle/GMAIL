@@ -1,5 +1,5 @@
 const { sendCommand } = require('../services/blacklistClient');
-const { findUserById} = require('../Models/userModel');
+const { findUserById} = require('../services/userService');
 
 
 /**

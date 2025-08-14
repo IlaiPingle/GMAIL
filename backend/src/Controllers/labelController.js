@@ -13,8 +13,8 @@ async function createLabel(req, res) {
 		}
 
 		const newLabel = await LabelService.createLabel(userId, labelName);
-		res.set('Location', `/api/labels/${encodeURIComponent(labelName)}`);
-		return res.status(201).end();
+		res.set('Location', `/api/labels/${encodeURIComponent(newLabel.name)}`);
+		return res.status(201).json(newLabel);
 	} catch (error) {
 		return res.status(error.status || 500).json({ message: error.message || 'An error occurred while creating the label' });
 	}
@@ -66,7 +66,7 @@ async function updateLabel(req, res) {
 		}
 
 		await LabelService.updateLabel(userId, labelName, newName);
-		return res.status(204).json();
+		return res.status(204).end();
 	} catch (error) {
 		return res.status(error.status || 500).json({ message: error.message || 'An error occurred while updating the label' });
 	}
@@ -108,7 +108,7 @@ async function getMailsByLabel(req, res) {
 async function removeLabelFromMail(req, res) {
 	try {
 		const userId = req.userId;
-		const mailId = parseInt(req.params.id, 10);
+		const mailId = req.params.id;
 		const labelName = req.body.labelName;
 
 		if (!userId || !mailId || !labelName) {
@@ -124,7 +124,7 @@ async function removeLabelFromMail(req, res) {
 async function addLabelToMail(req, res) {
 	try {
 		const userId = req.userId;
-		const mailId = parseInt(req.params.id, 10);
+		const mailId = req.params.id;
 		const labelName = req.body.labelName;
 
 		if (!userId || !mailId || !labelName) {

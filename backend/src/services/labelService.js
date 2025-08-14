@@ -1,217 +1,224 @@
-const Users = require('../Models/userModel');
-const Email = require('../Models/emailModel');
-
+const { findUserById, isSystemLabel } = require("./userService");
+const Email = require("../Models/emailModel");
 /**
-* Create a new label for a user
-*/
+ * Create a new label for a user
+ */
 async function createLabel(userId, labelName) {
-	const user = await getUserOrThrow(userId); // Ensure user exists
-	if (user.labels.some(label => label.name === labelName)) { // Check if label already exists
-		const error = new Error('Label already exists');
-		error.status = 400;
-		throw error;
-	}
-	user.labels.push({ name: labelName, mailIds: [] });
-	await user.save(); // Save the user with the new label
-	return { name: labelName }; // Return the created label
+  const user = await getUserOrThrow(userId);
+  if (isSystemLabel(labelName)) {
+    const error = new Error("Cannot create system label");
+    error.status = 400;
+    throw error;
+  }
+  if (user.labels.some((label) => label.name === labelName)) {
+    // Check if label already exists
+    const error = new Error("Label already exists");
+    error.status = 400;
+    throw error;
+  }
+
+  user.labels.push({ name: labelName });
+  await user.save(); // Save the user with the new label
+  return { name: labelName }; // Return the created label
 }
 
 /**
-* Get all labels for a user
-*/
+ * Get all labels for a user
+ */
 async function getUserLabels(userId) {
-	const user = await getUserOrThrow(userId);
-	return user.labels
-		.filter(label => !Users.isSystemLabel(label.name)) // Filter out system labels
-		.map(label => label.name); // Return only label names
+  const user = await getUserOrThrow(userId);
+  return user.labels
+    .filter((label) => !isSystemLabel(label.name)) // Filter out system labels
+    .map((label) => label.name); // Return only label names
 }
 
 /**
-* Get a specific label by name
-*/
+ * Get a specific label by name
+ */
 async function getLabelByName(userId, labelName) {
-	const user = await getUserOrThrow(userId);
-	const label = user.labels.find(label => label.name === labelName);
-	if (!label) {
-		const error = new Error('Label not found');
-		error.status = 404;
-		throw error;
-	}
-
-	return label;
+  const user = await getUserOrThrow(userId);
+  const label = user.labels.find((label) => label.name === labelName);
+  if (!label) {
+    const error = new Error("Label not found");
+    error.status = 404;
+    throw error;
+  }
+  return label;
 }
 
 /**
-* Update a label name
-*/
+ * Update a label name
+ */
 async function updateLabel(userId, labelName, newName) {
-	const user = await getUserOrThrow(userId);
+  const user = await getUserOrThrow(userId);
+  if (isSystemLabel(newName)) {
+    const error = new Error("new name cannot be a system label");
+    error.status = 400;
+    throw error;
+  }
+  if (isSystemLabel(labelName)) {
+    const error = new Error("Cannot rename system label");
+    error.status = 400;
+    throw error;
+  }
+  // Check if label exists
+  const labelIndex = user.labels.findIndex((l) => l.name === labelName);
+  if (labelIndex === -1) {
+    const error = new Error("Label not found");
+    error.status = 404;
+    throw error;
+  }
+  // Check if new label name already exists
+  if (user.labels.some((l) => l.name === newName)) {
+    const error = new Error("Label with this name already exists");
+    error.status = 400;
+    throw error;
+  }
+  // Update label name
+  user.labels[labelIndex].name = newName;
+  await user.save();
 
-	// Check if label exists
-	const labelIndex = user.labels.findIndex(l => l.name === labelName);
-	if (labelIndex === -1) {
-		const error = new Error('Label not found');
-		error.status = 404;
-		throw error;
-	}
+  await Email.updateMany(
+    { owner: user._id, labels: labelName },
+    { $addToSet: { labels: newName }, $pull: { labels: labelName } }
+  );
 
-	// Check if new label name already exists
-	if (user.labels.some(l => l.name === newName)) {
-		const error = new Error('Label with this name already exists');
-		error.status = 400;
-		throw error;
-	}
-
-	// Get mail IDs associated with this label
-	const mailIds = user.labels[labelIndex].mailIds;
-
-	// Update label name
-	user.labels[labelIndex].name = newName;
-	await user.save();
-
-	// Update label name in emails
-	for (const mailId of mailIds) {
-		const mail = await Email.findById(mailId);
-		if (mail) {
-			mail.labels = mail.labels.map(label => label === labelName ? newName : label);
-			await mail.save();
-		}
-	}
-
-	return true;
+  return true;
 }
 
 /**
-* Delete a label
-*/
+ * Delete a label
+ */
 async function deleteLabel(userId, labelName) {
-	const user = await getUserOrThrow(userId);
-	const labelIndex = user.labels.findIndex(label => label.name === labelName);
-	if (labelIndex === -1) {
-		const error = new Error('Label not found');
-		error.status = 404;
-		throw error;
-	}
-	// Get mail IDs associated with this label
-	const mailIds = user.labels[labelIndex].mailIds;
-	user.labels.splice(labelIndex, 1); // Remove the label from the user's labels
-	await user.save();
+  const user = await getUserOrThrow(userId);
+  if (isSystemLabel(labelName)) {
+    const error = new Error("Cannot delete system label");
+    error.status = 400;
+    throw error;
+  }
 
-	// Remove the label from all associated mails
-	for (const mailId of mailIds) {
-		const mail = await Email.findById(mailId);
-		if (mail) {
-			mail.labels = mail.labels.filter(label => label !== labelName);
-			await mail.save();
-		}
-	}
-	return true;
+  const before = user.labels?.length || 0;
+  user.labels = user.labels.filter((label) => label.name !== labelName);
+  if (before === user.labels?.length) {
+    const error = new Error("Label not found");
+    error.status = 404;
+    throw error;
+  }
+  await user.save();
+
+  // Remove the label from all associated mails
+  await Email.updateMany(
+    { owner: user._id, labels: labelName },
+    { $pull: { labels: labelName } }
+  );
+  return true;
 }
 
 async function addLabelToMail(userId, mailId, labelName) {
-	const user = await getUserOrThrow(userId);
-	const mail = await Email.findOne({ _id: mailId, user: user._id });
-	// Check if mail exists
-	if (!mail) {
-		const error = new Error('Mail not found');
-		error.status = 404;
-		throw error;
-	}
-	// Check if label exists
-	const label = user.labels.find(label => label.name === labelName);
-	if (!label) {
-		const error = new Error('Label not found');
-		error.status = 404;
-		throw error;
-	}
-	// Add label to the mail if it doesn't already exist
-	if (!mail.labels.includes(labelName)) {
-		mail.labels.push(labelName);
-		await mail.save();
-	}
-	// Add mail ID to the label's mailIds if it doesn't already exist
-	if (!label.mailIds.some(id => id.toString() === mailId.toString())) {
-		label.mailIds.push(mail._id);
-		await user.save();
-	}
-	return true;
+  const user = await getUserOrThrow(userId);
+  const exists =
+    isSystemLabel(labelName) ||
+    user.labels.some((label) => label.name === labelName);
+  // Check if label exists
+  if (!exists) {
+    const error = new Error("Label not found");
+    error.status = 404;
+    throw error;
+  }
+  try {
+    const res = await Email.updateOne(
+      { _id: mailId, owner: user._id },
+      { $addToSet: { labels: labelName } }
+    );
+    if (res.matchedCount === 0) {
+      const error = new Error("Mail not found");
+      error.status = 404;
+      throw error;
+    }
+  } catch (error) {
+    if (error?.name === "CastError") {
+      const castError = new Error("Invalid mail ID");
+      castError.status = 400;
+      throw castError;
+    }
+    throw error;
+  }
+  return true;
 }
 /**
  * Remove a label from a mail
  */
 async function removeLabelFromMail(userId, mailId, labelName) {
-	const user = await getUserOrThrow(userId);
-	const mail = await Email.findOne({ id: mailId, userId: user._id });
-	if (!mail) {
-		const error = new Error('Mail not found');
-		error.status = 404;
-		throw error;
-	}
-	// Remove label from the mail
-	mail.labels = mail.labels.filter(label => label !== labelName);
-	await mail.save();
-
-	const label = user.labels.find(label => label.name === labelName);
-	if (label) {
-		// Remove mail ID from the label's mailIds
-		label.mailIds = label.mailIds.filter(id => id.toString() !== mailId.toString());
-		await user.save();
-	}
-	return true;
+  const user = await getUserOrThrow(userId);
+  try {
+    const res = await Email.updateOne(
+      { _id: mailId, owner: user._id },
+      { $pull: { labels: labelName } }
+    );
+    if (res.matchedCount === 0) {
+      const error = new Error("Mail not found");
+      error.status = 404;
+      throw error;
+    }
+    return true;
+  } catch (error) {
+    if (error?.name === "CastError") {
+      const castError = new Error("Invalid mail ID");
+      castError.status = 400;
+      throw castError;
+    }
+    throw error;
+  }
 }
 /**
  * Get all mails associated with a specific label for a user
  */
 async function getMailsByLabel(userId, labelName) {
-	const user = await getUserOrThrow(userId);
-	// Find the label by name
-	const label = user.labels.find(label => label.name === labelName);
-	if (!label) {
-		const error = new Error('Label not found');
-		error.status = 404;
-		throw error;
-	}
-	// Fetch mails associated with the label
-	const mails = await Email.find({ _id: { $in: label.mailIds } }).sort({ dateCreated: -1 });
-	return mails;
+
+  const emails = await Email.find({ owner: userId, labels: labelName })
+    .sort({ createdAt: -1 })
+    .lean();
+	const mailsOut = emails.map(({ _id, ...rest }) => ({
+		id: _id.toString(),
+		...rest
+	}));
+	return mailsOut;
 }
 
 /**
-* Helper function to get a user or throw an error
-*/
+ * Helper function to get a user or throw an error
+ */
 async function getUserOrThrow(userId) {
-	if (!userId) {
-		const error = new Error('User ID is required');
-		error.status = 400;
-		throw error;
-	}
-	try {
-		const user = await Users.findUserById(userId);
-		if (!user) {
-			const error = new Error('User not found');
-			error.status = 404;
-			throw error;
-		}
-		return user;
-	} catch (error) {
-		if (error.kind === 'ObjectId') {
-			const notFoundError = new Error('User not found');
-			notFoundError.status = 404;
-			throw notFoundError;
-		}
-		throw error;
-	}
+  if (!userId) {
+    const error = new Error("User ID is required");
+    error.status = 400;
+    throw error;
+  }
+  try {
+    const user = await findUserById(userId);
+    if (!user) {
+      const error = new Error("User not found");
+      error.status = 404;
+      throw error;
+    }
+    return user;
+  } catch (error) {
+    if (error.name === "CastError") {
+      const notFoundError = new Error("User not found");
+      notFoundError.status = 404;
+      throw notFoundError;
+    }
+    throw error;
+  }
 }
 
-
-
 module.exports = {
-	createLabel,
-	getUserLabels,
-	getLabelByName,
-	updateLabel,
-	deleteLabel,
-	addLabelToMail,
-	getMailsByLabel,
-	removeLabelFromMail,
+  createLabel,
+  getUserLabels,
+  getLabelByName,
+  updateLabel,
+  deleteLabel,
+  addLabelToMail,
+  getMailsByLabel,
+  removeLabelFromMail,
 };

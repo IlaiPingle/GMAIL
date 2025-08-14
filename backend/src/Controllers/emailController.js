@@ -1,4 +1,5 @@
 const EmailService = require('../services/emailService');
+const UserService = require('../services/userService');
 /**
 * Send a new email
 * @param {*} req - The request object containing user ID, receiver, subject, and body.
@@ -8,14 +9,14 @@ const EmailService = require('../services/emailService');
 async function sendNewMail(req, res) {
 	try {
 		const userId = req.userId;
-		const mailId = Number(req.params.id);
+		const mailId = req.params.id;
 		const { receiver, subject, body } = req.body;
 
 		if (!userId || !receiver || !mailId) {
 			return res.status(400).json({ message: 'missing required fields' });
 		}
 		const newMail = await EmailService.sendNewMail(userId, mailId, receiver, subject, body);
-		res.set('Location', `/api/mails/${newMail.id}`);
+		res.set('Location', `/api/mails/${newMail._id}`);
 		return res.status(201).json(newMail);
 	}
 	catch (error) {
@@ -50,7 +51,7 @@ async function getMails(req, res) {
 async function getMailById(req, res) {
 	try {
 		const userId = req.userId;
-		const mailId = Number(req.params.id);
+		const mailId = req.params.id;
 		if (!userId || !mailId) {
 			return res.status(400).json({ message: 'User ID and Mail ID are required' });
 		}
@@ -69,7 +70,7 @@ async function getMailById(req, res) {
 async function removeMail(req, res) {
 	try {
 		const userId = req.userId;
-		const mailId = Number(req.params.id);
+		const mailId = req.params.id;
 		if (!userId || !mailId) {
 			return res.status(400).json({ message: 'User ID and Mail ID are required' });
 		}
@@ -107,7 +108,7 @@ async function findInMails(req, res) {
 async function updatemail(req, res) {
 	try {
 		const userId = req.userId;
-		const mailId = Number(req.params.id);
+		const mailId = req.params.id;
 		const { receiver, subject, body } = req.body;
 
 		if (!userId || !mailId) {
@@ -128,12 +129,11 @@ async function createNewDraft(req, res) {
 		if (!userId) {
 			return res.status(400).json({ message: 'User ID is required' });
 		}
-		const user = await EmailService.getUserOrThrow(userId);
-		const newDraft = await EmailService.createNewMail(user.username, receiver, subject, body);
-		user.mails.set(newDraft.id, newDraft);
-		newDraft.labels.push('drafts', 'all');
-		user.labels.get('drafts').mailIds.add(newDraft.id);
-		user.labels.get('all').mailIds.add(newDraft.id);
+		const user = await UserService.findUserById(userId);
+		if (!user) {
+			return res.status(404).json({ message: 'User not found' });
+		}
+		const newDraft = await EmailService.createNewMail(userId, user.username, receiver, subject, body);
 		return res.status(201).json(newDraft);
 	} catch (error) {
 		return res.status(error.status || 500).json({ message: error.message });
