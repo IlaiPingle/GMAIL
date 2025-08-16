@@ -11,12 +11,12 @@ const emailSchema = new Schema({
   },
   sender: {
     type: String,
-    required: true,
+    required: false,
     index: true
   },
   receiver: {
     type: String,
-    required: true,
+    required: false,
     index: true
   },
   subject: {

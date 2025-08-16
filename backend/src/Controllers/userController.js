@@ -97,14 +97,14 @@ exports.logoutUser = (req, res) => {
 	res.status(200).json({ message: 'Logged out successfully' });
 }
 
-exports.getUser = (req, res) => {
+exports.getUser = async (req, res) => {
 	const Id = req.params.id;
-	const user = UserService.findUserById(Id)
+	const user = await UserService.findUserById(Id)
 	if (!user) {
 		return res.status(404).json({ message: 'User not found' })
 	}
 	res.status(200).json({
-		id: user.id,
+		id: user._id.toString(),
 		username: user.username,
 		first_name: user.first_name,
 		sur_name: user.sur_name,

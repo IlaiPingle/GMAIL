@@ -8,36 +8,40 @@ const mongoose = require('mongoose');
 */
 async function sendNewMail(userId, mailId, receiver, subject, body) {
 	const senderUser = await findUserById(userId);
+	if (!senderUser) {
+		const e = new Error('Sender not found');
+		e.status = 404;
+		throw e;
+	}
 	const receiverUser = await findUserByUsername(receiver);
 	if (!receiverUser) {
 		const error = new Error('Receiver not found');
 		error.status = 404;
 		throw error;
 	}
-	// Get the sender's draft mail
-	const senderMail = await Email.findOneAndUpdate(
-		{ owner: userId, _id: mailId }, 
-		{
-			$set: {
-				sender: senderUser.username,
-				receiver: receiver,           
-				subject: subject ?? '',
-				body: body ?? '',
-			},
-			$addToSet: { labels: { $each: ['sent', 'all'] } },
-		},
-		{ new: true, lean: true }  
-	);
-	if (!senderMail) {
+	let mail = await Email.findOne({ owner: userId, _id: mailId });
+	if (!mail) {
 		const error = new Error('Draft mail not found');
 		error.status = 404;
 		throw error;
 	}
-	
-	
+	mail.sender = senderUser.username;
+	mail.receiver = receiver;
+	mail.subject = subject ?? '';
+	mail.body = body ?? '';
+	mail.labels = mail.labels.filter(label => label !== 'drafts');
+	if (!mail.labels.includes('sent')) {
+		// If not sent, mark as sent
+		mail.labels.push('sent');
+	}
+	if (!mail.labels.includes('all')) {
+		mail.labels.push('all');
+	}
+	await mail.save();
+
 	// Check security before sending to recipient
-	const isBlacklisted = await validateEmailSecurity(senderMail.sender, subject, body);
-	
+	const isBlacklisted = await validateEmailSecurity(mail.sender, subject, body);
+
 	// Create new mail for receiver
 	await Email.create({
 		owner: receiverUser._id,
@@ -47,7 +51,8 @@ async function sendNewMail(userId, mailId, receiver, subject, body) {
 		body: body ?? "",
 		labels: [isBlacklisted ? "spam" : "inbox", "all", "unread"],
 	});
-	const { _id, ...rest } = senderMail;
+	const savedMail = await Email.findOne({ _id: mail._id }).lean();
+	const { _id, ...rest } = savedMail;
 	return { id: _id.toString(), ...rest };
 }
 
@@ -55,7 +60,7 @@ async function sendNewMail(userId, mailId, receiver, subject, body) {
 * Get user's emails sorted by date
 */
 async function getUserMails(userId) {
-	const emails = await Email.find({ owner: userId }).sort({ createdAt: -1 }).lean();
+	const emails = await Email.find({ owner: userId }).sort({ createdAt: -1 }).limit(50).lean();
 	const mailsOut = emails.map(({ _id, ...rest }) => ({
 		id: _id.toString(),
 		...rest
@@ -73,8 +78,9 @@ async function getMailById(userId, mailId) {
 		error.status = 404;
 		throw error;
 	}
-	const { _id, ...rest } = mail;
-	return { id: _id.toString(), ...rest };
+	const mailObj = mail.toObject ? mail.toObject() : mail;
+	const { _id, ...rest } = mailObj;
+	return { id: _id.toString(), ...rest, body: rest.body || '' };
 }
 
 /**
@@ -103,7 +109,7 @@ async function searchMails(userId, searchTerm) {
 			{ subject: { $regex: searchTerm, $options: 'i' } },
 			{ body: { $regex: searchTerm, $options: 'i' } }
 		]
-	}).sort({ createdAt: -1 }).lean();
+	}).sort({ createdAt: -1 }).limit(50).lean();
 	return emails.map(({ _id, ...rest }) => ({
 		id: _id.toString(),
 		...rest

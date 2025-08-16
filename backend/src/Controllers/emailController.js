@@ -1,3 +1,4 @@
+const { default: mongoose } = require('mongoose');
 const EmailService = require('../services/emailService');
 const UserService = require('../services/userService');
 /**
@@ -10,17 +11,26 @@ async function sendNewMail(req, res) {
 	try {
 		const userId = req.userId;
 		const mailId = req.params.id;
-		const { receiver, subject, body } = req.body;
+		let { receiver, subject, body } = req.body;
 
 		if (!userId || !receiver || !mailId) {
 			return res.status(400).json({ message: 'missing required fields' });
 		}
+		if (!mongoose.isValidObjectId(mailId)) {
+			return res.status(400).json({ message: 'Invalid mail ID' });
+		}
+		const draftMail = await EmailService.getMailById(userId, mailId).catch(() => null);
+		subject = subject || draftMail?.subject || '';
+		body = body || (draftMail?.body || '');
 		const newMail = await EmailService.sendNewMail(userId, mailId, receiver, subject, body);
-		res.set('Location', `/api/mails/${newMail._id}`);
+		if (typeof res.location === 'function') {
+			res.location(`/api/mails/${newMail.id}`);
+		}
 		return res.status(201).json(newMail);
 	}
 	catch (error) {
-		return res.status(error.status || 500).json({ message: error.message });
+		console.error('Error sending new mail:', error);
+		return res.status(error.status || 500).json({ message: error.message || 'Internal Server Error' });
 	}
 }
 /**
@@ -136,7 +146,8 @@ async function createNewDraft(req, res) {
 		const newDraft = await EmailService.createNewMail(userId, user.username, receiver, subject, body);
 		return res.status(201).json(newDraft);
 	} catch (error) {
-		return res.status(error.status || 500).json({ message: error.message });
+		console.error('Error creating new draft:', error);
+		return res.status(error.status || 500).json({ message: error.message || 'Internal Server Error' });
 	}
 }
 

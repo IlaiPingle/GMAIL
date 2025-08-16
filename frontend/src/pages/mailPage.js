@@ -114,7 +114,7 @@ function MailPage() {
         <h1>{mail.subject || 'No Subject'}</h1>
         <p><strong>From:</strong> {mail.sender || 'Unknown Sender'}</p>
         <p><strong>To:</strong> {mail.receiver || 'Unknown Recipient'}</p>
-        <p><strong>Date:</strong> {new Date(mail.dateCreated || mail.date || mail.Date || mail.timestamp).toLocaleString()}</p>
+        <p><strong>Date:</strong> {new Date(mail.createdAt || mail.dateCreated || Date.now()).toLocaleString()}</p>
         <div className="mail-body">
           {mail.body || 'No content'}
         </div>
