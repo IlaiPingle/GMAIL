@@ -1,54 +1,48 @@
-const users = new Map(); // <key- userId, value-userObject>
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-// This variable is used to generate unique IDs for each user.
-let nextUserId = 1
-const SYSTEM_LABELS = ['inbox','starred', 'snoozed', 'important', 'chats', 'sent', 'drafts', 'bin', 'spam', 'all','scheduled', 'unread'];
-// This function creates a new user object and adds it to the users array.
-function createUser(username, password, first_name, sur_name, picture) {
-    userId = nextUserId++;
-    const newUser = {
-        id: userId,
-        username,
-        password,
-        first_name,
-        sur_name,
-        picture,
-        mails: new Map(),
-        labels : new Map()
-    }
-    
-    // Initialize system labels
-    SYSTEM_LABELS.forEach(labelName => {
-        newUser.labels.set(labelName, {
-            mailIds: new Set()
-        });
-    });
-    
-    users.set(userId, newUser);
-    return newUser;
-}
+const labelSchema = new Schema({
+	name: {
+		type: String,
+		required: true,
+	}
+});
 
-// This function find the user by its id and returns the user object.
-function findUserById(id) {
-    return users.get(id);
-}
+const userSchema = new Schema({
+	username: {
+		type: String,
+		required: true,
+		index: true,
+		unique: true
+	},
+	password: {
+		type: String,
+		required: true
+	},
+	first_name: {
+		type: String,
+		required: true
+	},
+	sur_name: {
+		type: String,
+		required: true
+	},
+	picture: String,
+	labels: {
+		type: [labelSchema],
+		default: []
+	}
+});
 
-// This function find the user by its username and returns the user object.
-
-function findUserByUsername(username) {
-    return Array.from(users.values()).find((user) =>
-        user.username === username);
-}
-function isSystemLabel(labelName) {
-    return SYSTEM_LABELS.includes(labelName.toLowerCase());
-}
+// System labels are predefined labels that are used in the application.
+const SYSTEM_LABELS = ['inbox', 'starred', 'snoozed', 'important', 'chats', 'sent', 'drafts', 'bin', 'spam', 'all', 'scheduled', 'unread'];
 
 
+
+
+const User = mongoose.model('User', userSchema);
 
 module.exports = {
-    users,
-    createUser,
-    findUserById,
-    findUserByUsername,
-    isSystemLabel,
-}
+	User,
+	SYSTEM_LABELS
+};

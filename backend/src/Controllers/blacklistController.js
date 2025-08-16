@@ -1,5 +1,5 @@
 const { sendCommand } = require('../services/blacklistClient');
-const { findUserById} = require('../Models/userModel');
+const { findUserById} = require('../services/userService');
 
 
 /**
@@ -11,7 +11,8 @@ const { findUserById} = require('../Models/userModel');
 async function addURL(req, res) {
     try {
         const userId = req.userId;
-        if (findUserById(Number(userId)) === undefined) {
+        const user = await findUserById(userId);
+        if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
         const { url } = req.body;
@@ -45,9 +46,10 @@ async function addURL(req, res) {
 async function removeURL(req, res) {
     try {
         const userId = req.userId;
-        if (findUserById(Number(userId)) === undefined) {
-            return res.status(404).json({ error: "User not found" });
-        }
+        const user = await findUserById(userId);
+		if (!user) {
+			return res.status(404).json({ error: "User not found" });
+		}
         const url = decodeURIComponent(req.params.id);
         if (!url) {
             return res.status(400).json({ error: 'URL is required' });
