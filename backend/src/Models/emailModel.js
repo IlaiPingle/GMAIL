@@ -17,15 +17,18 @@ const emailSchema = new Schema({
   receiver: {
     type: String,
     required: false,
-    index: true
+    index: true,
+    maxlength: 50
   },
   subject: {
     type: String,
-    default: ''
+    default: '',
+    maxlength: 100
   },
   body: {
     type: String,
-    default: ''
+    default: '',
+    maxlength: 500
   },
   labels: {
     type: [String],

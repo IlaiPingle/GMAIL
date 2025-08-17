@@ -13,7 +13,7 @@ async function createLabel(userId, labelName) {
   if (user.labels.some((label) => label.name === labelName)) {
     // Check if label already exists
     const error = new Error("Label already exists");
-    error.status = 400;
+    error.status = 409;
     throw error;
   }
 
@@ -177,6 +177,7 @@ async function getMailsByLabel(userId, labelName) {
 
   const emails = await Email.find({ owner: userId, labels: labelName })
     .sort({ createdAt: -1 })
+	.limit(50)
     .lean();
 	const mailsOut = emails.map(({ _id, ...rest }) => ({
 		id: _id.toString(),

@@ -21,7 +21,8 @@ app.use(cors({
 }));
 
 app.use(cookieParser());
-app.use(bodyparser.json());
+app.use(bodyparser.json({ limit: '256kb' }));
+app.use(bodyparser.urlencoded({ extended: true, limit: '256kb' }));
 app.set('json spaces', 2);
 
 // Public routes (no authentication required)
