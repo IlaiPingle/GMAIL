@@ -1,6 +1,5 @@
 const { sendCommand } = require('../services/blacklistClient');
 const { findUserById} = require('../services/userService');
-const { URL } = require('url');
 
 
 /**
@@ -17,7 +16,7 @@ async function addURL(req, res) {
             return res.status(404).json({ message: 'User not found' });
         }
         const { url } = req.body;
-        if (typeof url !== 'string' || !/[^\s]/.test(url)) {
+        if (!url) {
             return res.status(400).json({ message: 'NO URL provided!' });
         }
         const response = await sendCommand('POST', url);
@@ -51,13 +50,8 @@ async function removeURL(req, res) {
 		if (!user) {
 			return res.status(404).json({ message: "User not found" });
 		}
-		let url;
-		try {
-			url = decodeURIComponent(req.params.id);
-		} catch (error) {
-			return res.status(400).json({ message: 'Invalid URL format' });
-		}
-        if (typeof url !== 'string' || !/[^\s]/.test(url)) {
+		const url = decodeURIComponent(req.params.id);
+        if (!url) {
             return res.status(400).json({ message: 'URL is required' });
         }
         const response = await sendCommand('DELETE', url);

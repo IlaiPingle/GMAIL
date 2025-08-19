@@ -1,5 +1,4 @@
 const UserService = require('../services/userService');
-const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
@@ -33,14 +32,8 @@ function validatePassword(password) {
 exports.registerUser = async (req, res) => {
 	try {
 		const { username, password, first_name, sur_name, picture } = req.body;
-		if (typeof username !== 'string' || typeof password !== 'string' || typeof first_name !== 'string' || typeof sur_name !== 'string') {
+		if (!username || !password || !first_name || !sur_name || !picture) {
 			return res.status(400).json({ message: 'Invalid input types' });
-		}
-		if (!/[^\s]/.test(username) || !/[^\s]/.test(first_name) || !/[^\s]/.test(sur_name)) {
-			return res.status(400).json({ message: 'Missing required fields' });
-		}
-		if (username.length < 3 || username.length > 20) {
-			return res.status(400).json({ message: 'Username must be between 3 and 20 characters long' });
 		}
 		const validation = validatePassword(password);
 		if (!validation.valid) {
@@ -72,14 +65,10 @@ exports.registerUser = async (req, res) => {
 exports.loginUser = async (req, res) => {
 	const { username, password } = req.body
 
-	if (typeof username !== 'string' || typeof password !== 'string') {
+		if (!username || !password) {
 		return res.status(400).json({ message: 'Username and password are required' })
 	}
-	if (!/[^\s]/.test(username) || password.length === 0) {
-		return res.status(400).json({ message: 'Username and password are required' });
-	}
 	const user = await UserService.findUserByUsername(username)
-
 	if (!user) {
 		return res.status(401).json({ message: 'Invalid username or password' });
 	}
@@ -111,7 +100,7 @@ exports.logoutUser = (req, res) => {
 exports.getUser = async (req, res) => {
 	try {
 		const Id = req.params.id;
-		if (typeof Id !== 'string' || !mongoose.isValidObjectId(Id)) {
+		if (!Id) {
 			return res.status(400).json({ message: 'Invalid user ID' });
 		}
 		const user = await UserService.findUserById(Id)

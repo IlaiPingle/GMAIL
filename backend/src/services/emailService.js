@@ -7,38 +7,16 @@ const mongoose = require('mongoose');
 * Send a new email with security validation
 */
 async function sendNewMail(userId, mailId, receiver, subject, body) {
-	if (!mongoose.isValidObjectId(mailId)) {
-		const error = new Error('Invalid mail ID');
-		error.status = 400;
-		throw error;
-	}
 	const senderUser = await findUserById(userId);
 	if (!senderUser) {
 		const e = new Error('Sender not found');
 		e.status = 404;
 		throw e;
 	}
-	if (typeof receiver !== 'string' || !/[^\s]/.test(receiver) || receiver.length < 3 || receiver.length > 50) {
-		const error = new Error('Invalid receiver');
-		error.status = 400;
-		throw error;
-	}
 	const receiverUser = await findUserByUsername(receiver);
 	if (!receiverUser) {
 		const error = new Error('Receiver not found');
 		error.status = 404;
-		throw error;
-	}
-	const subj = String(subject ?? '');
-	const bod = String(body ?? '');
-	if (subj.length > 100) {
-		const error = new Error('Subject must be at most 100 characters long');
-		error.status = 400;
-		throw error;
-	}
-	if (bod.length > 500) {
-		const error = new Error('Body must be at most 500 characters long');
-		error.status = 400;
 		throw error;
 	}
 	let mail = await Email.findOne({ owner: userId, _id: mailId });
@@ -49,8 +27,8 @@ async function sendNewMail(userId, mailId, receiver, subject, body) {
 	}
 	mail.sender = senderUser.username;
 	mail.receiver = receiver;
-	mail.subject = subj;
-	mail.body = bod;
+	mail.subject = subject ?? '';
+	mail.body = body ?? '';
 	mail.labels = mail.labels.filter(label => label !== 'drafts');
 	if (!mail.labels.includes('sent')) {
 		// If not sent, mark as sent
@@ -69,8 +47,8 @@ async function sendNewMail(userId, mailId, receiver, subject, body) {
 		owner: receiverUser._id,
 		sender: senderUser.username,
 		receiver: receiver,
-		subject: subj,
-		body: bod,
+		subject: subject ?? "",
+		body: body ?? "",
 		labels: [isBlacklisted ? "spam" : "inbox", "all", "unread"],
 	});
 	const savedMail = await Email.findOne({ _id: mail._id }).lean();
@@ -123,15 +101,13 @@ async function removeMail(userId, mailId) {
 * Search emails by term
 */
 async function searchMails(userId, searchTerm) {
-	const escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-	const rx = new RegExp(escape(String(searchTerm)), 'i');
 	const emails = await Email.find({
 		owner: userId,
 		$or: [
-			{ sender: rx },
-			{ receiver: rx },
-			{ subject: rx },
-			{ body: rx }
+			{ sender: { $regex: searchTerm, $options: 'i' } },
+			{ receiver: { $regex: searchTerm, $options: 'i' } },
+			{ subject: { $regex: searchTerm, $options: 'i' } },
+			{ body: { $regex: searchTerm, $options: 'i' } }
 		]
 	}).sort({ createdAt: -1 }).limit(50).lean();
 	return emails.map(({ _id, ...rest }) => ({
@@ -144,71 +120,12 @@ async function searchMails(userId, searchTerm) {
 * Update email content
 */
 async function updateMail(userId, mailId, receiver, subject, body) {
-	if (!mongoose.isValidObjectId(mailId)) {
-		const error = new Error('Invalid mail ID');
-		error.status = 400;
-		throw error;
-	}
 	const mail = await Email.findOne({ owner: userId, _id: mailId });
 	if (!mail) {
 		const error = new Error('Mail not found');
 		error.status = 404;
 		throw error;
 	}
-	
-	if (receiver !== undefined) {
-		if (typeof receiver !== 'string') {
-			const error = new Error('Invalid receiver');
-			error.status = 400;
-			throw error;
-		}
-		if (receiver !== '' && !/[^\s]/.test(receiver)) {
-			const error = new Error('Invalid receiver');
-			error.status = 400;
-			throw error;
-		}
-		if (receiver.length > 50) {
-			const error = new Error('Receiver must be at most 50 characters long');
-			error.status = 400;
-			throw error;
-		}
-		if (receiver !== '') {
-			const user = await findUserByUsername(receiver);
-			if (!user) {
-				const error = new Error('Receiver not found');
-				error.status = 404;
-				throw error;
-			}
-		}
-		mail.receiver = receiver;
-	}
-	if (subject !== undefined) {
-		if (typeof subject !== 'string') {
-			const error = new Error('Invalid subject');
-			error.status = 400;
-			throw error;
-		}
-		if (subject.length > 100) {
-			const error = new Error('Subject must be at most 100 characters long');
-			error.status = 400;
-			throw error;
-		}
-		mail.subject = subject;
-	}
-	if (body !== undefined) {
-		if (typeof body !== 'string') {
-			const error = new Error('Invalid body');
-			error.status = 400;
-			throw error;
-		}
-		if (body.length > 500) {
-			const error = new Error('Body must be at most 500 characters long');
-			error.status = 400;
-			throw error;
-		}
-		mail.body = body;
-	}
-
 	const savedMail = await mail.save();
 	const { _id, ...rest } = savedMail.toObject();
 	return { id: _id.toString(), ...rest };
@@ -221,12 +138,9 @@ async function validateEmailSecurity(sender, subject, body) {
 	const text = `${sender || ''} ${subject || ''} ${body || ''}`;
 	const urlRegex = /^https?:\/\/[^\s]+$/;
 	const words = text.split(/\s+/);
-	let checked = 0;
 	
 	for (const word of words) {
-		if (checked >= 20) break;
 		if (!urlRegex.test(word)) continue;
-		checked++;
 		try {
 			const response = await sendCommand('GET', word);
 			if (response.startsWith("200") && response.includes("True")) {
@@ -242,39 +156,15 @@ async function validateEmailSecurity(sender, subject, body) {
 }
 
 /**
-* Crreate a new mail draft
+* Create a new mail draft
 */
 async function createNewMail(userId ,sender, receiver, subject, body) {
-	const subj = String(subject ?? '');
-	const bod = String(body ?? '');
-	if (subj.length > 100) {
-		const error = new Error('Subject must be at most 100 characters long');
-		error.status = 400;
-		throw error;
-	}
-	if (bod.length > 500) {
-		const error = new Error('Body must be at most 500 characters long');
-		error.status = 400;
-		throw error;
-	}
-	if (receiver !== undefined) {
-		if (typeof receiver !== 'string') {
-			const error = new Error('Invalid receiver');
-			error.status = 400;
-			throw error;
-		}
-		if (receiver !== '' && !/[^\s]/.test(receiver) || receiver.length > 50) {
-			const error = new Error('Invalid receiver');
-			error.status = 400;
-			throw error;
-		}
-	}
 	const newMail = new Email({
 		owner: userId,
 		sender: sender || '',
 		receiver: receiver || '',
-		subject: subj,
-		body: bod,
+		subject: subject || '',
+		body: body || '',
 		labels: ['drafts', 'all'],
 	});
 	const savedMail = await newMail.save();

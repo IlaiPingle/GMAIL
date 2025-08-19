@@ -6,7 +6,6 @@ const HOST = 'bloom-server'; // while running in docker, this should be the name
 function sendCommand(command, url) {
 	return new Promise((resolve, reject) => {
 		const client = new net.Socket();
-		client.setTimeout(5000); // Set timeout to 5 seconds
 		let response = '';
 		client.connect(PORT, HOST, () => {
 			client.write(`${command} ${url}\n`);
@@ -20,11 +19,6 @@ function sendCommand(command, url) {
 		});
 		client.on('end', () => {
 			resolve(response.trim());
-		});
-
-		client.on('timeout', () => {
-			client.destroy();
-			reject(new Error('Request timed out'));
 		});
 
 		client.on('error', (err) => {

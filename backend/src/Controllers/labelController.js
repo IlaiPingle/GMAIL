@@ -1,5 +1,4 @@
 const LabelService = require('../services/labelService');
-const mongoose = require('mongoose');
 
 /**
 * Create a new label
@@ -9,11 +8,8 @@ async function createLabel(req, res) {
 		const userId = req.userId
 		const { labelName } = req.body;
 
-		if (!userId || typeof labelName !== 'string' || !/[^\s]/.test(labelName)) {
+		if (!userId || !labelName) {
 			return res.status(400).json({ message: 'User ID and label name are required' });
-		}
-		if (labelName.length > 30) {
-			return res.status(400).json({ message: 'Label name must be at most 30 characters long' });
 		}
 		const newLabel = await LabelService.createLabel(userId, labelName);
 		res.set('Location', `/api/labels/${encodeURIComponent(newLabel.name)}`);
@@ -44,11 +40,8 @@ async function getLabelById(req, res) {
 		const userId = req.userId;
 		const labelName = req.params.id;
 
-		if (!userId || typeof labelName !== 'string' || !/[^\s]/.test(labelName)) {
+		if (!userId || !labelName) {
 			return res.status(400).json({ message: 'User ID and label ID are required' });
-		}
-		if (labelName.length > 30) {
-			return res.status(400).json({ message: 'Label name must be at most 30 characters long' });
 		}
 		const label = await LabelService.getLabelByName(userId, labelName);
 		return res.status(200).json(label);
@@ -66,11 +59,8 @@ async function updateLabel(req, res) {
 		const labelName = req.params.id;
 		const { newName } = req.body;
 
-		if (!userId || typeof labelName !== 'string' || typeof newName !== 'string' || !/[^\s]/.test(newName)) {
+		if (!userId || !labelName || !newName) {
 			return res.status(400).json({ message: 'User ID, label ID, and new name are required' });
-		}
-		if (newName.length > 30) {
-			return res.status(400).json({ message: 'Label name must be at most 30 characters long' });
 		}
 		await LabelService.updateLabel(userId, labelName, newName);
 		return res.status(204).end();
@@ -87,11 +77,8 @@ async function deleteLabel(req, res) {
 		const userId = req.userId;
 		const labelName = req.params.id;
 
-		if (!userId || typeof labelName !== 'string' || !/[^\s]/.test(labelName)) {
+		if (!userId || !labelName) {
 			return res.status(400).json({ message: 'User ID and label ID are required' });
-		}
-		if (labelName.length > 30) {
-			return res.status(400).json({ message: 'Label name must be at most 30 characters long' });
 		}
 		await LabelService.deleteLabel(userId, labelName);
 		return res.status(204).end();
@@ -110,11 +97,8 @@ async function getMailsByLabel(req, res) {
 	try {
 		const userId = req.userId;
 		const labelName = req.query.label;
-		if (!userId || typeof labelName !== 'string' || !/[^\s]/.test(labelName)) {
+		if (!userId || !labelName) {
 			return res.status(400).json({ message: 'User ID and label name are required' });
-		}
-		if (labelName.length > 30) {
-			return res.status(400).json({ message: 'Label name must be at most 30 characters long' });
 		}
 		const mails = await LabelService.getMailsByLabel(userId, labelName);
 		return res.status(200).json(mails);
@@ -135,14 +119,8 @@ async function removeLabelFromMail(req, res) {
 		const mailId = req.params.id;
 		const { labelName } = req.body;
 
-		if (!userId || !mailId || typeof labelName !== 'string' || !/[^\s]/.test(labelName)) {
+		if (!userId || !mailId || !labelName) {
 			return res.status(400).json({ message: 'User ID, mail ID, and label name are required' });
-		}
-		if (!mongoose.isValidObjectId(mailId)) {
-			return res.status(400).json({ message: 'Invalid Mail ID' });
-		}
-		if (labelName.length > 30) {
-			return res.status(400).json({ message: 'Label name must be at most 30 characters long' });
 		}
 		await LabelService.removeLabelFromMail(userId, mailId, labelName);
 		return res.status(204).end();
@@ -163,14 +141,8 @@ async function addLabelToMail(req, res) {
 		const mailId = req.params.id;
 		const { labelName } = req.body;
 
-		if (!userId || !mailId || typeof labelName !== 'string' || !/[^\s]/.test(labelName)) {
+		if (!userId || !mailId || !labelName) {
 			return res.status(400).json({ message: 'User ID, mail ID, and label name are required' });
-		}
-		if (!mongoose.isValidObjectId(mailId)) {
-			return res.status(400).json({ message: 'Invalid Mail ID' });
-		}
-		if (labelName.length > 30) {
-			return res.status(400).json({ message: 'Label name must be at most 30 characters long' });
 		}
 		await LabelService.addLabelToMail(userId, mailId, labelName);
 		return res.status(204).end();
