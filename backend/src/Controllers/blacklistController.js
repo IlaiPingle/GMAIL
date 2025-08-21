@@ -13,28 +13,28 @@ async function addURL(req, res) {
         const userId = req.userId;
         const user = await findUserById(userId);
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(404).json({ message: 'User not found' });
         }
         const { url } = req.body;
         if (!url) {
-            return res.status(400).json({ error: 'NO URL provided!' });
+            return res.status(400).json({ message: 'NO URL provided!' });
         }
         const response = await sendCommand('POST', url);
-        if (response === "201") {
+        if (response.startsWith('201')) {
             const newURL = encodeURIComponent(url);
             res.set('Location', `/api/blacklist/${newURL}`);
             return res.status(201).end();
         }
-        else if (response === "500") {
-            return res.status(500).json({error: "Internal Server Error (blacklist service)"});
+        else if (response.startsWith('500')) {
+            return res.status(500).json({message: "Internal Server Error (blacklist service)"});
         }
-        else if (response === "404") {
-            return res.status(404).json({ error: "Not Found (blacklist service)" });
+        else if (response.startsWith('404')) {
+            return res.status(404).json({ message: "Not Found (blacklist service)" });
         }
-        return res.status(400).json({ error: "Bad Request (blacklist service)"});
+        return res.status(400).json({ message: "Bad Request (blacklist service)"});
     }
     catch (error) {
-        return res.status(500).json({ error: "Web server ERROR!" });
+        return res.status(500).json({ message: "Web server ERROR!" });
     }
 }
 /**
@@ -48,23 +48,23 @@ async function removeURL(req, res) {
         const userId = req.userId;
         const user = await findUserById(userId);
 		if (!user) {
-			return res.status(404).json({ error: "User not found" });
+			return res.status(404).json({ message: "User not found" });
 		}
-        const url = decodeURIComponent(req.params.id);
+		const url = decodeURIComponent(req.params.id);
         if (!url) {
-            return res.status(400).json({ error: 'URL is required' });
+            return res.status(400).json({ message: 'URL is required' });
         }
         const response = await sendCommand('DELETE', url);
-        if (response === "204") {
+        if (response.startsWith('204')) {
             return res.status(204).end();
         }
-        else if (response === "404") {
-            return res.status(404).json({error: "Not Found (blacklist service)"});
+        else if (response.startsWith('404')) {
+            return res.status(404).json({message: "Not Found (blacklist service)"});
         }
-        return res.status(400).json({ error: "Bad Request (blacklist service)" });
+        return res.status(400).json({ message: "Bad Request (blacklist service)" });
     }
     catch (error) {
-        return res.status(500).json( { error: "Internal Server Error" });
+        return res.status(500).json( { message: "Internal Server Error" });
     }
 }
 

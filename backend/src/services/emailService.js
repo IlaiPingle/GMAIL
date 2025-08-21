@@ -126,11 +126,6 @@ async function updateMail(userId, mailId, receiver, subject, body) {
 		error.status = 404;
 		throw error;
 	}
-	
-	if (receiver !== undefined) mail.receiver = receiver;
-	if (subject !== undefined) mail.subject = subject;
-	if (body !== undefined) mail.body = body;
-
 	const savedMail = await mail.save();
 	const { _id, ...rest } = savedMail.toObject();
 	return { id: _id.toString(), ...rest };
@@ -146,7 +141,6 @@ async function validateEmailSecurity(sender, subject, body) {
 	
 	for (const word of words) {
 		if (!urlRegex.test(word)) continue;
-		
 		try {
 			const response = await sendCommand('GET', word);
 			if (response.startsWith("200") && response.includes("True")) {
@@ -162,7 +156,7 @@ async function validateEmailSecurity(sender, subject, body) {
 }
 
 /**
-* Crreate a new mail draft
+* Create a new mail draft
 */
 async function createNewMail(userId ,sender, receiver, subject, body) {
 	const newMail = new Email({

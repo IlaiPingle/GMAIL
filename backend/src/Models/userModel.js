@@ -5,6 +5,7 @@ const labelSchema = new Schema({
 	name: {
 		type: String,
 		required: true,
+		maxlength: 30
 	}
 });
 

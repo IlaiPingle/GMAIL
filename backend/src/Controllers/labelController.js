@@ -11,7 +11,6 @@ async function createLabel(req, res) {
 		if (!userId || !labelName) {
 			return res.status(400).json({ message: 'User ID and label name are required' });
 		}
-
 		const newLabel = await LabelService.createLabel(userId, labelName);
 		res.set('Location', `/api/labels/${encodeURIComponent(newLabel.name)}`);
 		return res.status(201).json(newLabel);
@@ -44,7 +43,6 @@ async function getLabelById(req, res) {
 		if (!userId || !labelName) {
 			return res.status(400).json({ message: 'User ID and label ID are required' });
 		}
-
 		const label = await LabelService.getLabelByName(userId, labelName);
 		return res.status(200).json(label);
 	} catch (error) {
@@ -64,7 +62,6 @@ async function updateLabel(req, res) {
 		if (!userId || !labelName || !newName) {
 			return res.status(400).json({ message: 'User ID, label ID, and new name are required' });
 		}
-
 		await LabelService.updateLabel(userId, labelName, newName);
 		return res.status(204).end();
 	} catch (error) {
@@ -83,7 +80,6 @@ async function deleteLabel(req, res) {
 		if (!userId || !labelName) {
 			return res.status(400).json({ message: 'User ID and label ID are required' });
 		}
-
 		await LabelService.deleteLabel(userId, labelName);
 		return res.status(204).end();
 	} catch (error) {
@@ -91,6 +87,12 @@ async function deleteLabel(req, res) {
 	}
 }
 
+/**
+ * Get mails by label
+ * @param {*} req - The request object containing user ID and label name.
+ * @param {*} res - The response object to send the result.
+ * @returns {Object} - An array of mails associated with the label or an error message.
+ */
 async function getMailsByLabel(req, res) {
 	try {
 		const userId = req.userId;
@@ -105,32 +107,43 @@ async function getMailsByLabel(req, res) {
 	}
 }
 
+/**
+ * Remove a label from a mail
+ * @param {*} req - The request object containing user ID, mail ID, and label name.
+ * @param {*} res - The response object to send the result.
+ * @returns {Object} - A success status or an error message.
+ */
 async function removeLabelFromMail(req, res) {
 	try {
 		const userId = req.userId;
 		const mailId = req.params.id;
-		const labelName = req.body.labelName;
+		const { labelName } = req.body;
 
 		if (!userId || !mailId || !labelName) {
 			return res.status(400).json({ message: 'User ID, mail ID, and label name are required' });
 		}
-
 		await LabelService.removeLabelFromMail(userId, mailId, labelName);
 		return res.status(204).end();
 	} catch (error) {
 		return res.status(error.status || 500).json({ message: error.message || 'An error occurred while removing the label from mails' });
 	}
 };
+
+/**
+ * Add a label to a mail
+ * @param {*} req - The request object containing user ID, mail ID, and label name.
+ * @param {*} res - The response object to send the result.
+ * @returns {Object} - A success status or an error message.
+ */
 async function addLabelToMail(req, res) {
 	try {
 		const userId = req.userId;
 		const mailId = req.params.id;
-		const labelName = req.body.labelName;
+		const { labelName } = req.body;
 
 		if (!userId || !mailId || !labelName) {
 			return res.status(400).json({ message: 'User ID, mail ID, and label name are required' });
 		}
-
 		await LabelService.addLabelToMail(userId, mailId, labelName);
 		return res.status(204).end();
 	} catch (error) {

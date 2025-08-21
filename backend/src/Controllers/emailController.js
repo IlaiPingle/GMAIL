@@ -1,4 +1,3 @@
-const { default: mongoose } = require('mongoose');
 const EmailService = require('../services/emailService');
 const UserService = require('../services/userService');
 /**
@@ -16,19 +15,15 @@ async function sendNewMail(req, res) {
 		if (!userId || !receiver || !mailId) {
 			return res.status(400).json({ message: 'missing required fields' });
 		}
-		if (!mongoose.isValidObjectId(mailId)) {
-			return res.status(400).json({ message: 'Invalid mail ID' });
-		}
 		const draftMail = await EmailService.getMailById(userId, mailId).catch(() => null);
-		subject = subject || draftMail?.subject || '';
-		body = body || (draftMail?.body || '');
-		const newMail = await EmailService.sendNewMail(userId, mailId, receiver, subject, body);
+		const finalSubject = subject !== undefined ? subject : (draftMail?.subject ?? '');
+		const finalBody = body !== undefined ? body : (draftMail?.body ?? '');
+		const newMail = await EmailService.sendNewMail(userId, mailId, receiver, finalSubject, finalBody);
 		if (typeof res.location === 'function') {
 			res.location(`/api/mails/${newMail.id}`);
 		}
 		return res.status(201).json(newMail);
-	}
-	catch (error) {
+	} catch (error) {
 		console.error('Error sending new mail:', error);
 		return res.status(error.status || 500).json({ message: error.message || 'Internal Server Error' });
 	}
@@ -100,8 +95,8 @@ async function findInMails(req, res) {
 	try {
 		const userId = req.userId;
 		const searchTerm = req.query.q;
-		if (!userId || !searchTerm) {
-			return res.status(400).json({ message: 'User ID and search term are required' });
+		if (!userId) {
+			return res.status(400).json({ message: 'User ID is required' });
 		}
 		const foundMails = await EmailService.searchMails(userId, searchTerm);
 		return res.status(200).json(foundMails);
@@ -131,6 +126,12 @@ async function updatemail(req, res) {
 	}
 }
 
+/**
+ * Create a new email draft
+ * @param {*} req - The request object containing user ID, subject, body, and receiver.
+ * @param {*} res - The response object to send the result.
+ * @returns {Object} - The created draft email object or an error message.
+ */
 async function createNewDraft(req, res) {
 	try {
 		const userId = req.userId;
