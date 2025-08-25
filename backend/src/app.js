@@ -16,10 +16,10 @@ mongoose.connect(process.env.MONGODB_URI)
 const app = express()
 
 app.use(cors({
-	origin: 'http://localhost:3000', // Adjust this to your frontend URL
+	origin: ['http://localhost:3000', 'http://10.0.2.2:8080'], // Adjust this to your frontend URL and Android emulator
 	credentials: true // Allow credentials (cookies) to be sent
 }));
-
+app.use('/uploads', express.static('uploads'));
 app.use(cookieParser());
 app.use(bodyparser.json({ limit: '256kb' }));
 app.use(bodyparser.urlencoded({ extended: true, limit: '256kb' }));

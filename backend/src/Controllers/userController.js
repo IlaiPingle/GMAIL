@@ -31,9 +31,13 @@ function validatePassword(password) {
 
 exports.registerUser = async (req, res) => {
 	try {
-		const { username, password, first_name, sur_name, picture } = req.body;
-		if (!username || !password || !first_name || !sur_name || !picture) {
+		const { username, password, first_name, sur_name } = req.body;
+		if (!username || !password || !first_name || !sur_name) {
 			return res.status(400).json({ message: 'Invalid input types' });
+		}
+		let picture = null;
+		if (req.file) {
+			picture = req.file.path;
 		}
 		const validation = validatePassword(password);
 		if (!validation.valid) {
