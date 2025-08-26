@@ -20,6 +20,8 @@ services:
     build:
       context: ./backend
       dockerfile: docker/Dockerfile
+    volumes:
+      - ./backend/uploads:/app/uploads
     ports:
       - "8080:8080"
     env_file:
