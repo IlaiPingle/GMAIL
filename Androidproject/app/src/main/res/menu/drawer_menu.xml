@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_all_inboxes"
+            android:icon="@drawable/ic_all_inbox"
+            android:title="All inboxes" />
+        <item
+            android:id="@+id/nav_inbox"
+            android:icon="@drawable/ic_inbox"
+            android:title="Inbox" />
+        <item
+            android:id="@+id/nav_starred"
+            android:icon="@drawable/ic_star"
+            android:title="Starred" />
+        <item
+            android:id="@+id/nav_snoozed"
+            android:icon="@drawable/ic_schedule"
+            android:title="Snoozed" />
+        <item
+            android:id="@+id/nav_sent"
+            android:icon="@drawable/ic_send"
+            android:title="Sent" />
+    </group>
+</menu>

@@ -17,7 +17,7 @@
         android:usesCleartextTraffic="true"
         android:theme="@style/Theme.App">
         <activity
-            android:name=".LoginActivity"
+            android:name=".ui.auth.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,11 +26,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.auth.MainActivity"
             android:exported="false">
         </activity>
         <activity
-            android:name=".HomeActivity"
+            android:name=".ui.email.HomeActivity"
             android:exported="false">
         </activity>
     </application>
