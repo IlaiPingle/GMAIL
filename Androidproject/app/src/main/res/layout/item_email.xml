@@ -1,84 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?attr/selectableItemBackground"
     android:paddingStart="16dp"
-    android:paddingTop="12dp"
     android:paddingEnd="16dp"
-    android:paddingBottom="12dp">
+    android:paddingTop="16dp"
+    android:paddingBottom="16dp"
+    android:background="?attr/selectableItemBackground">
 
     <TextView
-        android:id="@+id/tv_avatar"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:id="@+id/textSenderInitial"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
         android:background="@drawable/circle_background"
         android:gravity="center"
-        android:text="A"
-        android:textColor="@android:color/white"
         android:textSize="20sp"
+        android:textColor="@android:color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <ImageView
+        android:id="@+id/imgStar"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="8dp"
+        android:src="@android:drawable/btn_star_big_off"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
-        android:id="@+id/tv_sender"
+        android:id="@+id/textSender"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="8dp"
         android:ellipsize="end"
         android:maxLines="1"
-        android:textColor="@android:color/black"
         android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@+id/tv_time"
-        app:layout_constraintStart_toEndOf="@+id/tv_avatar"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="John Smith" />
+        app:layout_constraintEnd_toStartOf="@+id/textTime"
+        app:layout_constraintStart_toEndOf="@+id/textSenderInitial"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/tv_time"
+        android:id="@+id/textSubject"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/imgStar"
+        app:layout_constraintStart_toEndOf="@+id/textSenderInitial"
+        app:layout_constraintTop_toBottomOf="@+id/textSender" />
+
+    <TextView
+        android:id="@+id/textPreview"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@android:color/darker_gray"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textSenderInitial"
+        app:layout_constraintTop_toBottomOf="@+id/textSubject" />
+
+    <TextView
+        android:id="@+id/textTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="12:34 PM" />
-
-    <TextView
-        android:id="@+id/tv_subject"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textColor="@android:color/black"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/tv_avatar"
-        app:layout_constraintTop_toBottomOf="@+id/tv_sender"
-        tools:text="Meeting tomorrow" />
-
-    <TextView
-        android:id="@+id/tv_preview"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textSize="14sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/tv_avatar"
-        app:layout_constraintTop_toBottomOf="@+id/tv_subject"
-        tools:text="Hi, let's meet tomorrow to discuss the project..." />
-
-    <View
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_marginTop="8dp"
-        android:background="#EEEEEE"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_preview" />
-
+        app:layout_constraintEnd_toStartOf="@+id/imgStar"
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -50,4 +50,7 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
     implementation("androidx.security:security-crypto:1.1.0-alpha03")
     implementation("com.squareup.okhttp3:okhttp-urlconnection:4.11.0")
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    implementation("com.google.android.material:material:1.11.0")
 }

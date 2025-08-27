@@ -1,5 +1,9 @@
-package com.example.androidproject;
+package com.example.androidproject.model;
 
+/**
+ * Model class representing an individual email item.
+ * Used in the RecyclerView adapter for displaying emails.
+ */
 public class EmailItem {
     private String sender;
     private String subject;
@@ -8,6 +12,7 @@ public class EmailItem {
     private boolean isRead;
     private boolean isStarred;
 
+    // Constructor
     public EmailItem(String sender, String subject, String preview, String time, boolean isRead) {
         this.sender = sender;
         this.subject = subject;

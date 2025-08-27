@@ -1,4 +1,4 @@
-package com.example.androidproject;
+package com.example.androidproject.ui.email;
 
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -12,8 +12,9 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.androidproject.R;
-import com.example.androidproject.EmailItem;
+import com.example.androidproject.model.EmailItem;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,16 +42,29 @@ public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.EmailViewHol
             Color.parseColor("#795548")  // Brown 500
     };
 
+    /**
+     * Interface for handling email item clicks.
+     * Implemented by the hosting activity/fragment to respond to item selections.
+     */
     public interface OnEmailClickListener {
         void onEmailClick(int position);
     }
 
+    // Constructor
     public EmailAdapter(List<EmailItem> emailList, OnEmailClickListener listener) {
         this.emailList = new ArrayList<>(emailList);
         this.allEmails = new ArrayList<>(emailList);
         this.listener = listener;
     }
 
+    /**
+     * Creates new ViewHolder objects as needed.
+     * Inflates the item layout and initializes the ViewHolder.
+     * @param parent   The ViewGroup into which the new View will be added after it is bound to
+     *                 an adapter position.
+     * @param viewType The view type of the new View.
+     * @return
+     */
     @NonNull
     @Override
     public EmailViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -59,6 +73,13 @@ public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.EmailViewHol
         return new EmailViewHolder(view);
     }
 
+    /**
+     * Binds data to the ViewHolder at the specified position.
+     * Sets text, images, click listeners, and styles based on email properties.
+     * @param holder   The ViewHolder which should be updated to represent the contents of the
+     *                 item at the given position in the data set.
+     * @param position The position of the item within the adapter's data set.
+     */
     @Override
     public void onBindViewHolder(@NonNull EmailViewHolder holder, int position) {
         EmailItem email = emailList.get(position);
@@ -114,6 +135,11 @@ public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.EmailViewHol
 
     }
 
+    /**
+     * Sets the full list of email items and refreshes the adapter.
+     * Clears any existing items and adds the new ones.
+     * @param items The new list of email items to display.
+     */
     public void setItems(List<EmailItem> items) {
         allEmails.clear();
         allEmails.addAll(items);
@@ -122,16 +148,29 @@ public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.EmailViewHol
         notifyDataSetChanged();
     }
 
+    /**
+     * Gets the email item at the specified position.
+     * Useful for accessing item details in click handlers.
+     * @param position The position of the item in the adapter.
+     * @return The EmailItem at the given position.
+     */
     public EmailItem getItem(int position) {
         return emailList.get(position);
     }
 
+    // Total number of items
     @Override
     public int getItemCount() {
         return emailList.size();
     }
 
-    // Search filter by sender, subject, and preview
+    /**
+     * Provides filtering capabilities for the email list.
+     * Filters based on sender, subject, or preview text matching the query.
+     * Case-insensitive and trims whitespace.
+     * Updates the displayed list and notifies the adapter of changes.
+     * @return A Filter object for performing filtering operations.
+     */
     @Override
     public Filter getFilter() {
         return new Filter() {

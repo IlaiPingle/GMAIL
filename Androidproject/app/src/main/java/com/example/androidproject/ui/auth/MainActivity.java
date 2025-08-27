@@ -1,4 +1,4 @@
-package com.example.androidproject;
+package com.example.androidproject.ui.auth;
 
 import android.Manifest;
 import android.content.Intent;
@@ -32,10 +32,27 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.example.androidproject.ui.email.HomeActivity;
+import com.example.androidproject.R;
+import com.example.androidproject.util.TokenManager;
+import com.example.androidproject.util.ValidationUtils;
+import com.example.androidproject.api.ApiClient;
+import com.example.androidproject.api.ApiService;
+import com.example.androidproject.model.LoginResponse;
+import com.example.androidproject.model.RegisterResponse;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
+/**
+ * MainActivity handles user registration including:
+ * - Input fields for first name, last name, username, password, confirm password
+ * - Profile photo selection from gallery
+ * - Input validation with real-time feedback
+ * - API call to register user with multipart form data (including image upload)
+ * - Auto-login upon successful registration
+ * - Navigation to LoginActivity if user opts to sign in instead
+ */
 public class MainActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 100;
     private ImageView imgProfile;
@@ -45,6 +62,10 @@ public class MainActivity extends AppCompatActivity {
     private TextInputEditText etFirstName, etLastName, etUsername, etPassword, etConfirmPassword;
     private ProgressBar progressBar;
 
+    /**
+     * Launcher for image picker activity result
+     * Uses Activity Result API for better lifecycle handling
+     */
     private final ActivityResultLauncher<Intent> imagePickerLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -132,6 +153,13 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Check for storage permission and launch image picker
+     * Handles different permission requirements for Android versions
+     * Uses Activity Result API for permission request
+     * Opens image picker if permission is granted
+     * Otherwise, shows a toast message if permission is denied
+     */
     private void checkPermissionAndPickImage() {
         String permission;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -146,10 +174,24 @@ public class MainActivity extends AppCompatActivity {
             requestPermissionLauncher.launch(permission);
         }
     }
+
+    /**
+     * Launches an intent to pick an image from the device's gallery
+     * Uses Activity Result API to handle the result
+     * Sets the selected image URI and updates the ImageView
+     * to display the chosen profile photo
+     */
     private void openImagePicker() {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         imagePickerLauncher.launch(intent);
     }
+    /**
+     * Validates user input fields and submits registration data if valid
+     * Checks for empty fields, username format, password strength, and matching passwords
+     * Displays error messages on invalid fields
+     * Ensures a profile photo is selected before submission
+     * Calls uploadData() to perform the API call if all validations pass
+     */
     private void validateAndSubmit() {
         clearErrors();
 
@@ -202,6 +244,18 @@ public class MainActivity extends AppCompatActivity {
         uploadData(first, last, user, pass, selectedImageUri);
     }
 
+    /**
+     * Uploads registration data to the server using a multipart form request
+     * Includes text fields and the selected profile image
+     * Handles API response and errors
+     * On successful registration, saves user info and auto-logs in
+     * Displays appropriate toast messages for success or failure
+     * @param first    User's first name
+     * @param last     User's last name
+     * @param user     Desired username
+     * @param pass     Desired password
+     * @param imageUri URI of the selected profile image
+     */
     private void uploadData(String first, String last, String user, String pass, Uri imageUri) {
         showLoading(true);
         // Create API service
@@ -265,6 +319,14 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Automatically logs in the user after successful registration
+     * Makes an API call to the login endpoint with provided credentials
+     * On success, navigates to HomeActivity
+     * On failure, navigates to LoginActivity
+     * @param username The username to log in with
+     * @param password The password to log in with
+     */
     private void autoLogin(String username, String password) {
         ApiService api = ApiClient.getClient().create(ApiService.class);
         api.login(username, password).enqueue(new Callback<LoginResponse>() {
@@ -287,6 +349,10 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Clears all error messages from input fields
+     * Resets the error state of TextInputLayouts
+     */
     private void clearErrors() {
         tilFirstName.setError(null);
         tilLastName.setError(null);
@@ -295,10 +361,17 @@ public class MainActivity extends AppCompatActivity {
         tilConfirmPassword.setError(null);
     }
 
+    // Helper to get trimmed text from TextInputEditText
     private String getText(TextInputEditText et) {
         return et.getText() == null ? "" : et.getText().toString().trim();
     }
 
+    /**
+     * Converts a content URI to an absolute file path
+     * Handles different URI schemes and document providers
+     * @param uri The content URI to convert
+     * @return The absolute file path, or null if not found
+     */
     public String getFilePathFromUri(Uri uri) {
         String filePath;
         if (DocumentsContract.isDocumentUri(this, uri)) {
@@ -325,6 +398,12 @@ public class MainActivity extends AppCompatActivity {
         return filePath;
     }
 
+    /**
+     * Queries the MediaStore to get the file path from a content URI
+     * @param uri The content URI to query
+     * @param selection Optional selection criteria
+     * @return The file path as a string, or null if not found
+     */
     private String getPathFromMediaStore(Uri uri, String selection) {
         String path = null;
         String[] projection = {MediaStore.Images.Media.DATA};
@@ -339,6 +418,7 @@ public class MainActivity extends AppCompatActivity {
         return path;
     }
 
+    // Parse error message from response body
     private String parseError(ResponseBody errorBody) {
         try {
             return errorBody.string();
@@ -348,6 +428,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Shows or hides the loading indicator (ProgressBar)
+     * @param isLoading true to show loading, false to hide
+     */
     private void showLoading(boolean isLoading) {
         progressBar = findViewById(R.id.progress_bar);
         if (progressBar != null) {

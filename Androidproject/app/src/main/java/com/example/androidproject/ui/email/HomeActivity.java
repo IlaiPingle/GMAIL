@@ -1,6 +1,5 @@
-package com.example.androidproject;
+package com.example.androidproject.ui.email;
 
-import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -20,17 +19,19 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import com.example.androidproject.R;
+import com.example.androidproject.api.EmailApiService;
+import com.example.androidproject.model.EmailItem;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import java.util.ArrayList;
 import java.util.List;
-import com.example.androidproject.EmailApiService;
+
 import com.example.androidproject.model.EmailData;
-import com.example.androidproject.EmailAdapter;
-import com.example.androidproject.EmailItem;
-import com.example.androidproject.ApiClient;
+import com.example.androidproject.api.ApiClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -49,6 +50,7 @@ public class HomeActivity extends AppCompatActivity implements
     private final List<EmailItem> emailList = new ArrayList<>();
     private TabLayout tabLayout;
     private boolean isLoading = false;
+    private String currentLabel = "inbox";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +90,20 @@ public class HomeActivity extends AppCompatActivity implements
         tabLayout.addTab(tabLayout.newTab().setText("Primary"));
         tabLayout.addTab(tabLayout.newTab().setText("Social"));
         tabLayout.addTab(tabLayout.newTab().setText("Promotions"));
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                String category;
+                switch (tab.getPosition()) {
+                    case 1: category = "social"; break;
+                    case 2: category = "promotions"; break;
+                    default: category = "primary"; break;
+                }
+                filterEmailsByCategory(category);
+            }
+            @Override public void onTabUnselected(TabLayout.Tab tab) {}
+            @Override public void onTabReselected(TabLayout.Tab tab) {}
+        });
 
         // Setup RecyclerView
         recyclerView = findViewById(R.id.recyclerViewEmails);
@@ -196,19 +212,130 @@ public class HomeActivity extends AppCompatActivity implements
 
         // Handle navigation item clicks
         if (id == R.id.nav_all_inboxes) {
-            Toast.makeText(this, "All inboxes", Toast.LENGTH_SHORT).show();
+            currentLabel = "inbox";
+            fetchEmailsFromApi();
         } else if (id == R.id.nav_inbox) {
-            Toast.makeText(this, "Inbox", Toast.LENGTH_SHORT).show();
+            currentLabel = "inbox";
+            fetchEmailsFromApi();
         } else if (id == R.id.nav_starred) {
-            Toast.makeText(this, "Starred", Toast.LENGTH_SHORT).show();
+            filterEmailsByLabel("starred");
         } else if (id == R.id.nav_snoozed) {
-            Toast.makeText(this, "Snoozed", Toast.LENGTH_SHORT).show();
+            filterEmailsByLabel("snoozed");
         } else if (id == R.id.nav_sent) {
-            Toast.makeText(this, "Sent", Toast.LENGTH_SHORT).show();
+            currentLabel = "sent";
+            fetchEmailsFromApi();
         }
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    /**
+     * Filter emails by category (Primary, Social, Promotions).
+     */
+    private void filterEmailsByCategory(String category) {
+        if (swipeRefreshLayout != null) {
+            swipeRefreshLayout.setRefreshing(true);
+        }
+        EmailApiService apiService = ApiClient.getClient().create(EmailApiService.class);
+        Call<List<EmailData>> call = apiService.getMails(category);
+        call.enqueue(new Callback<List<EmailData>>() {
+            @Override
+            public void onResponse(Call<List<EmailData>> call, Response<List<EmailData>> response) {
+                finishLoading();
+                if (response.isSuccessful() && response.body() != null) {
+                    List<EmailItem> items = new ArrayList<>();
+                    for (EmailData email : response.body()) {
+                        items.add(email.toEmailItem());
+                    }
+                    // Update UI
+                    adapter.setItems(items);
+                    if (items.isEmpty()) {
+                        showInfo("No emails yet");
+                    }
+                } else {
+                    String serverMsg = "";
+                    try {
+                        if (response.errorBody() != null) {
+                            serverMsg = response.errorBody().string();
+                        }
+                    } catch (Exception ignored) {}
+                    if (response.code() == 401) {
+                        showErrorWithRetry("Session expired. Please log in again.");
+                        // Here you would redirect to login activity
+                        return;
+                    }
+                    String msg = serverMsg.isEmpty()
+                            ? "Failed to load emails (" + response.code() + ")"
+                            : "Failed to load emails: " + serverMsg;
+                    showErrorWithRetry(msg);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<EmailData>> call, Throwable t) {
+                finishLoading();
+                showErrorWithRetry("Network error: " + t.getMessage());
+            }
+        });
+    }
+
+    /**
+     * Filter emails by label (starred, snoozed).
+     */
+    private void filterEmailsByLabel(String label) {
+        currentLabel = label;
+        if (!emailList.isEmpty()) {
+            List<EmailItem> filtered = new ArrayList<>();
+            if (label.equals("starred")) {
+                for (EmailItem e : emailList) {
+                    if (e.isStarred()) filtered.add(e);
+                }
+                adapter.setItems(filtered);
+                return;
+            }
+        }
+        EmailApiService apiService = ApiClient.getClient().create(EmailApiService.class);
+        Call<List<EmailData>> call = apiService.getMailsByLabel(label);
+        call.enqueue(new Callback<List<EmailData>>() {
+            @Override
+            public void onResponse(Call<List<EmailData>> call, Response<List<EmailData>> response) {
+                finishLoading();
+                if (response.isSuccessful() && response.body() != null) {
+                    List<EmailItem> items = new ArrayList<>();
+                    for (EmailData email : response.body()) {
+                        items.add(email.toEmailItem());
+                    }
+                    // Update UI
+                    adapter.setItems(items);
+                    if (items.isEmpty()) {
+                        showInfo("No emails yet");
+                    }
+                } else {
+                    String serverMsg = "";
+                    try {
+                        if (response.errorBody() != null) {
+                            serverMsg = response.errorBody().string();
+                        }
+                    } catch (Exception ignored) {}
+                    if (response.code() == 401) {
+                        showErrorWithRetry("Session expired. Please log in again.");
+                        // Here you would redirect to login activity
+                        return;
+                    }
+                    String msg = serverMsg.isEmpty()
+                            ? "Failed to load emails (" + response.code() + ")"
+                            : "Failed to load emails: " + serverMsg;
+                    showErrorWithRetry(msg);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<EmailData>> call, Throwable t) {
+                finishLoading();
+                showErrorWithRetry("Network error: " + t.getMessage());
+            }
+        });
     }
 
     /**
