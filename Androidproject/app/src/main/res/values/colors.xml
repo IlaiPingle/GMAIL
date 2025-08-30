@@ -9,4 +9,5 @@
     <color name="md_theme_light_outline">#DADCE0</color>
     <color name="md_theme_light_primaryContainer">#E8F0FE</color>
     <color name="md_theme_light_error">#D93025</color>
+    <color name="chip_background">#E0E0E0</color>
 </resources>

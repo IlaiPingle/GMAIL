@@ -5,6 +5,11 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
+import retrofit2.http.Path;
+import retrofit2.http.Body;
+import retrofit2.http.POST;
+import retrofit2.http.DELETE;
+import java.util.Map;
 
 /**
  * Retrofit service interface for email API endpoints.
@@ -20,4 +25,10 @@ public interface EmailApiService {
 
     @GET("api/mails/search")
     Call<List<EmailData>> searchMails(@Query("q") String query);
+    @POST("api/mails/{id}")
+    Call<EmailData> sendMail(@Path("id") String draftId, @Body Map<String, Object> body);
+    @POST("api/mails")
+    Call<EmailData> createDraft(@Body Map<String, Object> body);
+    @DELETE("api/mails/{id}")
+    Call<Void> deleteMail(@Path("id") String mailId);
 }
