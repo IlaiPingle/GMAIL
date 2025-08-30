@@ -31,4 +31,6 @@ public interface EmailApiService {
     Call<EmailData> createDraft(@Body Map<String, Object> body);
     @DELETE("api/mails/{id}")
     Call<Void> deleteMail(@Path("id") String mailId);
+    @DELETE("api/tokens")
+    Call<Void> logout();
 }
