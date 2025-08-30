@@ -1,6 +1,8 @@
 package com.example.androidproject.model;
 
 import com.google.gson.annotations.SerializedName;
+
+import java.util.ArrayList;
 import java.util.List;
 /**
  * Model class representing an individual email item.

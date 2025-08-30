@@ -1,5 +1,6 @@
 package com.example.androidproject.ui.email;
 
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -28,7 +29,9 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.example.androidproject.model.EmailData;
 import com.example.androidproject.api.ApiClient;
@@ -48,6 +51,8 @@ public class HomeActivity extends AppCompatActivity implements
     private EmailAdapter adapter;
     private SwipeRefreshLayout swipeRefreshLayout;
     private final List<EmailItem> emailList = new ArrayList<>();
+    private final List<EmailData> emailDataList = new ArrayList<>();
+    private final Map<EmailItem, EmailData> emailMap = new HashMap<>();
     private TabLayout tabLayout;
     private boolean isLoading = false;
     private String currentLabel = "inbox";
@@ -131,8 +136,8 @@ public class HomeActivity extends AppCompatActivity implements
         // Setup FAB
         FloatingActionButton fab = findViewById(R.id.fabCompose);
         fab.setOnClickListener(v -> {
-            Toast.makeText(this, "Compose new email", Toast.LENGTH_SHORT).show();
-            // Launch compose activity
+            Intent intent = new Intent(this, ComposeEmailActivity.class);
+            startActivity(intent);
         });
 
         // Setup SearchView
@@ -152,7 +157,7 @@ public class HomeActivity extends AppCompatActivity implements
     }
 
     /**
-     * Setup swipe actions for RecyclerView items (archive and delete).
+     * Setup swipe actions for RecyclerView items (delete on swipe).
      */
     private void setupSwipeActions() {
         ItemTouchHelper.SimpleCallback callback = new ItemTouchHelper.SimpleCallback(0,
@@ -168,18 +173,42 @@ public class HomeActivity extends AppCompatActivity implements
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();
-                EmailItem deletedEmail = emailList.get(position);
+                EmailItem deletedEmail = adapter.getItem(position);
+                EmailData deleteData = emailMap.get(deletedEmail);
+                if (deletedEmail == null || deleteData == null) {
+                    adapter.notifyItemChanged(position);
+                    return;
+                }
 
-                emailList.remove(position);
-                adapter.notifyItemRemoved(position);
+                emailList.remove(deletedEmail);
+                emailDataList.remove(deleteData);
+                emailMap.remove(deletedEmail);
+                adapter.setItems(emailList);
 
-                String action = (direction == ItemTouchHelper.RIGHT) ? "archived" : "deleted";
-
-                Snackbar.make(recyclerView, "Email " + action, Snackbar.LENGTH_LONG)
-                        .setAction("UNDO", v -> {
+                EmailApiService api = ApiClient.getClient().create(EmailApiService.class);
+                api.deleteMail(deleteData.getId()).enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if (!response.isSuccessful()) {
                             emailList.add(position, deletedEmail);
-                            adapter.notifyItemInserted(position);
-                        }).show();
+                            emailDataList.add(position, deleteData);
+                            emailMap.put(deletedEmail, deleteData);
+                            adapter.setItems(emailList);
+                            Snackbar.make(recyclerView, "Failed to delete email (" + response.code() + ")", Snackbar.LENGTH_LONG).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        emailList.add(position, deletedEmail);
+                        emailDataList.add(position, deleteData);
+                        emailMap.put(deletedEmail, deleteData);
+                        adapter.setItems(emailList);
+                        Snackbar.make(recyclerView, "Network error: " + t.getMessage(), Snackbar.LENGTH_LONG).show();
+
+                    }
+                });
+                Snackbar.make(recyclerView, "Email deleted", Snackbar.LENGTH_LONG).show();
             }
 
             @Override
@@ -189,7 +218,7 @@ public class HomeActivity extends AppCompatActivity implements
                 View itemView = vh.itemView;
                 Paint paint = new Paint();
                 if (dX > 0) {
-                    paint.setColor(Color.parseColor("#2E7D32")); // green for archive
+                    paint.setColor(Color.parseColor("#C62828")); // red for delete
                     c.drawRect(itemView.getLeft(), itemView.getTop(),
                             itemView.getLeft() + dX, itemView.getBottom(), paint);
                 } else if (dX < 0) {
@@ -244,13 +273,18 @@ public class HomeActivity extends AppCompatActivity implements
             public void onResponse(Call<List<EmailData>> call, Response<List<EmailData>> response) {
                 finishLoading();
                 if (response.isSuccessful() && response.body() != null) {
-                    List<EmailItem> items = new ArrayList<>();
+                    emailList.clear();
+                    emailDataList.clear();
+                    emailMap.clear();
                     for (EmailData email : response.body()) {
-                        items.add(email.toEmailItem());
+                        EmailItem item = email.toEmailItem();
+                        emailList.add(item);
+                        emailDataList.add(email);
+                        emailMap.put(item, email);
                     }
                     // Update UI
-                    adapter.setItems(items);
-                    if (items.isEmpty()) {
+                    adapter.setItems(emailList);
+                    if (emailList.isEmpty()) {
                         showInfo("No emails yet");
                     }
                 } else {
@@ -302,13 +336,18 @@ public class HomeActivity extends AppCompatActivity implements
             public void onResponse(Call<List<EmailData>> call, Response<List<EmailData>> response) {
                 finishLoading();
                 if (response.isSuccessful() && response.body() != null) {
-                    List<EmailItem> items = new ArrayList<>();
+                    emailList.clear();
+                    emailDataList.clear();
+                    emailMap.clear();
                     for (EmailData email : response.body()) {
-                        items.add(email.toEmailItem());
+                        EmailItem item = email.toEmailItem();
+                        emailList.add(item);
+                        emailDataList.add(email);
+                        emailMap.put(item, email);
                     }
                     // Update UI
-                    adapter.setItems(items);
-                    if (items.isEmpty()) {
+                    adapter.setItems(emailList);
+                    if (emailList.isEmpty()) {
                         showInfo("No emails yet");
                     }
                 } else {
@@ -357,13 +396,18 @@ public class HomeActivity extends AppCompatActivity implements
             public void onResponse(Call<List<EmailData>> call, Response<List<EmailData>> response) {
                 finishLoading();
                 if (response.isSuccessful() && response.body() != null) {
-                    List<EmailItem> items = new ArrayList<>();
+                    emailList.clear();
+                    emailDataList.clear();
+                    emailMap.clear();
                     for (EmailData email : response.body()) {
-                        items.add(email.toEmailItem());
+                        EmailItem item = email.toEmailItem();
+                        emailList.add(item);
+                        emailDataList.add(email);
+                        emailMap.put(item, email);
                     }
                     // Update UI
-                    adapter.setItems(items);
-                    if (items.isEmpty()) {
+                    adapter.setItems(emailList);
+                    if (emailList.isEmpty()) {
                         showInfo("No emails yet");
                     }
                 } else {
@@ -429,11 +473,13 @@ public class HomeActivity extends AppCompatActivity implements
      */
     @Override
     public void onEmailClick(int position) {
-        EmailItem email = adapter.getItem(position);
-        email.setRead(true);
-        adapter.notifyItemChanged(position);
-
-        // Here you would launch the email detail activity
-        Toast.makeText(this, "Email from: " + email.getSender(), Toast.LENGTH_SHORT).show();
+        if (position < 0 || position >= emailDataList.size()) return;
+        EmailData data = emailDataList.get(position);
+        Intent intent = new Intent(this, ComposeEmailActivity.class);
+        intent.putExtra("draft_id", data.getId());
+        intent.putExtra("to", data.getReceiver());
+        intent.putExtra("subject", data.getSubject());
+        intent.putExtra("body", data.getBody());
+        startActivity(intent);
     }
 }
