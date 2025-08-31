@@ -5,8 +5,12 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -142,18 +146,20 @@ public class HomeActivity extends AppCompatActivity implements
         });
 
         // Setup SearchView
-        SearchView searchView = findViewById(R.id.searchView);
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                adapter.getFilter().filter(newText);
+        EditText editTextSearch = findViewById(R.id.editTextSearch);
+        ImageButton buttonSearch = findViewById(R.id.btnSearch);
+        buttonSearch.setOnClickListener(v -> {
+            String query = editTextSearch.getText().toString().trim();
+            performSearch(query);
+        });
+        editTextSearch.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH ||
+                    (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
+                String query = editTextSearch.getText().toString().trim();
+                performSearch(query);
                 return true;
             }
+            return false;
         });
     }
 
@@ -509,6 +515,57 @@ public class HomeActivity extends AppCompatActivity implements
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 Toast.makeText(HomeActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    /**
+     * Perform search by querying the API and updating the RecyclerView.
+     * @param query The search query string.
+     */
+    private void performSearch(String query) {
+        if (swipeRefreshLayout != null) {
+            swipeRefreshLayout.setRefreshing(true);
+        }
+        EmailApiService apiService = ApiClient.getClient().create(EmailApiService.class);
+        Call<List<EmailData>> call = apiService.searchMails(query);
+        call.enqueue(new Callback<List<EmailData>>() {
+            @Override
+            public void onResponse(Call<List<EmailData>> call, Response<List<EmailData>> response) {
+                finishLoading();
+                if (response.isSuccessful() && response.body() != null) {
+                    emailList.clear();
+                    emailDataList.clear();
+                    emailMap.clear();
+                    for (EmailData email : response.body()) {
+                        EmailItem item = email.toEmailItem();
+                        emailList.add(item);
+                        emailDataList.add(email);
+                        emailMap.put(item, email);
+                    }
+                    adapter.setItems(emailList);
+                    if (emailList.isEmpty()) {
+                        showInfo("No emails found");
+                    }
+                } else {
+                    String serverMsg = "";
+                    try {
+                        if (response.errorBody() != null) {
+                            serverMsg = response.errorBody().string();
+                        }
+                    } catch (Exception ignored) {
+                    }
+                    String msg = serverMsg.isEmpty()
+                            ? "Failed to search emails (" + response.code() + ")"
+                            : "Failed to search emails: " + serverMsg;
+                    showErrorWithRetry(msg);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<EmailData>> call, Throwable t) {
+                finishLoading();
+                showErrorWithRetry("Network error: " + t.getMessage());
             }
         });
     }

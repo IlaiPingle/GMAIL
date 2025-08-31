@@ -43,12 +43,34 @@
                         app:cardCornerRadius="20dp"
                         app:cardElevation="0dp">
 
-                        <androidx.appcompat.widget.SearchView
-                            android:id="@+id/searchView"
+                        <LinearLayout
+                            android:id="@+id/searchBarLayout"
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            app:iconifiedByDefault="false"
-                            app:queryHint="Search in emails" />
+                            android:layout_height="40dp"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:background="@drawable/search_bar_bg"
+                            android:padding="4dp">
+
+                            <ImageButton
+                                android:id="@+id/btnSearch"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:background="?attr/selectableItemBackgroundBorderless"
+                                android:src="@drawable/ic_search"
+                                android:contentDescription="Search" />
+
+                            <EditText
+                                android:id="@+id/editTextSearch"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:hint="Search emails"
+                                android:background="@android:color/transparent"
+                                android:paddingStart="8dp"
+                                android:paddingEnd="16dp"
+                                android:inputType="text" />
+                        </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
                 </RelativeLayout>
             </com.google.android.material.appbar.MaterialToolbar>
