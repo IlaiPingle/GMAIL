@@ -24,6 +24,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.example.androidproject.R;
 import com.example.androidproject.api.EmailApiService;
 import com.example.androidproject.model.EmailItem;
+import com.example.androidproject.ui.auth.LoginActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
@@ -253,6 +254,8 @@ public class HomeActivity extends AppCompatActivity implements
         } else if (id == R.id.nav_sent) {
             currentLabel = "sent";
             fetchEmailsFromApi();
+        } else if (id == R.id.nav_logout) {
+            performLogout();
         }
 
         drawerLayout.closeDrawer(GravityCompat.START);
@@ -481,5 +484,32 @@ public class HomeActivity extends AppCompatActivity implements
         intent.putExtra("subject", data.getSubject());
         intent.putExtra("body", data.getBody());
         startActivity(intent);
+    }
+
+    /**
+     * Perform logout by calling the API and redirecting to login activity.
+     */
+    private void performLogout() {
+        EmailApiService api = ApiClient.getClient().create(EmailApiService.class);
+        api.logout().enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    ApiClient.clearCookies(HomeActivity.this);
+                    Toast.makeText(HomeActivity.this, "Logged out successfully", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(HomeActivity.this, LoginActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    Toast.makeText(HomeActivity.this, "Failed to log out (" + response.code() + ")", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(HomeActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 }

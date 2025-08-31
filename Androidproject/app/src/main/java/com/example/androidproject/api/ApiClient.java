@@ -19,6 +19,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * - Configures OkHttpClient with cookie handling, timeouts, logging, and authentication.
  * - Provides a single Retrofit instance throughout the app.
  * - Must be initialized with application context before use.
+ * - Includes method to clear cookies when needed.
  */
 public class ApiClient {
     private static final String BASE_URL_DEV = "http://10.0.2.2:8080/"; // Localhost for Android emulator
@@ -63,5 +64,11 @@ public class ApiClient {
                     .build();
         }
         return retrofit;
+    }
+
+    public static void clearCookies(Context context) {
+        CookieManager cookieManager = new CookieManager();
+        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_NONE);
+        java.net.CookieHandler.setDefault(cookieManager);
     }
 }
