@@ -59,18 +59,32 @@
                                 android:layout_height="40dp"
                                 android:background="?attr/selectableItemBackgroundBorderless"
                                 android:src="@drawable/ic_search"
-                                android:contentDescription="Search" />
+                                android:contentDescription="Search"
+                                app:tint="@color/icon_tint" />
 
                             <EditText
                                 android:id="@+id/editTextSearch"
                                 android:layout_width="0dp"
                                 android:layout_height="match_parent"
                                 android:layout_weight="1"
-                                android:hint="Search emails"
+                                android:hint="Search in emails"
                                 android:background="@android:color/transparent"
                                 android:paddingStart="8dp"
-                                android:paddingEnd="16dp"
-                                android:inputType="text" />
+                                android:paddingEnd="8dp"
+                                android:inputType="text"
+                                android:imeOptions="actionSearch"
+                                android:textColor="@color/md_theme_light_onSurface"
+                                android:textColorHint="@color/secondary_text"/>
+
+                            <ImageButton
+                                android:id="@+id/btnClear"
+                                android:src="@drawable/ic_close"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:background="?attr/selectableItemBackgroundBorderless"
+                                android:visibility="gone"
+                                android:contentDescription="Clear search"
+                                app:tint="@color/icon_tint" />
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
                 </RelativeLayout>

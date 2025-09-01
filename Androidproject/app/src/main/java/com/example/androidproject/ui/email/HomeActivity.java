@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.text.Editable;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -160,6 +161,16 @@ public class HomeActivity extends AppCompatActivity implements
                 return true;
             }
             return false;
+        });
+        ImageButton btnClear = findViewById(R.id.btnClear);
+        btnClear.setOnClickListener(v -> editTextSearch.setText(""));
+        editTextSearch.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable editable) {
+                btnClear.setVisibility(editable.length() > 0 ? View.VISIBLE : View.GONE);
+            }
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
         });
     }
 
