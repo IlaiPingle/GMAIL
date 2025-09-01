@@ -8,7 +8,8 @@
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/md_theme_light_surface">
 
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
@@ -18,7 +19,7 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"
+                android:background="@color/md_theme_light_primary"
                 app:contentInsetStartWithNavigation="56dp">
 
                 <RelativeLayout
@@ -102,8 +103,8 @@
             android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
             android:contentDescription="Compose new email"
-            app:tint="@android:color/white"
-            app:backgroundTint="#DB4437"
+            app:tint="@color/md_theme_light_onPrimary"
+            app:backgroundTint="@color/md_theme_light_primary"
             app:srcCompat="@drawable/ic_compose" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
@@ -112,6 +113,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
+        android:background="@color/md_theme_light_surface"
         app:headerLayout="@layout/nav_header_main"
         app:menu="@menu/drawer_menu" />
 </androidx.drawerlayout.widget.DrawerLayout>
