@@ -67,7 +67,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#E0E0E0"/>
+                        android:background="@color/md_theme_light_outline"/>
 
                     <!-- To field with chips -->
                     <LinearLayout
@@ -103,7 +103,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#E0E0E0"/>
+                        android:background="@color/md_theme_light_outline"/>
 
                     <!-- Subject field -->
                     <EditText
@@ -119,7 +119,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#E0E0E0"/>
+                        android:background="@color/md_theme_light_outline"/>
 
                     <!-- Message body -->
                     <EditText

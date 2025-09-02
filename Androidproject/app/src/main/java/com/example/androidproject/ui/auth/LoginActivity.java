@@ -5,26 +5,17 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-
+import androidx.lifecycle.ViewModelProvider;
 import com.example.androidproject.ui.email.HomeActivity;
 import com.example.androidproject.R;
 import com.example.androidproject.util.TokenManager;
 import com.example.androidproject.util.ValidationUtils;
-import com.example.androidproject.api.ApiClient;
-import com.example.androidproject.api.ApiService;
-import com.example.androidproject.model.LoginResponse;
+import com.example.androidproject.ui.auth.LoginViewModel;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-
-import java.io.IOException;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 /**
  * LoginActivity handles user login functionality.
@@ -36,6 +27,7 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputLayout tilUsername, tilPassword;
     private TextInputEditText etUsername, etPassword;
     private ProgressBar progressBar;
+    private LoginViewModel loginViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +50,38 @@ public class LoginActivity extends AppCompatActivity {
         btnSignIn.setOnClickListener(v -> validateAndSignIn());
         btnCreateAccount.setOnClickListener(v -> navigateToRegistration());
         btnForgotPassword.setOnClickListener(v -> handleForgotPassword());
+        // Initialize ViewModel
+        loginViewModel = new ViewModelProvider(this).get(LoginViewModel.class);
+        // Observe ViewModel LiveData
+        loginViewModel.getLoginResult().observe(this, loginResponse -> {
+            showLoading(false);
+            if (loginResponse != null && loginResponse.getUser() != null) {
+                Toast.makeText(LoginActivity.this,
+                        "Login successful", Toast.LENGTH_SHORT).show();
+                TokenManager.saveUserInfo(
+                        this,
+                        loginResponse.getUser().getUsername(),
+                        loginResponse.getUser().getFirstName(),
+                        loginResponse.getUser().getSurName(),
+                        loginResponse.getUser().getPicture()
+                );
+                // Save the token
+                if (loginResponse.getToken() != null) {
+                    TokenManager.saveAuthToken(this, loginResponse.getToken());
+                }
+                // Navigate to the Home activity
+                Intent intent = new Intent(this, HomeActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+        loginViewModel.getErrorMessage().observe(this, errorMsg -> {
+            showLoading(false);
+            if (errorMsg != null) {
+                Toast.makeText(LoginActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+            }
+        });
+        loginViewModel.getLoading().observe(this, this::showLoading);
     }
 
     /**
@@ -97,50 +121,7 @@ public class LoginActivity extends AppCompatActivity {
      * @param password The password entered by the user.
      */
     private void performLogin (String username, String password) {
-        showLoading(true);
-        ApiService apiService = ApiClient.getClient().create(ApiService.class);
-        Call<LoginResponse> call = apiService.login(username, password);
-        call.enqueue(new Callback<LoginResponse>() {
-            @Override
-            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                showLoading(false);
-                if (response.isSuccessful() && response.body() != null) {
-                    Toast.makeText(LoginActivity.this,
-                            "Login successful", Toast.LENGTH_SHORT).show();
-                    LoginResponse.User user = response.body().getUser();
-                    if (user != null) {
-                        TokenManager.saveUserInfo(
-                                LoginActivity.this,
-                                user.getUsername(),
-                                user.getFirstName(),
-                                user.getSurName(),
-                                user.getPicture()
-                        );
-                    }
-                    // Navigate to the Home activity
-                    ApiClient.initialize(getApplicationContext());
-                    Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-                    startActivity(intent);
-                    finish();
-                } else {
-                    String errorMsg = "Login failed";
-                    if (response.errorBody() != null) {
-                        try {
-                            errorMsg = response.errorBody().string();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    Toast.makeText(LoginActivity.this, errorMsg, Toast.LENGTH_LONG).show();
-                }
-            }
-            @Override
-            public void onFailure(Call<LoginResponse> call, Throwable t) {
-                showLoading(false);
-                Toast.makeText(LoginActivity.this,
-                        "Network error: " + t.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        });
+        loginViewModel.login(username, password);
     }
 
 
@@ -159,20 +140,6 @@ public class LoginActivity extends AppCompatActivity {
     private void handleForgotPassword() {
         // TODO: Implement forgot password flow
         Toast.makeText(this, "Forgot password clicked", Toast.LENGTH_SHORT).show();
-    }
-
-    /**
-     * Parses the error message from the response body.
-     * @param errorBody The response body containing the error.
-     * @return The parsed error message.
-     */
-    private String parseError (ResponseBody errorBody) {
-        try {
-            return errorBody.string();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "An Unknown error occurred";
-        }
     }
 
     /**
