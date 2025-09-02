@@ -1,0 +1,31 @@
+package com.example.androidproject.data.local.db;
+
+import android.content.Context;
+
+import androidx.room.Database;
+import androidx.room.Room;
+import androidx.room.RoomDatabase;
+import androidx.room.TypeConverters;
+
+import com.example.androidproject.data.local.dao.LabelDao;
+import com.example.androidproject.data.local.dao.MailDao;
+import com.example.androidproject.data.models.Mail;
+
+@Database(entities = {Mail.class}, version = 1)
+@TypeConverters({Converters.class})
+public abstract class AppDB extends RoomDatabase {
+    private static AppDB instance;
+
+    public abstract MailDao mailDao();
+    public abstract LabelDao labelDao();
+
+    public static synchronized AppDB getInstance(Context context) {
+        if (instance == null) {
+            instance = Room.databaseBuilder(context.getApplicationContext(),
+                            AppDB.class, "gmail_db")
+                    .fallbackToDestructiveMigration()
+                    .build();
+        }
+        return instance;
+    }
+}
