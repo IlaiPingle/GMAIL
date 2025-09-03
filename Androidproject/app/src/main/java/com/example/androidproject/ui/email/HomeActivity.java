@@ -4,14 +4,18 @@ import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -30,6 +34,7 @@ import com.example.androidproject.R;
 import com.example.androidproject.api.EmailApiService;
 import com.example.androidproject.model.EmailItem;
 import com.example.androidproject.ui.auth.LoginActivity;
+import com.example.androidproject.util.TokenManager;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
@@ -123,6 +128,9 @@ public class HomeActivity extends AppCompatActivity implements
         // Setup adapter
         adapter = new EmailAdapter(emailList, this);
         recyclerView.setAdapter(adapter);
+
+        // Bind user avatar
+        bindToolbarAvatar();
 
         // Setup SwipeRefreshLayout
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
@@ -512,6 +520,7 @@ public class HomeActivity extends AppCompatActivity implements
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
+                    TokenManager.clearData(HomeActivity.this);
                     ApiClient.clearCookies(HomeActivity.this);
                     Toast.makeText(HomeActivity.this, "Logged out successfully", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(HomeActivity.this, LoginActivity.class);
@@ -528,6 +537,42 @@ public class HomeActivity extends AppCompatActivity implements
                 Toast.makeText(HomeActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    /**
+     * Bind user avatar in the toolbar.
+     */
+    private void bindToolbarAvatar() {
+        ImageView avatarImg = findViewById(R.id.toolbarAvatar);
+        TextView avatarInitial = findViewById(R.id.toolbarAvatarInitial);
+        if (avatarImg == null || avatarInitial == null) return;
+
+        String first = TokenManager.getFirstName(this);
+        String sur   = TokenManager.getSurName(this);
+        String user  = TokenManager.getUsername(this);
+        String pic   = TokenManager.getPicture(this);
+
+        String initials = "";
+        if (!TextUtils.isEmpty(first)) initials += first.substring(0, 1).toUpperCase();
+        if (!TextUtils.isEmpty(sur))   initials += sur.substring(0, 1).toUpperCase();
+        if (TextUtils.isEmpty(initials) && !TextUtils.isEmpty(user)) {
+            initials = user.substring(0, 1).toUpperCase();
+        }
+        if (TextUtils.isEmpty(initials)) initials = "?";
+        avatarInitial.setText(initials);
+
+        if (!TextUtils.isEmpty(pic)) {
+            avatarInitial.setVisibility(View.GONE);
+            avatarImg.setVisibility(View.VISIBLE);
+            try {
+                avatarImg.setImageURI(Uri.parse(pic)); // For file:// or content://
+                // For http(s) URLs, prefer an image loader (e.g., Glide/Picasso)
+                // Glide.with(this).load(pic).into(avatarImg);
+            } catch (Exception ignored) {}
+        } else {
+            avatarImg.setVisibility(View.GONE);
+            avatarInitial.setVisibility(View.VISIBLE);
+        }
     }
 
     /**
