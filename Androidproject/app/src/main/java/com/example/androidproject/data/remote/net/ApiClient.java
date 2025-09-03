@@ -1,4 +1,4 @@
-package com.example.androidproject.api;
+package com.example.androidproject.data.remote.net;
 
 import android.content.Context;
 import java.net.CookieManager;
@@ -6,6 +6,8 @@ import java.net.CookiePolicy;
 import java.util.concurrent.TimeUnit;
 
 import com.example.androidproject.BuildConfig;
+import com.example.androidproject.api.AuthInterceptor;
+import com.example.androidproject.api.TokenAuthenticator;
 
 import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
@@ -22,9 +24,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * - Includes method to clear cookies when needed.
  */
 public class ApiClient {
-    private static final String BASE_URL_DEV = "http://10.0.2.2:8080/"; // Localhost for Android emulator
-    // For physical device, use your computer's actual IP address:
-//    private static final String BASE_URL_PROD = "http://192.168.1.100:8080/"; // Replace with your server's IP address
+    private static final String BASE_URL = "http://10.0.2.2:8080/"; // Localhost for Android emulator
     private static Retrofit retrofit = null;
     private static Context appContext;
 
@@ -58,7 +58,7 @@ public class ApiClient {
                     .build();
 
             retrofit = new Retrofit.Builder()
-                    .baseUrl(BASE_URL_DEV)
+                    .baseUrl(BASE_URL)
                     .client(client)
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();

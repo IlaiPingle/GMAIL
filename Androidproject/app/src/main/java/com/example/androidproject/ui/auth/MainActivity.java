@@ -29,7 +29,14 @@ import com.example.androidproject.ui.email.HomeActivity;
 import com.example.androidproject.R;
 import com.example.androidproject.util.TokenManager;
 import com.example.androidproject.util.ValidationUtils;
+<<<<<<< HEAD
 import com.example.androidproject.ui.auth.RegisterViewModel;
+=======
+import com.example.androidproject.data.remote.net.ApiClient;
+import com.example.androidproject.api.ApiService;
+import com.example.androidproject.model.LoginResponse;
+import com.example.androidproject.model.RegisterResponse;
+>>>>>>> 0a106a71ae21b65a6dfd8331f8d65876d70b1050
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
