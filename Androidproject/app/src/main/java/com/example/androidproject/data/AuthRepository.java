@@ -1,6 +1,6 @@
 package com.example.androidproject.data;
 
-import com.example.androidproject.api.ApiClient;
+import com.example.androidproject.data.remote.net.ApiClient;
 import com.example.androidproject.api.ApiService;
 import com.example.androidproject.model.LoginResponse;
 import com.example.androidproject.model.RegisterResponse;

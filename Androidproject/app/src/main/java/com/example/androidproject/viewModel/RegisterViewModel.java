@@ -1,4 +1,4 @@
-package com.example.androidproject.ui.auth;
+package com.example.androidproject.viewModel;
 
 import android.app.Application;
 
@@ -7,10 +7,9 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.androidproject.data.AuthRepository;
 import com.example.androidproject.model.LoginResponse;
 import com.example.androidproject.model.RegisterResponse;
-import com.example.androidproject.util.TokenManager;
+import com.example.androidproject.data.repository.UserRepository;
 
 import java.io.File;
 
@@ -28,7 +27,7 @@ import retrofit2.Response;
  * registration results, and login results to the UI.
  */
 public class RegisterViewModel extends AndroidViewModel {
-    private final AuthRepository repo = new AuthRepository();
+    private final UserRepository userRepo;
 
     private final MutableLiveData<Boolean> loading = new MutableLiveData<>(false);
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
@@ -37,6 +36,7 @@ public class RegisterViewModel extends AndroidViewModel {
 
     public RegisterViewModel(@NonNull Application application) {
         super(application);
+        userRepo = new UserRepository(application);
     }
 
     public LiveData<Boolean> getLoading() { return loading; }
@@ -58,25 +58,14 @@ public class RegisterViewModel extends AndroidViewModel {
             imagePart = MultipartBody.Part.createFormData("picture", imageFile.getName(), imageBody);
         }
 
-        repo.register(firstNameBody, surNameBody, usernameBody, passwordBody, imagePart)
+        userRepo.remote().register(firstNameBody, surNameBody, usernameBody, passwordBody, imagePart)
                 .enqueue(new Callback<RegisterResponse>() {
                     @Override public void onResponse(Call<RegisterResponse> call, Response<RegisterResponse> res) {
                         loading.setValue(false);
                         if (res.isSuccessful() && res.body() != null) {
                             RegisterResponse body = res.body();
+                            userRepo.persistFromRegister(body);
                             registerResult.setValue(body);
-
-                            // Save basic user info
-                            if (body.getUser() != null) {
-                                TokenManager.saveUserInfo(
-                                        getApplication(),
-                                        body.getUser().getUsername(),
-                                        body.getUser().getFirstName(),
-                                        body.getUser().getSurName(),
-                                        body.getUser().getPicture()
-                                );
-                            }
-                            // Auto-login
                             autoLogin(user, pass);
                         } else {
                             errorMessage.setValue("Registration failed");
@@ -90,14 +79,11 @@ public class RegisterViewModel extends AndroidViewModel {
     }
 
     private void autoLogin(String username, String password) {
-        repo.login(username, password).enqueue(new Callback<LoginResponse>() {
+        userRepo.remote().login(username, password).enqueue(new Callback<LoginResponse>() {
             @Override public void onResponse(Call<LoginResponse> call, Response<LoginResponse> res) {
                 if (res.isSuccessful() && res.body() != null) {
-                    LoginResponse body = res.body();
-                    loginResult.setValue(body);
-                    if (body.getToken() != null) {
-                        TokenManager.saveAuthToken(getApplication(), body.getToken());
-                    }
+                    userRepo.persistFromLogin(res.body());
+                    loginResult.setValue(res.body());
                 } else {
                     errorMessage.setValue("Auto-login failed");
                 }

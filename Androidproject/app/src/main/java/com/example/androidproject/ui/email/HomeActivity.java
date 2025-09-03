@@ -28,12 +28,15 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.androidproject.R;
 import com.example.androidproject.api.EmailApiService;
 import com.example.androidproject.model.EmailItem;
 import com.example.androidproject.ui.auth.LoginActivity;
-import com.example.androidproject.util.TokenManager;
+import com.example.androidproject.data.models.User;
+import com.example.androidproject.data.repository.UserRepository;
+import com.example.androidproject.viewModel.HomeViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
@@ -66,6 +69,7 @@ public class HomeActivity extends AppCompatActivity implements
     private TabLayout tabLayout;
     private boolean isLoading = false;
     private String currentLabel = "inbox";
+    private HomeViewModel homeViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,8 +132,25 @@ public class HomeActivity extends AppCompatActivity implements
         adapter = new EmailAdapter(emailList, this);
         recyclerView.setAdapter(adapter);
 
-        // Bind user avatar
-        bindToolbarAvatar();
+        // Setup ViewModel
+        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+        homeViewModel.getLoggedOut().observe(this, loggedOut -> {
+            if (loggedOut != null && loggedOut) {
+                Intent intent = new Intent(this, LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
+            }
+        });
+        homeViewModel.getError().observe(this, errorMsg -> {
+            if (errorMsg != null) {
+                Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show();
+            }
+        });
+        homeViewModel.getLoading().observe(this, isLoading -> {
+            // Optionally show a loading indicator
+        });
+        homeViewModel.getCurrentUser().observe(this, this::bindToolbarAvatar);
 
         // Setup SwipeRefreshLayout
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
@@ -514,48 +535,27 @@ public class HomeActivity extends AppCompatActivity implements
      * Perform logout by calling the API and redirecting to login activity.
      */
     private void performLogout() {
-        EmailApiService api = ApiClient.getClient().create(EmailApiService.class);
-        api.logout().enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                if (response.isSuccessful()) {
-                    TokenManager.clearData(HomeActivity.this);
-                    ApiClient.clearCookies(HomeActivity.this);
-                    Toast.makeText(HomeActivity.this, "Logged out successfully", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(HomeActivity.this, LoginActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    finish();
-                } else {
-                    Toast.makeText(HomeActivity.this, "Failed to log out (" + response.code() + ")", Toast.LENGTH_LONG).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                Toast.makeText(HomeActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        });
+        homeViewModel.logout();
     }
 
     /**
      * Bind user avatar in the toolbar.
      */
-    private void bindToolbarAvatar() {
+    private void bindToolbarAvatar(User user) {
         ImageView avatarImg = findViewById(R.id.toolbarAvatar);
         TextView avatarInitial = findViewById(R.id.toolbarAvatarInitial);
         if (avatarImg == null || avatarInitial == null) return;
 
-        String first = TokenManager.getFirstName(this);
-        String sur   = TokenManager.getSurName(this);
-        String user  = TokenManager.getUsername(this);
-        String pic   = TokenManager.getPicture(this);
+        String first = user == null ? "" : user.firstName;
+        String sur   = user == null ? "" : user.surName;
+        String username  = user == null ? "" : user.username;
+        String pic   = user == null ? "" : (user.picture == null ? "" : user.picture);
 
         String initials = "";
         if (!TextUtils.isEmpty(first)) initials += first.substring(0, 1).toUpperCase();
         if (!TextUtils.isEmpty(sur))   initials += sur.substring(0, 1).toUpperCase();
-        if (TextUtils.isEmpty(initials) && !TextUtils.isEmpty(user)) {
-            initials = user.substring(0, 1).toUpperCase();
+        if (TextUtils.isEmpty(initials) && !TextUtils.isEmpty(username)) {
+            initials = username.substring(0, 1).toUpperCase();
         }
         if (TextUtils.isEmpty(initials)) initials = "?";
         avatarInitial.setText(initials);
@@ -564,9 +564,7 @@ public class HomeActivity extends AppCompatActivity implements
             avatarInitial.setVisibility(View.GONE);
             avatarImg.setVisibility(View.VISIBLE);
             try {
-                avatarImg.setImageURI(Uri.parse(pic)); // For file:// or content://
-                // For http(s) URLs, prefer an image loader (e.g., Glide/Picasso)
-                // Glide.with(this).load(pic).into(avatarImg);
+                avatarImg.setImageURI(Uri.parse(pic));
             } catch (Exception ignored) {}
         } else {
             avatarImg.setVisibility(View.GONE);

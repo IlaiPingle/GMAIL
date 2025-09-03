@@ -10,15 +10,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.androidproject.ui.email.HomeActivity;
 import com.example.androidproject.R;
-import com.example.androidproject.util.TokenManager;
+import com.example.androidproject.data.models.User;
 import com.example.androidproject.util.ValidationUtils;
-<<<<<<< HEAD
-import com.example.androidproject.ui.auth.LoginViewModel;
-=======
-import com.example.androidproject.data.remote.net.ApiClient;
-import com.example.androidproject.api.ApiService;
-import com.example.androidproject.model.LoginResponse;
->>>>>>> 0a106a71ae21b65a6dfd8331f8d65876d70b1050
+import com.example.androidproject.viewModel.LoginViewModel;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -58,23 +52,21 @@ public class LoginActivity extends AppCompatActivity {
         btnForgotPassword.setOnClickListener(v -> handleForgotPassword());
         // Initialize ViewModel
         loginViewModel = new ViewModelProvider(this).get(LoginViewModel.class);
+        // Check if user is already logged in
+        loginViewModel.getCurrentUser().observe(this, (User user) -> {
+            if (user != null && user.username != null && !user.username.isEmpty()) {
+                // User is already logged in, navigate to HomeActivity
+                Intent intent = new Intent(this, HomeActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
         // Observe ViewModel LiveData
         loginViewModel.getLoginResult().observe(this, loginResponse -> {
             showLoading(false);
             if (loginResponse != null && loginResponse.getUser() != null) {
                 Toast.makeText(LoginActivity.this,
                         "Login successful", Toast.LENGTH_SHORT).show();
-                TokenManager.saveUserInfo(
-                        this,
-                        loginResponse.getUser().getUsername(),
-                        loginResponse.getUser().getFirstName(),
-                        loginResponse.getUser().getSurName(),
-                        loginResponse.getUser().getPicture()
-                );
-                // Save the token
-                if (loginResponse.getToken() != null) {
-                    TokenManager.saveAuthToken(this, loginResponse.getToken());
-                }
                 // Navigate to the Home activity
                 Intent intent = new Intent(this, HomeActivity.class);
                 startActivity(intent);
