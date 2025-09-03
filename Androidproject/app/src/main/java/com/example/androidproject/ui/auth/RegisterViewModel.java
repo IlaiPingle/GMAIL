@@ -52,9 +52,11 @@ public class RegisterViewModel extends AndroidViewModel {
         RequestBody usernameBody = RequestBody.create(MediaType.parse("text/plain"), user);
         RequestBody passwordBody = RequestBody.create(MediaType.parse("text/plain"), pass);
 
-        RequestBody fileBody = RequestBody.create(MediaType.parse("image/*"), imageFile);
-        MultipartBody.Part imagePart =
-                MultipartBody.Part.createFormData("picture", imageFile.getName(), fileBody);
+        MultipartBody.Part imagePart = null;
+        if (imageFile != null && imageFile.exists()) {
+            RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), imageFile);
+            imagePart = MultipartBody.Part.createFormData("picture", imageFile.getName(), imageBody);
+        }
 
         repo.register(firstNameBody, surNameBody, usernameBody, passwordBody, imagePart)
                 .enqueue(new Callback<RegisterResponse>() {

@@ -253,12 +253,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (!ok) return;
-        if (selectedImageUri == null) {
-            Toast.makeText(this, "Please select a profile photo", Toast.LENGTH_SHORT).show();
-            return;
+        File imageFile = null;
+        if (selectedImageUri != null) {
+            String imagePath = getFilePathFromUri(selectedImageUri);
+            if (imagePath != null) {
+                imageFile = new File(imagePath);
+            }
         }
-        // All validations passed, proceed to upload data
-        File imageFile = new File(getFilePathFromUri(selectedImageUri));
         registerViewModel.register(first, last, user, pass, imageFile);
     }
 
