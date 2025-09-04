@@ -15,7 +15,6 @@ import java.util.List;
 public class MailsViewModel extends ViewModel {
     private final MailsRepository repository;
     private final LiveData<List<Mail>> mails;
-
     private String selectedLabel;
 
     public MailsViewModel() {

@@ -27,3 +27,4 @@
         android:text="user@example.com"
         android:textColor="@android:color/white" />
 </LinearLayout>
+

@@ -178,7 +178,6 @@ public class MailsRepository {
                     filteredMails.postValue(response.body());
                 }
             }
-
             @Override
             public void onFailure(Call<List<Mail>> call, Throwable t) {
                 t.printStackTrace();

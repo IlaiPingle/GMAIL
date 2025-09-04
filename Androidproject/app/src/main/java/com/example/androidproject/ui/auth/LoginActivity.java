@@ -9,7 +9,7 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.androidproject.ui.email.HomeActivity;
+import com.example.androidproject.ui.email.MailsActivity;
 import com.example.androidproject.R;
 import com.example.androidproject.util.TokenManager;
 import com.example.androidproject.util.ValidationUtils;
@@ -119,7 +119,7 @@ public class LoginActivity extends AppCompatActivity {
                     }
                     // Navigate to the Home activity
                     ApiClient.initialize(getApplicationContext());
-                    Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                    Intent intent = new Intent(LoginActivity.this, MailsActivity.class);
                     startActivity(intent);
                     finish();
                 } else {

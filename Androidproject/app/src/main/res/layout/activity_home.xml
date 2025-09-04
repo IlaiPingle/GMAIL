@@ -49,7 +49,6 @@
                             android:layout_height="40dp"
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
-                            android:background="@drawable/search_bar_bg"
                             android:padding="4dp">
 
                             <ImageButton
@@ -113,5 +112,5 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         app:headerLayout="@layout/nav_header_main"
-        app:menu="@menu/drawer_menu" />
+        app:menu="@menu/nav_system_labels" />
 </androidx.drawerlayout.widget.DrawerLayout>

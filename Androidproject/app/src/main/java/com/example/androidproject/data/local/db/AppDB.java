@@ -9,9 +9,10 @@ import androidx.room.TypeConverters;
 
 import com.example.androidproject.data.local.dao.LabelDao;
 import com.example.androidproject.data.local.dao.MailDao;
+import com.example.androidproject.data.models.Label;
 import com.example.androidproject.data.models.Mail;
 
-@Database(entities = {Mail.class}, version = 1)
+@Database(entities = {Mail.class, Label.class}, version = 1)
 @TypeConverters({Converters.class})
 public abstract class AppDB extends RoomDatabase {
     private static AppDB instance;

@@ -54,7 +54,7 @@ class AttachmentAdapter extends RecyclerView.Adapter<AttachmentAdapter.VH> {
         TextView name;
         VH(@NonNull View itemView) {
             super(itemView);
-            preview = itemView.findViewById(R.id.imagePreview);
+//            preview = itemView.findViewById(R.id.imagePreview);
             remove = itemView.findViewById(R.id.buttonRemove);
             name = itemView.findViewById(R.id.textFileName);
         }
@@ -74,7 +74,7 @@ class AttachmentAdapter extends RecyclerView.Adapter<AttachmentAdapter.VH> {
         if (isImage.test(uri)) {
             h.preview.setImageURI(uri);
         } else {
-            h.preview.setImageResource(R.drawable.ic_file);
+//            h.preview.setImageResource(R.drawable.ic_file);
         }
         h.remove.setOnClickListener(v -> onRemove.remove(h.getBindingAdapterPosition()));
     }

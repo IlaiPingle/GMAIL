@@ -17,12 +17,12 @@
             android:layout_width="80dp"
             android:layout_height="80dp">
 
-            <ImageView
-                android:id="@+id/imagePreview"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_file" />
+<!--            <ImageView-->
+<!--                android:id="@+id/imagePreview"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:scaleType="centerCrop"-->
+<!--                android:src="@drawable/ic_file" />-->
 
             <ImageView
                 android:id="@+id/buttonRemove"

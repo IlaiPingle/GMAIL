@@ -34,6 +34,7 @@ import androidx.core.content.ContextCompat;
 
 import com.example.androidproject.ui.email.HomeActivity;
 import com.example.androidproject.R;
+import com.example.androidproject.ui.email.MailsActivity;
 import com.example.androidproject.util.TokenManager;
 import com.example.androidproject.util.ValidationUtils;
 import com.example.androidproject.data.remote.net.ApiClient;
@@ -92,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_register);
 
         tilFirstName = findViewById(R.id.til_first_name);
         tilLastName = findViewById(R.id.til_last_name);
@@ -333,7 +334,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                 if (response.isSuccessful()) {
-                    startActivity(new Intent(MainActivity.this, HomeActivity.class));
+                    startActivity(new Intent(MainActivity.this, MailsActivity.class));
                     finish();
                 } else {
                     startActivity(new Intent(MainActivity.this, LoginActivity.class));
