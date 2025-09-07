@@ -29,33 +29,25 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.lifecycle.ViewModelProvider;
-
+import androidx.lifecycle.LiveData;
 import com.example.androidproject.R;
-import com.example.androidproject.api.EmailApiService;
 import com.example.androidproject.model.EmailItem;
 import com.example.androidproject.ui.auth.LoginActivity;
 import com.example.androidproject.data.models.User;
-import com.example.androidproject.data.repository.UserRepository;
-import com.example.androidproject.viewModel.HomeViewModel;
+import com.example.androidproject.data.models.Mail;
+import com.example.androidproject.viewModel.InboxViewModel;
+import com.example.androidproject.viewModel.MailsViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import com.example.androidproject.model.EmailData;
-import com.example.androidproject.data.remote.net.ApiClient;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 /**
- * HomeActivity displays a list of emails with functionalities like search, refresh, and compose.
+ * InboxActivity displays a list of emails with functionalities like search, refresh, and compose.
  */
-public class HomeActivity extends AppCompatActivity implements
+public class InboxActivity extends AppCompatActivity implements
         EmailAdapter.OnEmailClickListener,
         NavigationView.OnNavigationItemSelectedListener {
 
@@ -64,17 +56,17 @@ public class HomeActivity extends AppCompatActivity implements
     private EmailAdapter adapter;
     private SwipeRefreshLayout swipeRefreshLayout;
     private final List<EmailItem> emailList = new ArrayList<>();
-    private final List<EmailData> emailDataList = new ArrayList<>();
-    private final Map<EmailItem, EmailData> emailMap = new HashMap<>();
+    private final List<Mail> currentMails = new ArrayList<>();
     private TabLayout tabLayout;
     private boolean isLoading = false;
     private String currentLabel = "inbox";
-    private HomeViewModel homeViewModel;
+    private InboxViewModel inboxViewModel;
+    private MailsViewModel mailsViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
+        setContentView(R.layout.activity_inbox);
 
         // Setup toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -132,9 +124,11 @@ public class HomeActivity extends AppCompatActivity implements
         adapter = new EmailAdapter(emailList, this);
         recyclerView.setAdapter(adapter);
 
-        // Setup ViewModel
-        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
-        homeViewModel.getLoggedOut().observe(this, loggedOut -> {
+        // Setup ViewModels
+        inboxViewModel = new ViewModelProvider(this).get(InboxViewModel.class);
+        mailsViewModel = new ViewModelProvider(this).get(MailsViewModel.class);
+        observeAndRender(mailsViewModel.getMails());
+        inboxViewModel.getLoggedOut().observe(this, loggedOut -> {
             if (loggedOut != null && loggedOut) {
                 Intent intent = new Intent(this, LoginActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -142,15 +136,15 @@ public class HomeActivity extends AppCompatActivity implements
                 finish();
             }
         });
-        homeViewModel.getError().observe(this, errorMsg -> {
+        inboxViewModel.getError().observe(this, errorMsg -> {
             if (errorMsg != null) {
                 Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show();
             }
         });
-        homeViewModel.getLoading().observe(this, isLoading -> {
+        inboxViewModel.getLoading().observe(this, isLoading -> {
             // Optionally show a loading indicator
         });
-        homeViewModel.getCurrentUser().observe(this, this::bindToolbarAvatar);
+        inboxViewModel.getCurrentUser().observe(this, this::bindToolbarAvatar);
 
         // Setup SwipeRefreshLayout
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
@@ -160,8 +154,8 @@ public class HomeActivity extends AppCompatActivity implements
                 android.R.color.holo_red_light);
         swipeRefreshLayout.setOnRefreshListener(this::refreshEmails);
 
-        // Load emails from API
-        fetchEmailsFromApi();
+        // Initial load
+        loadEmails();
 
         // Setup swipe actions
         setupSwipeActions();
@@ -203,6 +197,48 @@ public class HomeActivity extends AppCompatActivity implements
     }
 
     /**
+     * Observe LiveData and render emails in RecyclerView.
+     * @param liveData The LiveData<List<Mail>> to observe.
+     */
+    private void observeAndRender(LiveData<List<Mail>> liveData) {
+        finishLoading();
+        liveData.observe(this, mails -> {
+            finishLoading();
+            if (mails == null) return;
+            currentMails.clear();
+            currentMails.addAll(mails);
+            emailList.clear();
+            for (Mail mail : mails) {
+                emailList.add(mapToItem(mail));
+            }
+            adapter.setItems(emailList);
+            if (emailList.isEmpty()) {
+                showInfo("No emails yet");
+            }
+        });
+    }
+
+    /**
+     * Map Mail model to EmailItem for RecyclerView display.
+     * @param m The Mail object to map.
+     * @return The corresponding EmailItem.
+     */
+    private EmailItem mapToItem(Mail m) {
+        String preview = m.getBody() == null ? "" : m.getBody();
+        String time = "";
+        boolean isRead = m.getLabels() == null || !m.getLabels().contains("unread");
+        EmailItem item = new EmailItem(
+                m.getSender() == null ? "" : m.getSender(),
+                m.getSubject() == null ? "" : m.getSubject(),
+                preview,
+                time,
+                isRead
+        );
+        item.setStarred(m.getLabels() != null && m.getLabels().contains("starred"));
+        return item;
+    }
+
+    /**
      * Setup swipe actions for RecyclerView items (delete on swipe).
      */
     private void setupSwipeActions() {
@@ -219,42 +255,27 @@ public class HomeActivity extends AppCompatActivity implements
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();
-                EmailItem deletedEmail = adapter.getItem(position);
-                EmailData deleteData = emailMap.get(deletedEmail);
-                if (deletedEmail == null || deleteData == null) {
+                if (position < 0 || position >= emailList.size()) {
                     adapter.notifyItemChanged(position);
                     return;
                 }
+                Mail mail = currentMails.get(position);
 
-                emailList.remove(deletedEmail);
-                emailDataList.remove(deleteData);
-                emailMap.remove(deletedEmail);
-                adapter.setItems(emailList);
+                currentMails.remove(position);
+                if (position < emailList.size()) {
+                    emailList.remove(position);
+                    adapter.setItems(emailList);
+                }
 
-                EmailApiService api = ApiClient.getClient().create(EmailApiService.class);
-                api.deleteMail(deleteData.getId()).enqueue(new Callback<Void>() {
-                    @Override
-                    public void onResponse(Call<Void> call, Response<Void> response) {
-                        if (!response.isSuccessful()) {
-                            emailList.add(position, deletedEmail);
-                            emailDataList.add(position, deleteData);
-                            emailMap.put(deletedEmail, deleteData);
-                            adapter.setItems(emailList);
-                            Snackbar.make(recyclerView, "Failed to delete email (" + response.code() + ")", Snackbar.LENGTH_LONG).show();
-                        }
+                if ("bin".equalsIgnoreCase(currentLabel) || "spam".equalsIgnoreCase(currentLabel)) {
+                    mailsViewModel.deleteMailById(mail.getId());
+                } else {
+                    if (!TextUtils.isEmpty(currentLabel) && "inbox".equalsIgnoreCase(currentLabel)) {
+                        mailsViewModel.removeLabelFromMail(mail, currentLabel);
                     }
-
-                    @Override
-                    public void onFailure(Call<Void> call, Throwable t) {
-                        emailList.add(position, deletedEmail);
-                        emailDataList.add(position, deleteData);
-                        emailMap.put(deletedEmail, deleteData);
-                        adapter.setItems(emailList);
-                        Snackbar.make(recyclerView, "Network error: " + t.getMessage(), Snackbar.LENGTH_LONG).show();
-
-                    }
-                });
-                Snackbar.make(recyclerView, "Email deleted", Snackbar.LENGTH_LONG).show();
+                    mailsViewModel.addLabelToMail(mail, "bin");
+                }
+                Snackbar.make(recyclerView, "Email moved to bin", Snackbar.LENGTH_LONG).show();
             }
 
             @Override
@@ -288,17 +309,17 @@ public class HomeActivity extends AppCompatActivity implements
         // Handle navigation item clicks
         if (id == R.id.nav_all_inboxes) {
             currentLabel = "inbox";
-            fetchEmailsFromApi();
+            loadEmails();
         } else if (id == R.id.nav_inbox) {
             currentLabel = "inbox";
-            fetchEmailsFromApi();
+            loadEmails();
         } else if (id == R.id.nav_starred) {
             filterEmailsByLabel("starred");
         } else if (id == R.id.nav_snoozed) {
             filterEmailsByLabel("snoozed");
         } else if (id == R.id.nav_sent) {
             currentLabel = "sent";
-            fetchEmailsFromApi();
+            loadEmails();
         } else if (id == R.id.nav_logout) {
             performLogout();
         }
@@ -314,121 +335,21 @@ public class HomeActivity extends AppCompatActivity implements
         if (swipeRefreshLayout != null) {
             swipeRefreshLayout.setRefreshing(true);
         }
-        EmailApiService apiService = ApiClient.getClient().create(EmailApiService.class);
-        Call<List<EmailData>> call = apiService.getMails(category);
-        call.enqueue(new Callback<List<EmailData>>() {
-            @Override
-            public void onResponse(Call<List<EmailData>> call, Response<List<EmailData>> response) {
-                finishLoading();
-                if (response.isSuccessful() && response.body() != null) {
-                    emailList.clear();
-                    emailDataList.clear();
-                    emailMap.clear();
-                    for (EmailData email : response.body()) {
-                        EmailItem item = email.toEmailItem();
-                        emailList.add(item);
-                        emailDataList.add(email);
-                        emailMap.put(item, email);
-                    }
-                    // Update UI
-                    adapter.setItems(emailList);
-                    if (emailList.isEmpty()) {
-                        showInfo("No emails yet");
-                    }
-                } else {
-                    String serverMsg = "";
-                    try {
-                        if (response.errorBody() != null) {
-                            serverMsg = response.errorBody().string();
-                        }
-                    } catch (Exception ignored) {}
-                    if (response.code() == 401) {
-                        showErrorWithRetry("Session expired. Please log in again.");
-                        // Here you would redirect to login activity
-                        return;
-                    }
-                    String msg = serverMsg.isEmpty()
-                            ? "Failed to load emails (" + response.code() + ")"
-                            : "Failed to load emails: " + serverMsg;
-                    showErrorWithRetry(msg);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<EmailData>> call, Throwable t) {
-                finishLoading();
-                showErrorWithRetry("Network error: " + t.getMessage());
-            }
-        });
+        observeAndRender(mailsViewModel.getMailsByLabel(category));
     }
 
     /**
-     * Filter emails by label (starred, snoozed).
+     * Filter emails by label (starred, snoozed, etc.).
      */
     private void filterEmailsByLabel(String label) {
         currentLabel = label;
-        if (!emailList.isEmpty()) {
-            List<EmailItem> filtered = new ArrayList<>();
-            if (label.equals("starred")) {
-                for (EmailItem e : emailList) {
-                    if (e.isStarred()) filtered.add(e);
-                }
-                adapter.setItems(filtered);
-                return;
-            }
-        }
-        EmailApiService apiService = ApiClient.getClient().create(EmailApiService.class);
-        Call<List<EmailData>> call = apiService.getMailsByLabel(label);
-        call.enqueue(new Callback<List<EmailData>>() {
-            @Override
-            public void onResponse(Call<List<EmailData>> call, Response<List<EmailData>> response) {
-                finishLoading();
-                if (response.isSuccessful() && response.body() != null) {
-                    emailList.clear();
-                    emailDataList.clear();
-                    emailMap.clear();
-                    for (EmailData email : response.body()) {
-                        EmailItem item = email.toEmailItem();
-                        emailList.add(item);
-                        emailDataList.add(email);
-                        emailMap.put(item, email);
-                    }
-                    // Update UI
-                    adapter.setItems(emailList);
-                    if (emailList.isEmpty()) {
-                        showInfo("No emails yet");
-                    }
-                } else {
-                    String serverMsg = "";
-                    try {
-                        if (response.errorBody() != null) {
-                            serverMsg = response.errorBody().string();
-                        }
-                    } catch (Exception ignored) {}
-                    if (response.code() == 401) {
-                        showErrorWithRetry("Session expired. Please log in again.");
-                        // Here you would redirect to login activity
-                        return;
-                    }
-                    String msg = serverMsg.isEmpty()
-                            ? "Failed to load emails (" + response.code() + ")"
-                            : "Failed to load emails: " + serverMsg;
-                    showErrorWithRetry(msg);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<EmailData>> call, Throwable t) {
-                finishLoading();
-                showErrorWithRetry("Network error: " + t.getMessage());
-            }
-        });
+        observeAndRender(mailsViewModel.getMailsByLabel(label));
     }
 
     /**
-     * Fetch emails from the API and update the RecyclerView.
+     * Load emails from the API and display them.
      */
-    private void fetchEmailsFromApi() {
+    private void loadEmails() {
         if (isLoading) return;
         isLoading = true;
         // Show loading indicator
@@ -436,55 +357,12 @@ public class HomeActivity extends AppCompatActivity implements
             swipeRefreshLayout.setEnabled(false);
             swipeRefreshLayout.post(() -> swipeRefreshLayout.setRefreshing(true));
         }
-
-        EmailApiService apiService = ApiClient.getClient().create(EmailApiService.class);
-        Call<List<EmailData>> call = apiService.getMails();
-        call.enqueue(new Callback<List<EmailData>>() {
-            @Override
-            public void onResponse(Call<List<EmailData>> call, Response<List<EmailData>> response) {
-                finishLoading();
-                if (response.isSuccessful() && response.body() != null) {
-                    emailList.clear();
-                    emailDataList.clear();
-                    emailMap.clear();
-                    for (EmailData email : response.body()) {
-                        EmailItem item = email.toEmailItem();
-                        emailList.add(item);
-                        emailDataList.add(email);
-                        emailMap.put(item, email);
-                    }
-                    // Update UI
-                    adapter.setItems(emailList);
-                    if (emailList.isEmpty()) {
-                        showInfo("No emails yet");
-                    }
-                } else {
-                    String serverMsg = "";
-                    try {
-                        if (response.errorBody() != null) {
-                            serverMsg = response.errorBody().string();
-                        }
-                    } catch (Exception ignored) {}
-                    if (response.code() == 401) {
-                        showErrorWithRetry("Session expired. Please log in again.");
-                        // Here you would redirect to login activity
-                        return;
-                    }
-                    String msg = serverMsg.isEmpty()
-                            ? "Failed to load emails (" + response.code() + ")"
-                            : "Failed to load emails: " + serverMsg;
-                    showErrorWithRetry(msg);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<EmailData>> call, Throwable t) {
-                finishLoading();
-                showErrorWithRetry("Network error: " + t.getMessage());
-            }
-        });
+        observeAndRender(mailsViewModel.getMails());
     }
 
+    /**
+     * Finish loading state and hide indicators.
+     */
     private void finishLoading() {
         isLoading = false;
         if (swipeRefreshLayout != null) {
@@ -496,46 +374,38 @@ public class HomeActivity extends AppCompatActivity implements
     /**
      * Show an informational "Snackbar" message.
      */
-    private void showErrorWithRetry(String message) {
-        Snackbar.make(recyclerView, message, Snackbar.LENGTH_INDEFINITE)
-                .setAction("RETRY", v -> fetchEmailsFromApi())
-                .show();
-    }
-
-    /**
-     * Show an informational "Snackbar" message.
-     */
     private void showInfo(String message) {
         Snackbar.make(recyclerView, message, Snackbar.LENGTH_SHORT).show();
     }
 
     /**
-     * When refresh is triggered, fetch emails from the API.
+     * Refresh emails based on the current label/category.
      */
     private void refreshEmails() {
-        fetchEmailsFromApi();
+        if ("inbox".equals(currentLabel)) {
+            observeAndRender(mailsViewModel.getMails());
+        } else {
+            observeAndRender(mailsViewModel.getMailsByLabel(currentLabel));
+        }
     }
 
     /**
-     * Handle email item click to mark as read and open detail view.
+     * Handle email item click to open detail view.
      */
     @Override
     public void onEmailClick(int position) {
-        if (position < 0 || position >= emailDataList.size()) return;
-        EmailData data = emailDataList.get(position);
-        Intent intent = new Intent(this, ComposeEmailActivity.class);
-        intent.putExtra("draft_id", data.getId());
-        intent.putExtra("to", data.getReceiver());
-        intent.putExtra("subject", data.getSubject());
-        intent.putExtra("body", data.getBody());
+        if (position < 0 || position >= currentMails.size()) return;
+        String id = currentMails.get(position).getId();
+        Intent intent = new Intent(this, EmailDetailActivity.class);
+        intent.putExtra(EmailDetailActivity.EXTRA_MAIL_ID, id);
         startActivity(intent);
     }
 
     /**
-     * Perform logout by calling the API and redirecting to login activity.
+     * Perform logout action.
      */
     private void performLogout() {
-        homeViewModel.logout();
+        inboxViewModel.logout();
     }
 
     /**
@@ -573,53 +443,13 @@ public class HomeActivity extends AppCompatActivity implements
     }
 
     /**
-     * Perform search by querying the API and updating the RecyclerView.
+     * Perform search with the given query string.
      * @param query The search query string.
      */
     private void performSearch(String query) {
         if (swipeRefreshLayout != null) {
             swipeRefreshLayout.setRefreshing(true);
         }
-        EmailApiService apiService = ApiClient.getClient().create(EmailApiService.class);
-        Call<List<EmailData>> call = apiService.searchMails(query);
-        call.enqueue(new Callback<List<EmailData>>() {
-            @Override
-            public void onResponse(Call<List<EmailData>> call, Response<List<EmailData>> response) {
-                finishLoading();
-                if (response.isSuccessful() && response.body() != null) {
-                    emailList.clear();
-                    emailDataList.clear();
-                    emailMap.clear();
-                    for (EmailData email : response.body()) {
-                        EmailItem item = email.toEmailItem();
-                        emailList.add(item);
-                        emailDataList.add(email);
-                        emailMap.put(item, email);
-                    }
-                    adapter.setItems(emailList);
-                    if (emailList.isEmpty()) {
-                        showInfo("No emails found");
-                    }
-                } else {
-                    String serverMsg = "";
-                    try {
-                        if (response.errorBody() != null) {
-                            serverMsg = response.errorBody().string();
-                        }
-                    } catch (Exception ignored) {
-                    }
-                    String msg = serverMsg.isEmpty()
-                            ? "Failed to search emails (" + response.code() + ")"
-                            : "Failed to search emails: " + serverMsg;
-                    showErrorWithRetry(msg);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<EmailData>> call, Throwable t) {
-                finishLoading();
-                showErrorWithRetry("Network error: " + t.getMessage());
-            }
-        });
+        observeAndRender(mailsViewModel.searchMails(query));
     }
 }

@@ -25,7 +25,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.androidproject.ui.email.HomeActivity;
+import com.example.androidproject.ui.email.InboxActivity;
 import com.example.androidproject.R;
 import com.example.androidproject.util.ValidationUtils;
 import com.example.androidproject.viewModel.RegisterViewModel;
@@ -34,7 +34,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 /**
- * MainActivity handles user registration including:
+ * RegisterActivity handles user registration including:
  * - Input fields for first name, last name, username, password, confirm password
  * - Profile photo selection from gallery
  * - Input validation with real-time feedback
@@ -42,7 +42,7 @@ import com.google.android.material.textfield.TextInputLayout;
  * - Auto-login upon successful registration
  * - Navigation to LoginActivity if user opts to sign in instead
  */
-public class MainActivity extends AppCompatActivity {
+public class RegisterActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 100;
     private ImageView imgProfile;
     private Uri selectedImageUri = null;
@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_register);
 
         tilFirstName = findViewById(R.id.til_first_name);
         tilLastName = findViewById(R.id.til_last_name);
@@ -155,14 +155,10 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Registration successful", Toast.LENGTH_SHORT).show();
             }
         });
-        registerViewModel.getLoginResult().observe(this, response -> {
-            if (response != null && response.getToken() != null) {
-                Intent intent = new Intent(this, HomeActivity.class);
-                startActivity(intent);
-                finish();
-            } else {
-                Intent intent = new Intent(this, LoginActivity.class);
-                startActivity(intent);
+        registerViewModel.getAuthSucceeded().observe(this, success -> {
+            if (Boolean.TRUE.equals(success)) {
+                // Navigate to InboxActivity and clear back stack
+                startActivity(new Intent(this, InboxActivity.class));
                 finish();
             }
         });

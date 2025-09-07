@@ -15,7 +15,7 @@ public class ValidationUtils {
 
     // Password strength validation
     private static final Pattern PASSWORD_PATTERN = Pattern.compile(
-            "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$");
+            "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&+=])(?=\\S+$).{8,}$");
 
     public static boolean isStrongPassword(String password) {
         return PASSWORD_PATTERN.matcher(password).matches();

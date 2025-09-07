@@ -8,7 +8,7 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
-import com.example.androidproject.ui.email.HomeActivity;
+import com.example.androidproject.ui.email.InboxActivity;
 import com.example.androidproject.R;
 import com.example.androidproject.data.models.User;
 import com.example.androidproject.util.ValidationUtils;
@@ -20,7 +20,7 @@ import com.google.android.material.textfield.TextInputLayout;
 /**
  * LoginActivity handles user login functionality.
  * It validates user input, communicates with the backend API,
- * and navigates to the HomeActivity upon successful login.
+ * and navigates to the InboxActivity upon successful login.
  */
 public class LoginActivity extends AppCompatActivity {
 
@@ -55,8 +55,8 @@ public class LoginActivity extends AppCompatActivity {
         // Check if user is already logged in
         loginViewModel.getCurrentUser().observe(this, (User user) -> {
             if (user != null && user.username != null && !user.username.isEmpty()) {
-                // User is already logged in, navigate to HomeActivity
-                Intent intent = new Intent(this, HomeActivity.class);
+                // User is already logged in, navigate to InboxActivity
+                Intent intent = new Intent(this, InboxActivity.class);
                 startActivity(intent);
                 finish();
             }
@@ -68,7 +68,7 @@ public class LoginActivity extends AppCompatActivity {
                 Toast.makeText(LoginActivity.this,
                         "Login successful", Toast.LENGTH_SHORT).show();
                 // Navigate to the Home activity
-                Intent intent = new Intent(this, HomeActivity.class);
+                Intent intent = new Intent(this, InboxActivity.class);
                 startActivity(intent);
                 finish();
             }
@@ -127,7 +127,7 @@ public class LoginActivity extends AppCompatActivity {
      * Navigates to the registration activity.
      */
     private void navigateToRegistration() {
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, RegisterActivity.class);
         startActivity(intent);
     }
 

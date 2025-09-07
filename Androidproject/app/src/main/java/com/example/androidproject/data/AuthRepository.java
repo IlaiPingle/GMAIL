@@ -2,6 +2,7 @@ package com.example.androidproject.data;
 
 import com.example.androidproject.data.remote.net.ApiClient;
 import com.example.androidproject.api.ApiService;
+import com.example.androidproject.model.IsSignedInResponse;
 import com.example.androidproject.model.LoginResponse;
 import com.example.androidproject.model.RegisterResponse;
 
@@ -32,5 +33,12 @@ public class AuthRepository {
 
     public Call<LoginResponse> login(String username, String password) {
         return api.login(username, password);
+    }
+
+    public Call<Void> logout() {
+        return api.logout();
+    }
+    public Call<IsSignedInResponse> isSignedIn() {
+        return api.isSignedIn();
     }
 }

@@ -17,26 +17,33 @@
         android:usesCleartextTraffic="true"
         android:theme="@style/Theme.App">
         <activity
-            android:name=".ui.auth.LoginActivity"
+            android:name=".ui.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.auth.MainActivity"
+            android:name=".ui.auth.LoginActivity"
             android:exported="false">
         </activity>
         <activity
-            android:name=".ui.email.HomeActivity"
+            android:name=".ui.auth.RegisterActivity"
+            android:exported="false">
+        </activity>
+        <activity
+            android:name=".ui.email.InboxActivity"
             android:exported="false">
         </activity>
         <activity
             android:name=".ui.email.ComposeEmailActivity"
             android:windowSoftInputMode="adjustResize"
             android:label="Compose"
+            android:exported="false">
+        </activity>
+        <activity
+            android:name=".ui.email.EmailDetailActivity"
             android:exported="false">
         </activity>
     </application>

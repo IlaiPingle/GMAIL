@@ -2,6 +2,7 @@ package com.example.androidproject.data.remote.net;
 
 import com.example.androidproject.data.models.Label;
 import com.example.androidproject.data.remote.api.WebServiceAPI;
+import com.example.androidproject.data.remote.net.ApiClient;
 
 import java.util.List;
 
@@ -14,17 +15,7 @@ public class LabelAPIClient {
     private final WebServiceAPI labelApi;
 
     public LabelAPIClient() {
-        OkHttpClient client = new OkHttpClient.Builder()
-                .cookieJar(new SessionCookieJar())
-                .build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:8080/api/")
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        labelApi = retrofit.create(WebServiceAPI.class);
+        labelApi = ApiClient.getClient().create(WebServiceAPI.class);
     }
 
     public void getLabels(Callback<List<String>> callback) {

@@ -462,13 +462,13 @@ public class ComposeEmailActivity extends AppCompatActivity {
             reqBody.put("subject", editTextSubject.getText().toString());
             reqBody.put("body", editTextBody.getText().toString());
             EmailApiService api = ApiClient.getClient().create(EmailApiService.class);
-            api.sendMail(draftId, reqBody).enqueue(new Callback<EmailData>() {
+            api.updateMail(draftId, reqBody).enqueue(new Callback<Void>() {
                 @Override
-                public void onResponse(Call<EmailData> call, Response<EmailData> response) {
+                public void onResponse(Call<Void> call, Response<Void> response) {
                     // handle response, show "Draft saved" if successful
                 }
                 @Override
-                public void onFailure(Call<EmailData> call, Throwable t) {
+                public void onFailure(Call<Void> call, Throwable t) {
                     // handle error
                 }
             });

@@ -1,34 +1,16 @@
 package com.example.androidproject.data.remote.net;
 
-
-
 import com.example.androidproject.data.models.Mail;
 import com.example.androidproject.data.remote.api.WebServiceAPI;
-
 import java.util.List;
-
-import okhttp3.OkHttpClient;
-
 import retrofit2.Callback;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MailAPIClient {
 
     private final WebServiceAPI mailApi;
 
     public MailAPIClient() {
-        OkHttpClient client = new OkHttpClient.Builder()
-                .cookieJar(new SessionCookieJar())
-                .build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:8080/api/")
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        mailApi = retrofit.create(WebServiceAPI.class);
+        this.mailApi = ApiClient.getClient().create(WebServiceAPI.class);
     }
 
     public void getMails(Callback<List<Mail>> callback) {
