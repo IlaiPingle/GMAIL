@@ -8,6 +8,8 @@ import com.example.androidproject.data.repository.LabelRepository;
 
 import java.util.List;
 
+import retrofit2.Callback;
+
 public class LabelsViewModel extends ViewModel {
     private final LabelRepository repository;
     private final LiveData<List<Label>> labels;
@@ -18,11 +20,15 @@ public class LabelsViewModel extends ViewModel {
     }
 
     public LiveData<List<Label>> getLabels() {
-        return labels;
+        return repository.getLabels();
     }
 
-    public void createLabel(String labelName) {
-        repository.createLabel(labelName);
+    public void refreshLabels() {
+        repository.refreshLabels();
+    }
+
+    public void createLabel(String labelName, Callback<Label> cb) {
+        repository.createLabel(labelName, cb);
     }
 
     public void deleteLabel(String labelName) {

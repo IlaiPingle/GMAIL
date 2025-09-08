@@ -3,6 +3,7 @@ package com.example.androidproject.data.remote.net;
 import com.example.androidproject.data.models.Mail;
 import com.example.androidproject.data.remote.api.WebServiceAPI;
 import java.util.List;
+import java.util.Map;
 import retrofit2.Callback;
 
 public class MailAPIClient {
@@ -46,10 +47,10 @@ public class MailAPIClient {
     }
 
     public void addLabelToMail(String mailId, String labelName, Callback<Void> callback) {
-        mailApi.addLabelToMail(mailId, labelName).enqueue(callback);
+        mailApi.addLabelToMail(mailId, Map.of("labelName", labelName)).enqueue(callback);
     }
 
     public void removeLabelFromMail(String mailId, String labelName, Callback<Void> callback) {
-        mailApi.removeLabelFromMail(mailId , labelName).enqueue(callback);
+        mailApi.removeLabelFromMail(mailId , Map.of("labelName", labelName)).enqueue(callback);
     }
 }

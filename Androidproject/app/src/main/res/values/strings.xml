@@ -20,4 +20,12 @@
     <string name="add_a_profile_photo_optional">Add a profile photo (optional)</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="create_new_label">Create new label</string>
+    <string name="label_name">Label name</string>
+    <string name="cancel">Cancel</string>
+    <string name="create">Create</string>
+    <string name="error_required">Required</string>
+    <string name="error_too_long">Too long (max 30)</string>
+    <string name="error_system_label">Cannot use system label name</string>
+    <string name="error_label_exists">Label already exists</string>
 </resources>

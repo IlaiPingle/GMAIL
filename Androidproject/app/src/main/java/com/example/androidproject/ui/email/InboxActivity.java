@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.view.KeyEvent;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -31,11 +32,14 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.LiveData;
 import com.example.androidproject.R;
+import com.example.androidproject.data.models.Label;
 import com.example.androidproject.model.EmailItem;
 import com.example.androidproject.ui.auth.LoginActivity;
 import com.example.androidproject.data.models.User;
 import com.example.androidproject.data.models.Mail;
+import com.example.androidproject.ui.label.AddLabelBottomSheet;
 import com.example.androidproject.viewModel.InboxViewModel;
+import com.example.androidproject.viewModel.LabelsViewModel;
 import com.example.androidproject.viewModel.MailsViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
@@ -62,6 +66,8 @@ public class InboxActivity extends AppCompatActivity implements
     private String currentLabel = "inbox";
     private InboxViewModel inboxViewModel;
     private MailsViewModel mailsViewModel;
+    private LabelsViewModel labelsViewModel;
+    private static final int GROUP_LABELS = 0x10A11E1; // group id for dynamic labels
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,6 +151,9 @@ public class InboxActivity extends AppCompatActivity implements
             // Optionally show a loading indicator
         });
         inboxViewModel.getCurrentUser().observe(this, this::bindToolbarAvatar);
+        labelsViewModel = new ViewModelProvider(this).get(LabelsViewModel.class);
+        labelsViewModel.getLabels().observe(this, labels ->
+            rebuildLabelsMenu(navigationView.getMenu(), labels));
 
         // Setup SwipeRefreshLayout
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
@@ -194,6 +203,30 @@ public class InboxActivity extends AppCompatActivity implements
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
         });
+    }
+
+    /**
+     * Rebuild the labels menu in the navigation drawer.
+     * @param menu The Menu object to populate.
+     * @param labels The list of Label objects.
+     */
+    private void rebuildLabelsMenu(Menu menu, List<Label> labels) {
+        for (int i = menu.size() - 1; i >= 0; i--) {
+            MenuItem item = menu.getItem(i);
+            if (item.getGroupId() == GROUP_LABELS) {
+                menu.removeItem(item.getItemId());
+            }
+        }
+        if (labels == null) return;
+        for (Label label : labels) {
+            MenuItem item = menu.add(GROUP_LABELS, Menu.NONE, Menu.NONE, label.getName());
+            item.setIcon(R.drawable.ic_label_outline);
+            item.setOnMenuItemClickListener(menuItem -> {
+                filterEmailsByLabel(label.getName());
+                drawerLayout.closeDrawer(GravityCompat.START);
+                return true;
+            });
+        }
     }
 
     /**
@@ -320,12 +353,21 @@ public class InboxActivity extends AppCompatActivity implements
         } else if (id == R.id.nav_sent) {
             currentLabel = "sent";
             loadEmails();
+        } else if (id == R.id.nav_new_label) {
+            showAddLabelSheet();
         } else if (id == R.id.nav_logout) {
             performLogout();
         }
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    /**
+     * Show the Add Label Bottom Sheet.
+     */
+    private void showAddLabelSheet() {
+        new AddLabelBottomSheet().show(getSupportFragmentManager(), "AddLabel");
     }
 
     /**
