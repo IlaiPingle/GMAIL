@@ -28,4 +28,7 @@
     <string name="error_too_long">Too long (max 30)</string>
     <string name="error_system_label">Cannot use system label name</string>
     <string name="error_label_exists">Label already exists</string>
+    <string name="edit_label">Edit label</string>
+    <string name="delete">Delete</string>
+    <string name="save">Save</string>
 </resources>

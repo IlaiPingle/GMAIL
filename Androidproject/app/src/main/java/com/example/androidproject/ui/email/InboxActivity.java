@@ -38,6 +38,7 @@ import com.example.androidproject.ui.auth.LoginActivity;
 import com.example.androidproject.data.models.User;
 import com.example.androidproject.data.models.Mail;
 import com.example.androidproject.ui.label.AddLabelBottomSheet;
+import com.example.androidproject.ui.label.EditLabelBottomSheet;
 import com.example.androidproject.viewModel.InboxViewModel;
 import com.example.androidproject.viewModel.LabelsViewModel;
 import com.example.androidproject.viewModel.MailsViewModel;
@@ -203,6 +204,40 @@ public class InboxActivity extends AppCompatActivity implements
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.inbox_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem item = menu.findItem(R.id.action_edit_label);
+        boolean show =!TextUtils.isEmpty(currentLabel) && !isSystemLabel(currentLabel)
+                && !"inbox".equalsIgnoreCase(currentLabel);
+        if (item != null) item.setVisible(show);
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    private boolean isSystemLabel(String name) {
+        if (name == null) return true;
+        String key = name.toLowerCase();
+        return key.equals("inbox") || key.equals("sent") || key.equals("starred") ||
+               key.equals("snoozed") || key.equals("spam") || key.equals("bin") ||
+               key.equals("trash") || key.equals("drafts") || key.equals("social") ||
+               key.equals("promotions") || key.equals("primary");
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_edit_label) {
+            EditLabelBottomSheet.newInstance(currentLabel)
+                    .show(getSupportFragmentManager(), "EditLabel");
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     /**
@@ -385,6 +420,7 @@ public class InboxActivity extends AppCompatActivity implements
      */
     private void filterEmailsByLabel(String label) {
         currentLabel = label;
+        invalidateOptionsMenu();
         observeAndRender(mailsViewModel.getMailsByLabel(label));
     }
 
@@ -399,6 +435,7 @@ public class InboxActivity extends AppCompatActivity implements
             swipeRefreshLayout.setEnabled(false);
             swipeRefreshLayout.post(() -> swipeRefreshLayout.setRefreshing(true));
         }
+        invalidateOptionsMenu();
         observeAndRender(mailsViewModel.getMails());
     }
 

@@ -3,10 +3,16 @@ package com.example.androidproject.data.remote.net;
 import com.example.androidproject.data.models.Label;
 import com.example.androidproject.data.remote.api.WebServiceAPI;
 import com.example.androidproject.data.remote.net.ApiClient;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import retrofit2.Callback;
 
+/**
+ * Client class for interacting with the Label API.
+ * It provides methods to fetch, create, update, and delete labels using Retrofit.
+ * The class uses the WebServiceAPI interface to define the API endpoints.
+ * Each method accepts a Retrofit Callback to handle asynchronous responses.
+ */
 public class LabelAPIClient {
     private final WebServiceAPI labelApi;
 
@@ -23,11 +29,11 @@ public class LabelAPIClient {
     }
 
     public void createLabel(String labelName, Callback<Label> callback) {
-        labelApi.createLabel(Map.of("labelName", labelName)).enqueue(callback);
+        labelApi.createLabel(Collections.singletonMap("labelName", labelName)).enqueue(callback);
     }
 
     public void updateLabel(String oldName, String newName, Callback<Void> callback) {
-        labelApi.updateLabel(oldName, Map.of("newName", newName)).enqueue(callback);
+        labelApi.updateLabel(oldName, Collections.singletonMap("newName", newName)).enqueue(callback);
     }
 
     public void deleteLabel(String labelName, Callback<Void> callback) {

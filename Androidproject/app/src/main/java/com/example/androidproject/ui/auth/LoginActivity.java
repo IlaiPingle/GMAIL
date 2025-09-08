@@ -52,23 +52,12 @@ public class LoginActivity extends AppCompatActivity {
         btnForgotPassword.setOnClickListener(v -> handleForgotPassword());
         // Initialize ViewModel
         loginViewModel = new ViewModelProvider(this).get(LoginViewModel.class);
-        // Check if user is already logged in
-        loginViewModel.getCurrentUser().observe(this, (User user) -> {
-            if (user != null && user.username != null && !user.username.isEmpty()) {
-                // User is already logged in, navigate to InboxActivity
-                Intent intent = new Intent(this, InboxActivity.class);
-                startActivity(intent);
-                finish();
-            }
-        });
         // Observe ViewModel LiveData
-        loginViewModel.getLoginResult().observe(this, loginResponse -> {
-            showLoading(false);
-            if (loginResponse != null && loginResponse.getUser() != null) {
-                Toast.makeText(LoginActivity.this,
-                        "Login successful", Toast.LENGTH_SHORT).show();
-                // Navigate to the Home activity
+        loginViewModel.getLoginSucceeded().observe(this, success -> {
+            if (Boolean.TRUE.equals(success)) {
+                Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(this, InboxActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 finish();
             }

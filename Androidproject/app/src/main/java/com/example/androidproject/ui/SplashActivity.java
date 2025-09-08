@@ -9,11 +9,14 @@ import com.example.androidproject.ui.email.InboxActivity;
 import com.example.androidproject.viewModel.SplashViewModel;
 
 public class SplashActivity extends AppCompatActivity {
+    private boolean hasNavigated = false;
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         SplashViewModel vm = new ViewModelProvider(this).get(SplashViewModel.class);
         vm.isSignedIn.observe(this, ok -> {
+            if (hasNavigated) return;
+            hasNavigated = true;
             Intent intent = new Intent(this, Boolean.TRUE.equals(ok) ? InboxActivity.class : LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);

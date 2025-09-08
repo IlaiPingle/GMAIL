@@ -7,12 +7,16 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.HttpUrl;
 
 
+/**
+ * A CookieJar that persists cookies in SharedPreferences for the app session.
+ * Cookies are stored in a single bucket since we have only one backend host.
+ * Cookies are cleared when the app is closed.
+ */
 public class SessionCookieJar implements CookieJar {
     private static final String PREFS_NAME = "cookies_store";
     private static final String KEY_COOKIES = "all"; // single bucket is enough for one backend host
@@ -61,11 +65,21 @@ public class SessionCookieJar implements CookieJar {
         return result;
     }
 
+    /**
+     * Clear all cookies from memory and persistent storage.
+     * This is typically called on logout.
+     */
     public synchronized void clear() {
         cache.clear();
         prefs.edit().remove(KEY_COOKIES).apply();
     }
 
+    /**
+     * Check if a cookie should be sent to a given URL.
+     * @param url the request URL
+     * @param c the cookie
+     * @return true if the cookie matches the URL
+     */
     private boolean cookieMatches(HttpUrl url, Cookie c) {
         boolean domainOk = c.hostOnly() ? url.host().equals(c.domain()) : url.host().endsWith(c.domain());
         boolean pathOk = url.encodedPath().startsWith(c.path());
@@ -73,10 +87,20 @@ public class SessionCookieJar implements CookieJar {
         return domainOk && pathOk && secureOk;
     }
 
+    /**
+     * Check if a cookie's domain matches a given domain.
+     * @param c the cookie
+     * @param domain the domain to check against
+     * @return true if the cookie's domain matches the given domain
+     */
     private boolean domainMatches(Cookie c, String domain) {
         return c.hostOnly() ? c.domain().equals(domain) : domain.endsWith(c.domain());
     }
 
+    /**
+     * Persist all cookies to SharedPreferences.
+     * This is called whenever cookies are updated.
+     */
     private void persistToPrefs() {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, List<Cookie>> e : cache.entrySet()) {
@@ -87,6 +111,10 @@ public class SessionCookieJar implements CookieJar {
         prefs.edit().putString(KEY_COOKIES, sb.toString()).apply();
     }
 
+    /**
+     * Load cookies from SharedPreferences into memory.
+     * This is called once during initialization.
+     */
     private void loadFromPrefs() {
         String s = prefs.getString(KEY_COOKIES, null);
         if (s == null || s.isEmpty()) return;
@@ -101,7 +129,12 @@ public class SessionCookieJar implements CookieJar {
         }
     }
 
-    // Simple serialization
+    /**
+     * Serialize a Cookie to a string for storage.
+     * Fields are tab-separated.
+     * @param c the cookie
+     * @return the serialized string representation of the cookie
+     */
     private String serialize(Cookie c) {
         return String.join("\t",
                 c.name(),
@@ -116,6 +149,12 @@ public class SessionCookieJar implements CookieJar {
         );
     }
 
+    /**
+     * Deserialize a Cookie from a string.
+     * Expects fields to be tab-separated.
+     * @param s the serialized cookie string
+     * @return the Cookie object, or null if deserialization fails
+     */
     private Cookie deserialize(String s) {
         try {
             String[] p = s.split("\t");

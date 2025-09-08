@@ -12,6 +12,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/**
+ * Repository class for managing Label data from both local database and remote API.
+ * It provides methods to fetch, create, update, and delete labels.
+ */
 public class LabelRepository {
     private final LabelDao labelDao;
     private final LabelAPIClient labelApi;
@@ -22,11 +26,20 @@ public class LabelRepository {
         this.labelApi = new LabelAPIClient();
     }
 
+    /**
+     * Fetches all labels from the local database and refreshes them from the remote API.
+     * @return LiveData list of labels.
+     */
     public LiveData<List<Label>> getLabels() {
         refreshLabels();
         return labelDao.getAllLabels();
     }
 
+    /**
+     * Refreshes the labels by fetching them from the remote API and updating the local database.
+     * This method runs the database operations in a separate thread to avoid blocking the main thread.
+     * The fetched labels are inserted into the local database after clearing the existing ones.
+     */
     public void refreshLabels() {
         labelApi.getLabels(new Callback<List<String>>() {
             @Override
@@ -51,6 +64,11 @@ public class LabelRepository {
         });
     }
 
+    /**
+     * Creates a new label with the given name using the remote API and inserts it into the local database upon success.
+     * @param labelName The name of the label to be created.
+     * @param callback A Retrofit callback to handle the API response.
+     */
     public void createLabel(String labelName, Callback<Label> callback) {
         labelApi.createLabel(labelName, new Callback<Label>() {
             @Override
@@ -72,23 +90,28 @@ public class LabelRepository {
         });
     }
 
-    public void deleteLabel(String labelName) {
+    public void deleteLabel(String labelName, Callback<Void> cb) {
         labelApi.deleteLabel(labelName, new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
                     new Thread(() -> labelDao.deleteByName(labelName)).start();
                 }
+                if (cb != null) {
+                    cb.onResponse(call, response);
+                }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                t.printStackTrace();
+                if (cb != null) {
+                    cb.onFailure(call, t);
+                }
             }
         });
     }
 
-    public void updateLabel(String oldName, String newName) {
+    public void updateLabel(String oldName, String newName, Callback<Void> cb) {
         labelApi.updateLabel(oldName, newName, new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
@@ -98,11 +121,16 @@ public class LabelRepository {
                         labelDao.insert(new Label(newName));
                     }).start();
                 }
+                if (cb != null) {
+                    cb.onResponse(call, response);
+                }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                t.printStackTrace();
+                if (cb != null) {
+                    cb.onFailure(call, t);
+                }
             }
         });
     }

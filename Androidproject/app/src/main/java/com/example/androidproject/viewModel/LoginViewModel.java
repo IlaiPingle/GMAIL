@@ -23,6 +23,7 @@ public class LoginViewModel extends AndroidViewModel {
     private final MutableLiveData<LoginResponse> loginResult = new MutableLiveData<>();
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
     private final MutableLiveData<Boolean> loading = new MutableLiveData<>(false);
+    private final MutableLiveData<Boolean> loginSucceeded = new MutableLiveData<>(false);
     public LoginViewModel(@NonNull Application application) {
         super(application);
         userRepo = new UserRepository(application);
@@ -32,6 +33,7 @@ public class LoginViewModel extends AndroidViewModel {
     public LiveData<String> getErrorMessage() { return errorMessage; }
     public LiveData<Boolean> getLoading() { return loading; }
     public LiveData<User> getCurrentUser() { return userRepo.getCurrentUser(); }
+    public LiveData<Boolean> getLoginSucceeded() { return loginSucceeded; }
 
     public void login(String username, String password) {
         loading.setValue(true);
@@ -39,10 +41,12 @@ public class LoginViewModel extends AndroidViewModel {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                 loading.setValue(false);
-                if (response.isSuccessful() && response.body() != null) {
-                    loginResult.setValue(response.body());
+                if (response.isSuccessful()) {
+                    loginSucceeded.setValue(true);
+                    userRepo.autoSignIn(null);
                 } else {
                     errorMessage.setValue("Login failed");
+                    loginSucceeded.setValue(false);
                 }
             }
 
@@ -50,6 +54,7 @@ public class LoginViewModel extends AndroidViewModel {
             public void onFailure(Call<LoginResponse> call, Throwable t) {
                 loading.setValue(false);
                 errorMessage.setValue("Network error: " + t.getMessage());
+                loginSucceeded.setValue(false);
             }
         });
     }
