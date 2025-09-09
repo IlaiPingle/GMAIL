@@ -1,8 +1,10 @@
 package com.example.androidproject.data.remote.api;
 
+import com.example.androidproject.data.models.Label;
 import com.example.androidproject.data.models.Mail;
 
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -38,20 +40,20 @@ public interface WebServiceAPI {
     Call<Mail> getMailById(@Path("id") String mailId);
 
     //labels endpoints
-    @GET("labels")
+    @GET("api/labels")
     Call<List<String>> getLabels();
-    @GET("labels/{labelName}")
-    Call<String> getLabelByName(@Path("labelName") String labelName);
-    @POST("labels")
-    Call<String> createLabel(@Body String labelName);
-    @PATCH("labels/{labelName}")
-    Call<String> updateLabel(@Path("labelName") String labelName, @Body String newName);
-    @DELETE("labels/{labelName}")
-    Call<Void> deleteLabel(@Path("labelName") String labelName);
-    @GET("labels/mails")
+    @GET("api/labels/{id}")
+    Call<Label> getLabelByName(@Path("id") String labelName);
+    @POST("api/labels")
+    Call<Label> createLabel(@Body Map<String, String> label);
+    @PATCH("api/labels/{id}")
+    Call<Void> updateLabel(@Path("id") String oldName, @Body Map<String, String> label);
+    @DELETE("api/labels/{id}")
+    Call<Void> deleteLabel(@Path("id") String labelName);
+    @GET("api/labels/mails")
     Call<List<Mail>> getMailsByLabel(@Query("label") String label);
-    @POST("labels/mails/{mailId}")
-    Call<Void> addLabelToMail(@Path("mailId") String mailId, @Body  String labelName);
-    @HTTP(method = "DELETE", path = "labels/mails/{mailId}", hasBody = true)
-    Call<Void> removeLabelFromMail(@Path("mailId") String mailId, @Body String labelName);
+    @POST("api/labels/mails/{mailId}")
+    Call<Void> addLabelToMail(@Path("mailId") String mailId, @Body Map<String, String> body);
+    @HTTP(method = "DELETE", path = "api/labels/mails/{mailId}", hasBody = true)
+    Call<Void> removeLabelFromMail(@Path("mailId") String mailId, @Body Map<String, String> body);
 }

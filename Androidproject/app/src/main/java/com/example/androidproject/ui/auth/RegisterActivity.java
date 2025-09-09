@@ -17,35 +17,24 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import java.io.File;
-import java.io.IOException;
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.ViewModelProvider;
 
-import com.example.androidproject.ui.email.HomeActivity;
+import com.example.androidproject.ui.email.InboxActivity;
 import com.example.androidproject.R;
-import com.example.androidproject.util.TokenManager;
 import com.example.androidproject.util.ValidationUtils;
-import com.example.androidproject.data.remote.net.ApiClient;
-import com.example.androidproject.api.ApiService;
-import com.example.androidproject.model.LoginResponse;
-import com.example.androidproject.model.RegisterResponse;
+import com.example.androidproject.viewModel.RegisterViewModel;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 /**
- * MainActivity handles user registration including:
+ * RegisterActivity handles user registration including:
  * - Input fields for first name, last name, username, password, confirm password
  * - Profile photo selection from gallery
  * - Input validation with real-time feedback
@@ -53,7 +42,7 @@ import com.google.android.material.textfield.TextInputLayout;
  * - Auto-login upon successful registration
  * - Navigation to LoginActivity if user opts to sign in instead
  */
-public class MainActivity extends AppCompatActivity {
+public class RegisterActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 100;
     private ImageView imgProfile;
     private Uri selectedImageUri = null;
@@ -61,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     private TextInputLayout tilFirstName, tilLastName, tilUsername, tilPassword, tilConfirmPassword;
     private TextInputEditText etFirstName, etLastName, etUsername, etPassword, etConfirmPassword;
     private ProgressBar progressBar;
+    private RegisterViewModel registerViewModel;
 
     /**
      * Launcher for image picker activity result
@@ -92,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_register);
 
         tilFirstName = findViewById(R.id.til_first_name);
         tilLastName = findViewById(R.id.til_last_name);
@@ -150,6 +140,27 @@ public class MainActivity extends AppCompatActivity {
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+        });
+        // Initialize ViewModel
+        registerViewModel = new ViewModelProvider(this).get(RegisterViewModel.class);
+        // Observe LiveData from ViewModel
+        registerViewModel.getLoading().observe(this, this::showLoading);
+        registerViewModel.getErrorMessage().observe(this, msg -> {
+            if (msg != null) {
+                Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+            }
+        });
+        registerViewModel.getRegisterResult().observe(this, response -> {
+            if (response != null) {
+                Toast.makeText(this, "Registration successful", Toast.LENGTH_SHORT).show();
+            }
+        });
+        registerViewModel.getAuthSucceeded().observe(this, success -> {
+            if (Boolean.TRUE.equals(success)) {
+                // Navigate to InboxActivity and clear back stack
+                startActivity(new Intent(this, InboxActivity.class));
+                finish();
+            }
         });
     }
 
@@ -237,116 +248,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (!ok) return;
-        if (selectedImageUri == null) {
-            Toast.makeText(this, "Please select a profile photo", Toast.LENGTH_SHORT).show();
-            return;
+        File imageFile = null;
+        if (selectedImageUri != null) {
+            String imagePath = getFilePathFromUri(selectedImageUri);
+            if (imagePath != null) {
+                imageFile = new File(imagePath);
+            }
         }
-        uploadData(first, last, user, pass, selectedImageUri);
-    }
-
-    /**
-     * Uploads registration data to the server using a multipart form request
-     * Includes text fields and the selected profile image
-     * Handles API response and errors
-     * On successful registration, saves user info and auto-logs in
-     * Displays appropriate toast messages for success or failure
-     * @param first    User's first name
-     * @param last     User's last name
-     * @param user     Desired username
-     * @param pass     Desired password
-     * @param imageUri URI of the selected profile image
-     */
-    private void uploadData(String first, String last, String user, String pass, Uri imageUri) {
-        showLoading(true);
-        // Create API service
-        ApiService apiService = ApiClient.getClient().create(ApiService.class);
-
-        // Create RequestBody instances
-        RequestBody firstNameBody = RequestBody.create(MediaType.parse("text/plain"), first);
-        RequestBody surNameBody = RequestBody.create(MediaType.parse("text/plain"), last);
-        RequestBody usernameBody = RequestBody.create(MediaType.parse("text/plain"), user);
-        RequestBody passwordBody = RequestBody.create(MediaType.parse("text/plain"), pass);
-
-        // Prepare image file
-        File file = new File(getFilePathFromUri(imageUri));
-        RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), file);
-        MultipartBody.Part imagePart = MultipartBody.Part.createFormData("picture",
-                file.getName(), requestFile);
-
-        // Make API call
-        Call<RegisterResponse> call = apiService.register(
-                firstNameBody, surNameBody, usernameBody, passwordBody, imagePart);
-
-        call.enqueue(new Callback<RegisterResponse>() {
-            @Override
-            public void onResponse(Call<RegisterResponse> call, Response<RegisterResponse> response) {
-                showLoading(false);
-                if (response.isSuccessful() && response.body() != null) {
-                    // Registration successful
-                    Toast.makeText(MainActivity.this, "Registration successful", Toast.LENGTH_SHORT).show();
-                    RegisterResponse.User u = response.body().getUser();
-                    if (u != null) {
-                        TokenManager.saveUserInfo(
-                                MainActivity.this,
-                                u.getUsername(),
-                                u.getFirstName(),
-                                u.getSurName(),
-                                u.getPicture()
-                        );
-                    }
-                    // Auto-login after registration
-                    autoLogin(user, pass);
-                } else {
-                    // Handle error
-                    String errorMsg = "Registration failed";
-                    if (response.errorBody() != null) {
-                        try {
-                            errorMsg = response.errorBody().string();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    Toast.makeText(MainActivity.this, errorMsg, Toast.LENGTH_LONG).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<RegisterResponse> call, Throwable t) {
-                showLoading(false);
-                Toast.makeText(MainActivity.this, "Network error: " + t.getMessage(),
-                        Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    /**
-     * Automatically logs in the user after successful registration
-     * Makes an API call to the login endpoint with provided credentials
-     * On success, navigates to HomeActivity
-     * On failure, navigates to LoginActivity
-     * @param username The username to log in with
-     * @param password The password to log in with
-     */
-    private void autoLogin(String username, String password) {
-        ApiService api = ApiClient.getClient().create(ApiService.class);
-        api.login(username, password).enqueue(new Callback<LoginResponse>() {
-            @Override
-            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                if (response.isSuccessful()) {
-                    startActivity(new Intent(MainActivity.this, HomeActivity.class));
-                    finish();
-                } else {
-                    startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                    finish();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<LoginResponse> call, Throwable t) {
-                startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                finish();
-            }
-        });
+        registerViewModel.register(first, last, user, pass, imageFile);
     }
 
     /**
@@ -416,16 +325,6 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         return path;
-    }
-
-    // Parse error message from response body
-    private String parseError(ResponseBody errorBody) {
-        try {
-            return errorBody.string();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "Unknown error";
-        }
     }
 
     /**

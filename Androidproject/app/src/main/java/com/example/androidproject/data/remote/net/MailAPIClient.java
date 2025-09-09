@@ -1,34 +1,17 @@
 package com.example.androidproject.data.remote.net;
 
-
-
 import com.example.androidproject.data.models.Mail;
 import com.example.androidproject.data.remote.api.WebServiceAPI;
-
 import java.util.List;
-
-import okhttp3.OkHttpClient;
-
+import java.util.Map;
 import retrofit2.Callback;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MailAPIClient {
 
     private final WebServiceAPI mailApi;
 
     public MailAPIClient() {
-        OkHttpClient client = new OkHttpClient.Builder()
-                .cookieJar(new SessionCookieJar())
-                .build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:8080/api/")
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        mailApi = retrofit.create(WebServiceAPI.class);
+        this.mailApi = ApiClient.getClient().create(WebServiceAPI.class);
     }
 
     public void getMails(Callback<List<Mail>> callback) {
@@ -64,10 +47,10 @@ public class MailAPIClient {
     }
 
     public void addLabelToMail(String mailId, String labelName, Callback<Void> callback) {
-        mailApi.addLabelToMail(mailId, labelName).enqueue(callback);
+        mailApi.addLabelToMail(mailId, Map.of("labelName", labelName)).enqueue(callback);
     }
 
     public void removeLabelFromMail(String mailId, String labelName, Callback<Void> callback) {
-        mailApi.removeLabelFromMail(mailId , labelName).enqueue(callback);
+        mailApi.removeLabelFromMail(mailId , Map.of("labelName", labelName)).enqueue(callback);
     }
 }

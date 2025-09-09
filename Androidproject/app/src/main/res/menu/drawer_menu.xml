@@ -26,5 +26,9 @@
             android:id="@+id/nav_sent"
             android:icon="@drawable/ic_send"
             android:title="Sent" />
+        <item
+            android:id="@+id/nav_new_label"
+            android:icon="@drawable/ic_label_outline"
+            android:title="@string/create_new_label" />
     </group>
 </menu>

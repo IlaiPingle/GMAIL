@@ -4,6 +4,7 @@ import com.example.androidproject.model.EmailData;
 import java.util.List;
 import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.PATCH;
 import retrofit2.http.Query;
 import retrofit2.http.Path;
 import retrofit2.http.Body;
@@ -33,4 +34,8 @@ public interface EmailApiService {
     Call<Void> deleteMail(@Path("id") String mailId);
     @DELETE("api/tokens")
     Call<Void> logout();
+    @GET("api/mails/{id}")
+    Call<EmailData> getMailById(@Path("id") String mailId);
+    @PATCH("api/mails/{id}")
+    Call<Void> updateMail(@Path("id") String mailId, @Body Map<String, Object> body);
 }

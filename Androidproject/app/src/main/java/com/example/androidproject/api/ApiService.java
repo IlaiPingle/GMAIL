@@ -1,13 +1,16 @@
 package com.example.androidproject.api;
 
+import com.example.androidproject.model.IsSignedInResponse;
 import com.example.androidproject.model.LoginResponse;
 import com.example.androidproject.model.RegisterResponse;
 
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.Call;
+import retrofit2.http.DELETE;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.GET;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
@@ -33,4 +36,8 @@ public interface ApiService {
             @Part("password") RequestBody password,
             @Part MultipartBody.Part picture
     );
+    @DELETE("api/tokens")
+    Call<Void> logout();
+    @GET("api/users/me")
+    Call<IsSignedInResponse> isSignedIn();
 }

@@ -36,5 +36,8 @@ public interface MailDao {
     @Query("SELECT * FROM mails WHERE id = :id")
     LiveData<Mail> getMail(String id);
 
+    @Query("DELETE FROM mails WHERE id = :id")
+    void deleteById(String id);
+
 }
 

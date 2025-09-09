@@ -8,8 +8,7 @@ import java.util.concurrent.TimeUnit;
 import com.example.androidproject.BuildConfig;
 import com.example.androidproject.api.AuthInterceptor;
 import com.example.androidproject.api.TokenAuthenticator;
-
-import okhttp3.JavaNetCookieJar;
+import com.example.androidproject.data.remote.net.SessionCookieJar;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
@@ -27,6 +26,8 @@ public class ApiClient {
     private static final String BASE_URL = "http://10.0.2.2:8080/"; // Localhost for Android emulator
     private static Retrofit retrofit = null;
     private static Context appContext;
+    private static OkHttpClient okHttpClient;
+    private static SessionCookieJar cookieJar;
 
     public static void initialize(Context context) {
         appContext = context.getApplicationContext();
@@ -38,8 +39,7 @@ public class ApiClient {
                throw new IllegalStateException("ApiClient is not initialized. Call ApiClient.initialize(context) before using getClient().");
            }
 
-           CookieManager cookieManager = new CookieManager();
-           cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
+           cookieJar = new SessionCookieJar(appContext);
 
            // Add logging for debugging
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
@@ -49,7 +49,7 @@ public class ApiClient {
             logging.redactHeader("Authorization");
 
             OkHttpClient client = new OkHttpClient.Builder()
-                    .cookieJar(new JavaNetCookieJar(new CookieManager(null, CookiePolicy.ACCEPT_ALL)))
+                    .cookieJar(cookieJar)
                     .connectTimeout(15, TimeUnit.SECONDS)
                     .readTimeout(15, TimeUnit.SECONDS)
                     .addInterceptor(new AuthInterceptor(appContext))
@@ -67,8 +67,8 @@ public class ApiClient {
     }
 
     public static void clearCookies(Context context) {
-        CookieManager cookieManager = new CookieManager();
-        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_NONE);
-        java.net.CookieHandler.setDefault(cookieManager);
+        if (cookieJar != null) {
+            cookieJar.clear();
+        }
     }
 }

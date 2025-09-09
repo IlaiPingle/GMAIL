@@ -80,8 +80,26 @@ public class TokenManager {
                 .putString(KEY_USERNAME, username)
                 .putString(KEY_FIRST_NAME, firstName)
                 .putString(KEY_SUR_NAME, surName)
-                .putString(KEY_PICTURE, picture)
+                .putString(KEY_PICTURE, picture == null ? "" : picture)
                 .apply();
+    }
+    // getters for user info
+    public static String getUsername(Context context) {
+        return getEncryptedSharedPreferences(context).getString(KEY_USERNAME, null);
+    }
+
+    public static String getFirstName(Context context) {
+        return getEncryptedSharedPreferences(context).getString(KEY_FIRST_NAME, null);
+    }
+
+    public static String getSurName(Context context) {
+        return getEncryptedSharedPreferences(context).getString(KEY_SUR_NAME, null);
+    }
+
+    public static String getPicture(Context context) {
+        // Return empty if not set to simplify UI checks
+        String v = getEncryptedSharedPreferences(context).getString(KEY_PICTURE, "");
+        return v == null ? "" : v;
     }
 
     /**

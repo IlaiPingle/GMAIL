@@ -8,7 +8,8 @@
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="?attr/colorSurface">
 
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
@@ -18,7 +19,7 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"
+                android:background="?attr/colorSurface"
                 app:contentInsetStartWithNavigation="56dp">
 
                 <RelativeLayout
@@ -33,6 +34,20 @@
                         android:layout_centerVertical="true"
                         android:layout_marginEnd="12dp"
                         android:src="@android:drawable/sym_def_app_icon" />
+
+                    <TextView
+                        android:id="@+id/toolbarAvatarInitial"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="12dp"
+                        android:gravity="center"
+                        android:textStyle="bold"
+                        android:textColor="?attr/colorOnPrimary"
+                        android:background="@drawable/circle_background"
+                        android:visibility="gone"
+                        android:text="?" />
 
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
@@ -58,18 +73,32 @@
                                 android:layout_height="40dp"
                                 android:background="?attr/selectableItemBackgroundBorderless"
                                 android:src="@drawable/ic_search"
-                                android:contentDescription="Search" />
+                                android:contentDescription="Search"
+                                app:tint="@color/icon_tint" />
 
                             <EditText
                                 android:id="@+id/editTextSearch"
                                 android:layout_width="0dp"
                                 android:layout_height="match_parent"
                                 android:layout_weight="1"
-                                android:hint="Search emails"
+                                android:hint="Search in emails"
                                 android:background="@android:color/transparent"
                                 android:paddingStart="8dp"
-                                android:paddingEnd="16dp"
-                                android:inputType="text" />
+                                android:paddingEnd="8dp"
+                                android:inputType="text"
+                                android:imeOptions="actionSearch"
+                                android:textColor="?attr/colorOnSurface"
+                                android:textColorHint="@color/secondary_text"/>
+
+                            <ImageButton
+                                android:id="@+id/btnClear"
+                                android:src="@drawable/ic_close"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:background="?attr/selectableItemBackgroundBorderless"
+                                android:visibility="gone"
+                                android:contentDescription="Clear search"
+                                app:tint="@color/icon_tint" />
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
                 </RelativeLayout>
@@ -102,8 +131,8 @@
             android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
             android:contentDescription="Compose new email"
-            app:tint="@android:color/white"
-            app:backgroundTint="#DB4437"
+            app:tint="?attr/colorOnPrimary"
+            app:backgroundTint="?attr/colorPrimary"
             app:srcCompat="@drawable/ic_compose" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
@@ -112,6 +141,9 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
+        android:background="?attr/colorSurface"
+        app:itemIconTint="?attr/colorOnSurface"
+        app:itemTextColor="?attr/colorOnSurface"
         app:headerLayout="@layout/nav_header_main"
         app:menu="@menu/drawer_menu" />
 </androidx.drawerlayout.widget.DrawerLayout>
