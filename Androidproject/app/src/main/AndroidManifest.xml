@@ -30,11 +30,7 @@
             android:exported="false">
         </activity>
         <activity
-            android:name=".ui.auth.MainActivity"
-            android:exported="false">
-        </activity>
-        <activity
-            android:name=".ui.email.HomeActivity"
+            android:name=".ui.auth.RegisterActivity"
             android:exported="false">
         </activity>
         <activity

@@ -16,37 +16,26 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
 import java.io.File;
-import java.io.IOException;
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.ViewModelProvider;
 
-import com.example.androidproject.ui.email.HomeActivity;
 import com.example.androidproject.R;
 import com.example.androidproject.ui.email.MailsActivity;
-import com.example.androidproject.util.TokenManager;
 import com.example.androidproject.util.ValidationUtils;
-import com.example.androidproject.data.remote.net.ApiClient;
-import com.example.androidproject.api.ApiService;
-import com.example.androidproject.model.LoginResponse;
-import com.example.androidproject.model.RegisterResponse;
+import com.example.androidproject.viewModel.UserViewModel;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 /**
- * MainActivity handles user registration including:
+ * RegisterActivity handles user registration including:
  * - Input fields for first name, last name, username, password, confirm password
  * - Profile photo selection from gallery
  * - Input validation with real-time feedback
@@ -54,40 +43,37 @@ import com.google.android.material.textfield.TextInputLayout;
  * - Auto-login upon successful registration
  * - Navigation to LoginActivity if user opts to sign in instead
  */
-public class MainActivity extends AppCompatActivity {
-    private static final int PERMISSION_REQUEST_CODE = 100;
+public class RegisterActivity extends AppCompatActivity {
     private ImageView imgProfile;
     private Uri selectedImageUri = null;
 
     private TextInputLayout tilFirstName, tilLastName, tilUsername, tilPassword, tilConfirmPassword;
     private TextInputEditText etFirstName, etLastName, etUsername, etPassword, etConfirmPassword;
     private ProgressBar progressBar;
+    private UserViewModel userViewModel;
 
     /**
-     * Launcher for image picker activity result
-     * Uses Activity Result API for better lifecycle handling
+     * Activity Result launcher for ACTION_PICK (legacy gallery).
      */
-    private final ActivityResultLauncher<Intent> imagePickerLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
+    private final ActivityResultLauncher<Intent> imagePickerLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                     selectedImageUri = result.getData().getData();
                     imgProfile.setImageURI(selectedImageUri);
                 }
-            }
-    );
+            });
 
-    // For permission request
-    private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
-            new ActivityResultContracts.RequestPermission(),
-            isGranted -> {
+    /**
+     * Activity Result launcher for runtime permission.
+     */
+    private final ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
                 if (isGranted) {
-                    openImagePicker();
+                    openLegacyImagePicker(); // proceed to gallery
                 } else {
                     Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
                 }
-            }
-    );
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,28 +94,53 @@ public class MainActivity extends AppCompatActivity {
         etConfirmPassword = findViewById(R.id.et_confirm_password);
 
         imgProfile = findViewById(R.id.img_profile);
+        progressBar = findViewById(R.id.progress_bar);
 
         MaterialButton btnNext = findViewById(R.id.btn_next);
-        btnNext.setOnClickListener(v -> validateAndSubmit());
         MaterialButton btnSelectPhoto = findViewById(R.id.btn_select_photo);
-        btnSelectPhoto.setOnClickListener(v -> checkPermissionAndPickImage());
         MaterialButton btnSignInInstead = findViewById(R.id.btn_sign_in_top);
+
+        btnNext.setOnClickListener(v -> validateAndSubmit());
+        btnSelectPhoto.setOnClickListener(v -> checkPermissionAndPickImage());
         btnSignInInstead.setOnClickListener(v -> {
             // Navigate to login activity
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
             finish(); // Assuming this activity was started from LoginActivity
         });
+
+        // Initialize ViewModel
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+        // Success flow: when user is saved locally (Room), we navigate forward.
+        userViewModel.getUser().observe(this, user -> {
+            if (user != null) {
+                Toast.makeText(this, "Registration successful", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(this, MailsActivity.class));
+                finish();
+            }
+        });
+        // Error flow: show toast and hide loading.
+        userViewModel.getErrorMessage().observe(this, errorMsg -> {
+            showLoading(false);
+            if (errorMsg != null && !errorMsg.isEmpty()) {
+                Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show();
+            }
+        });
         etUsername.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int st, int c, int a) {
+            }
+
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int st, int b, int c) {
+            }
+
             @Override
             public void afterTextChanged(Editable s) {
                 if (s.length() > 0 && !ValidationUtils.isValidUsername(s.toString())) {
                     tilUsername.setError("Use only letters, numbers and periods");
                 } else {
+                    tilUsername.setError(null);
                     tilUsername.setHelperText(getString(R.string.helper_username));
                 }
             }
@@ -137,55 +148,34 @@ public class MainActivity extends AppCompatActivity {
         etPassword.addTextChangedListener(new TextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
-                if (s.length() >0) {
+                if (s.length() > 0) {
                     if (s.length() < 8) {
                         tilPassword.setError("Password is too short");
+                        tilPassword.setError(null);
                     } else if (!ValidationUtils.isStrongPassword(s.toString())) {
+                        tilPassword.setError(null);
                         tilPassword.setHelperText("Make password stronger");
                     } else {
+                        tilPassword.setError(null);
                         tilPassword.setHelperText(getString(R.string.helper_password));
                     }
+                } else {
+                    tilPassword.setError(null);
+                    tilPassword.setHelperText(null);
                 }
             }
+
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
             @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
         });
+
     }
 
-    /**
-     * Check for storage permission and launch image picker
-     * Handles different permission requirements for Android versions
-     * Uses Activity Result API for permission request
-     * Opens image picker if permission is granted
-     * Otherwise, shows a toast message if permission is denied
-     */
-    private void checkPermissionAndPickImage() {
-        String permission;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            permission = Manifest.permission.READ_MEDIA_IMAGES;
-        } else {
-            permission = Manifest.permission.READ_EXTERNAL_STORAGE;
-        }
-
-        if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) {
-            openImagePicker();
-        } else {
-            requestPermissionLauncher.launch(permission);
-        }
-    }
-
-    /**
-     * Launches an intent to pick an image from the device's gallery
-     * Uses Activity Result API to handle the result
-     * Sets the selected image URI and updates the ImageView
-     * to display the chosen profile photo
-     */
-    private void openImagePicker() {
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        imagePickerLauncher.launch(intent);
-    }
     /**
      * Validates user input fields and submits registration data if valid
      * Checks for empty fields, username format, password strength, and matching passwords
@@ -238,116 +228,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (!ok) return;
-        if (selectedImageUri == null) {
-            Toast.makeText(this, "Please select a profile photo", Toast.LENGTH_SHORT).show();
-            return;
+        File imageFile = null;
+        if (selectedImageUri != null) {
+            String imagePath = getFilePathFromUri(selectedImageUri);
+            if (imagePath != null) {
+                imageFile = new File(imagePath);
+            }
         }
-        uploadData(first, last, user, pass, selectedImageUri);
-    }
-
-    /**
-     * Uploads registration data to the server using a multipart form request
-     * Includes text fields and the selected profile image
-     * Handles API response and errors
-     * On successful registration, saves user info and auto-logs in
-     * Displays appropriate toast messages for success or failure
-     * @param first    User's first name
-     * @param last     User's last name
-     * @param user     Desired username
-     * @param pass     Desired password
-     * @param imageUri URI of the selected profile image
-     */
-    private void uploadData(String first, String last, String user, String pass, Uri imageUri) {
-        showLoading(true);
-        // Create API service
-        ApiService apiService = ApiClient.getClient().create(ApiService.class);
-
-        // Create RequestBody instances
-        RequestBody firstNameBody = RequestBody.create(MediaType.parse("text/plain"), first);
-        RequestBody surNameBody = RequestBody.create(MediaType.parse("text/plain"), last);
-        RequestBody usernameBody = RequestBody.create(MediaType.parse("text/plain"), user);
-        RequestBody passwordBody = RequestBody.create(MediaType.parse("text/plain"), pass);
-
-        // Prepare image file
-        File file = new File(getFilePathFromUri(imageUri));
-        RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), file);
-        MultipartBody.Part imagePart = MultipartBody.Part.createFormData("picture",
-                file.getName(), requestFile);
-
-        // Make API call
-        Call<RegisterResponse> call = apiService.register(
-                firstNameBody, surNameBody, usernameBody, passwordBody, imagePart);
-
-        call.enqueue(new Callback<RegisterResponse>() {
-            @Override
-            public void onResponse(Call<RegisterResponse> call, Response<RegisterResponse> response) {
-                showLoading(false);
-                if (response.isSuccessful() && response.body() != null) {
-                    // Registration successful
-                    Toast.makeText(MainActivity.this, "Registration successful", Toast.LENGTH_SHORT).show();
-                    RegisterResponse.User u = response.body().getUser();
-                    if (u != null) {
-                        TokenManager.saveUserInfo(
-                                MainActivity.this,
-                                u.getUsername(),
-                                u.getFirstName(),
-                                u.getSurName(),
-                                u.getPicture()
-                        );
-                    }
-                    // Auto-login after registration
-                    autoLogin(user, pass);
-                } else {
-                    // Handle error
-                    String errorMsg = "Registration failed";
-                    if (response.errorBody() != null) {
-                        try {
-                            errorMsg = response.errorBody().string();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    Toast.makeText(MainActivity.this, errorMsg, Toast.LENGTH_LONG).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<RegisterResponse> call, Throwable t) {
-                showLoading(false);
-                Toast.makeText(MainActivity.this, "Network error: " + t.getMessage(),
-                        Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    /**
-     * Automatically logs in the user after successful registration
-     * Makes an API call to the login endpoint with provided credentials
-     * On success, navigates to HomeActivity
-     * On failure, navigates to LoginActivity
-     * @param username The username to log in with
-     * @param password The password to log in with
-     */
-    private void autoLogin(String username, String password) {
-        ApiService api = ApiClient.getClient().create(ApiService.class);
-        api.login(username, password).enqueue(new Callback<LoginResponse>() {
-            @Override
-            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                if (response.isSuccessful()) {
-                    startActivity(new Intent(MainActivity.this, MailsActivity.class));
-                    finish();
-                } else {
-                    startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                    finish();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<LoginResponse> call, Throwable t) {
-                startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                finish();
-            }
-        });
+        userViewModel.register(first, last, user, pass, imageFile);
     }
 
     /**
@@ -370,6 +258,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Converts a content URI to an absolute file path
      * Handles different URI schemes and document providers
+     *
      * @param uri The content URI to convert
      * @return The absolute file path, or null if not found
      */
@@ -401,7 +290,8 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Queries the MediaStore to get the file path from a content URI
-     * @param uri The content URI to query
+     *
+     * @param uri       The content URI to query
      * @param selection Optional selection criteria
      * @return The file path as a string, or null if not found
      */
@@ -419,22 +309,43 @@ public class MainActivity extends AppCompatActivity {
         return path;
     }
 
-    // Parse error message from response body
-    private String parseError(ResponseBody errorBody) {
-        try {
-            return errorBody.string();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "Unknown error";
+    /**
+     * Decide which permission is required (depends on Android version).
+     */
+    private String storagePermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            return Manifest.permission.READ_MEDIA_IMAGES;
+        } else {
+            return Manifest.permission.READ_EXTERNAL_STORAGE;
         }
     }
 
     /**
+     * Check permission and open gallery (legacy ACTION_PICK).
+     */
+    private void checkPermissionAndPickImage() {
+        String perm = storagePermission();
+        if (ContextCompat.checkSelfPermission(this, perm) == PackageManager.PERMISSION_GRANTED) {
+            openLegacyImagePicker();
+        } else {
+            requestPermissionLauncher.launch(perm);
+        }
+    }
+
+    /**
+     * Open legacy gallery intent (requires permission).
+     */
+    private void openLegacyImagePicker() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        imagePickerLauncher.launch(intent); // open gallery
+    }
+
+    /**
      * Shows or hides the loading indicator (ProgressBar)
+     *
      * @param isLoading true to show loading, false to hide
      */
     private void showLoading(boolean isLoading) {
-        progressBar = findViewById(R.id.progress_bar);
         if (progressBar != null) {
             progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         }

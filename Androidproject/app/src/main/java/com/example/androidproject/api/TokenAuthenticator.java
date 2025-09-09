@@ -6,7 +6,6 @@ import android.content.Intent;
 import androidx.annotation.Nullable;
 
 import com.example.androidproject.ui.auth.LoginActivity;
-import com.example.androidproject.util.TokenManager;
 
 import java.io.IOException;
 import okhttp3.Request;
@@ -29,7 +28,7 @@ public class TokenAuthenticator implements Authenticator {
     public Request authenticate(Route route, Response response) throws IOException{
         if (response.code() == 401) {
             // Token might be expired, clear it and prompt for re-login
-            TokenManager.clearData(context);
+//            TokenManager.clearData(context);
 
             Intent intent = new Intent(context, LoginActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

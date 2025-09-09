@@ -21,4 +21,6 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="search_in_mail">Search in mail</string>
+    <string name="compose_btn">compose</string>
+    <string name="user_labels_header">Labels</string>
 </resources>

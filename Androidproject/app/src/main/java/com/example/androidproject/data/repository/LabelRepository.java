@@ -1,5 +1,8 @@
 package com.example.androidproject.data.repository;
 
+import android.content.Context;
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -9,7 +12,6 @@ import com.example.androidproject.data.local.db.MyApplication;
 import com.example.androidproject.data.models.Label;
 import com.example.androidproject.data.remote.net.LabelAPIClient;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -19,56 +21,57 @@ import retrofit2.Response;
 public class LabelRepository {
     private final LabelDao labelDao;
     private final LabelAPIClient labelApi;
-    private final MutableLiveData<List<Label>> labels = new MutableLiveData<>();
 
-    public LabelRepository() {
-        AppDB db = AppDB.getInstance(MyApplication.context);
+    public LabelRepository(Context context) {
+        Context ctx = context.getApplicationContext();
+        AppDB db = AppDB.getInstance(ctx);
         this.labelDao = db.labelDao();
-        this.labelApi = new LabelAPIClient();
+        this.labelApi = new LabelAPIClient(ctx);
+        fetchLabelsFromServer();
     }
 
     public LiveData<List<Label>> getLabels() {
-        new Thread(() -> labels.postValue(labelDao.getAllLabels().getValue())).start();
-        labelApi.getLabels(new Callback<List<String>>() {
+        return labelDao.getAllLabels();
+    }
+
+    public void fetchLabelsFromServer() {
+        labelApi.getLabels(new retrofit2.Callback<List<Label>>() {
             @Override
-            public void onResponse(Call<List<String>> call, Response<List<String>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<Label> freshLabels = new ArrayList<>();
-                    for (String name : response.body()) {
-                        Label l = new Label();
-                        l.setName(name);
-                        freshLabels.add(l);
+            public void onResponse(Call<List<Label>> call, Response<List<Label>> resp) {
+                int code = resp.code();
+                android.util.Log.d("LabelRepo", "code=" + code);
+                if (!resp.isSuccessful() || resp.body() == null) {
+                    try {
+                        android.util.Log.e("LabelRepo", "errorBody=" + (resp.errorBody() == null ? "null" : resp.errorBody().string()));
+                    } catch (Exception ignored) {
                     }
-                    new Thread(() -> {
-                        labelDao.clear();
-                        labelDao.insertAll(freshLabels);
-                        labels.postValue(freshLabels);
-                    }).start();
+                    return; // early return on error
                 }
+                List<Label> fresh = resp.body();
+                new Thread(() -> {
+                    labelDao.clear();
+                    labelDao.insertAll(fresh);
+                }).start();
             }
 
             @Override
-            public void onFailure(Call<List<String>> call, Throwable t) {
-                t.printStackTrace();
+            public void onFailure(Call<List<Label>> call, Throwable t) {
+                Log.e("LabelRepo", "api failed", t);
             }
         });
-
-        return labels;
     }
 
     public void createLabel(String labelName) {
-        labelApi.createLabel(labelName, new Callback<String>() {
+        labelApi.createLabel(labelName, new Callback<Label>() {
             @Override
-            public void onResponse(Call<String> call, Response<String> response) {
+            public void onResponse(Call<Label> call, Response<Label> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Label label = new Label();
-                    label.setName(response.body());
-                    new Thread(() -> labelDao.insert(label)).start();
+                    new Thread(() -> labelDao.insert(response.body())).start();
                 }
             }
 
             @Override
-            public void onFailure(Call<String> call, Throwable t) {
+            public void onFailure(Call<Label> call, Throwable t) {
                 t.printStackTrace();
             }
         });
@@ -91,21 +94,19 @@ public class LabelRepository {
     }
 
     public void updateLabel(String oldName, String newName) {
-        labelApi.updateLabel(oldName, newName, new Callback<String>() {
+        labelApi.updateLabel(oldName, newName, new Callback<Label>() {
             @Override
-            public void onResponse(Call<String> call, Response<String> response) {
+            public void onResponse(Call<Label> call, Response<Label> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Label label = new Label();
-                    label.setName(response.body());
                     new Thread(() -> {
                         labelDao.deleteByName(oldName);
-                        labelDao.insert(label);
+                        labelDao.insert(response.body());
                     }).start();
                 }
             }
 
             @Override
-            public void onFailure(Call<String> call, Throwable t) {
+            public void onFailure(Call<Label> call, Throwable t) {
                 t.printStackTrace();
             }
         });

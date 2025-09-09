@@ -9,21 +9,21 @@ import androidx.room.PrimaryKey;
 public class Label {
     @PrimaryKey
     @NonNull
-    private String name;
-    public Label(@NonNull String name) {
-        this.name = name;
+    private String labelName;
+    public Label(@NonNull String labelName) {
+        this.labelName = labelName;
     }
     @Ignore
     public Label() {
-        name = "";
+        labelName = "";
     }
     @NonNull
-    public String getName() {
-        return name;
+    public String getLabelName() {
+        return labelName;
     }
 
-    public void setName(@NonNull String name) {
-        this.name = name;
+    public void setLabelName(@NonNull String labelName) {
+        this.labelName = this.labelName;
     }
 }
 

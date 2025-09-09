@@ -23,13 +23,13 @@ public interface LabelDao {
     @Delete
     void delete(Label label);
 
-    @Query("DELETE FROM labels WHERE name = :labelName")
+    @Query("DELETE FROM labels WHERE labelName = :labelName")
     void deleteByName(String labelName);
 
     @Query("SELECT * FROM labels")
     LiveData<List<Label>> getAllLabels();
 
-    @Query("SELECT * FROM labels WHERE name = :labelName LIMIT 1")
+    @Query("SELECT * FROM labels WHERE labelName = :labelName LIMIT 1")
     LiveData<Label> getLabelByName(String labelName);
 
     @Query("DELETE FROM labels")

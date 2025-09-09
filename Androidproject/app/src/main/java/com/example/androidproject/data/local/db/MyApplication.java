@@ -1,15 +1,18 @@
 package com.example.androidproject.data.local.db;
 
 import android.content.Context;
+import android.app.Application;
 
-import com.example.androidproject.data.remote.net.ApiClient;
+public class MyApplication extends Application {
+    private static MyApplication instance;
 
-public class MyApplication extends android.app.Application {
-    public static Context context;
-
+    @Override
     public void onCreate() {
         super.onCreate();
-        context = getApplicationContext();
-        ApiClient.initialize(context);
+        instance = this;
+    }
+
+    public static Context getAppContext() {
+        return instance.getApplicationContext();
     }
 }

@@ -1,13 +1,14 @@
 package com.example.androidproject.data.remote.net;
 
 import android.content.Context;
+
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.net.CookieStore;
+import java.net.HttpCookie;
 import java.util.concurrent.TimeUnit;
 
 import com.example.androidproject.BuildConfig;
-import com.example.androidproject.api.AuthInterceptor;
-import com.example.androidproject.api.TokenAuthenticator;
 
 import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
@@ -24,51 +25,38 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * - Includes method to clear cookies when needed.
  */
 public class ApiClient {
-    private static final String BASE_URL = "http://10.0.2.2:8080/"; // Localhost for Android emulator
-    private static Retrofit retrofit = null;
-    private static Context appContext;
+    private static final String BASE_URL = "http://10.0.2.2:8080/api/"; // Localhost for Android emulator
+    private static OkHttpClient client;
+    private static Retrofit retrofit;
 
-    public static void initialize(Context context) {
-        appContext = context.getApplicationContext();
-    }
+    public static Retrofit getClient(Context context) {
+        if (retrofit != null) return retrofit;
 
-    public static Retrofit getClient() {
-        if (retrofit == null) {
-           if (appContext == null) {
-               throw new IllegalStateException("ApiClient is not initialized. Call ApiClient.initialize(context) before using getClient().");
-           }
+        // Add logging for debugging
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor().setLevel(BuildConfig.DEBUG ?
+                HttpLoggingInterceptor.Level.BASIC : HttpLoggingInterceptor.Level.NONE);
 
-           CookieManager cookieManager = new CookieManager();
-           cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
+        client = new OkHttpClient.Builder()
+                .cookieJar(new SessionCookieJar(context))
+                .addInterceptor(logging)
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(15, TimeUnit.SECONDS)
+                .build();
 
-           // Add logging for debugging
-            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-            logging.setLevel(BuildConfig.DEBUG ?
-                    HttpLoggingInterceptor.Level.BASIC :
-                    HttpLoggingInterceptor.Level.NONE);
-            logging.redactHeader("Authorization");
+        retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
 
-            OkHttpClient client = new OkHttpClient.Builder()
-                    .cookieJar(new JavaNetCookieJar(new CookieManager(null, CookiePolicy.ACCEPT_ALL)))
-                    .connectTimeout(15, TimeUnit.SECONDS)
-                    .readTimeout(15, TimeUnit.SECONDS)
-                    .addInterceptor(new AuthInterceptor(appContext))
-                    .addInterceptor(logging)
-                    .authenticator(new TokenAuthenticator(appContext))
-                    .build();
-
-            retrofit = new Retrofit.Builder()
-                    .baseUrl(BASE_URL)
-                    .client(client)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-        }
         return retrofit;
     }
 
+    public static boolean hasSession(Context context) {
+        return new SessionCookieJar(context).hasSession();
+    }
+
     public static void clearCookies(Context context) {
-        CookieManager cookieManager = new CookieManager();
-        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_NONE);
-        java.net.CookieHandler.setDefault(cookieManager);
+        new SessionCookieJar(context).clear();
     }
 }

@@ -1,5 +1,7 @@
 package com.example.androidproject.data.repository;
 
+import android.content.Context;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -30,10 +32,11 @@ public class MailsRepository {
     private final MutableLiveData<List<Mail>> mails = new MutableLiveData<>();
 
 
-    public MailsRepository() {
-        AppDB db = AppDB.getInstance(MyApplication.context);
+    public MailsRepository(Context context) {
+        Context ctx = context.getApplicationContext();
+        AppDB db = AppDB.getInstance(ctx);
         this.mailDao = db.mailDao();
-        this.mailApi = new MailAPIClient();
+        this.mailApi = new MailAPIClient(ctx);
     }
 
     public LiveData<List<Mail>> getMails() {
@@ -200,7 +203,7 @@ public class MailsRepository {
     }
 
     public void removeLabelFromMail(String mailId, String labelName) {
-        mailApi.removeLabelFromMail(mailId, labelName, new Callback<Void>() {
+        mailApi.removeLabelFromMail(mailId,  labelName, new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
             }

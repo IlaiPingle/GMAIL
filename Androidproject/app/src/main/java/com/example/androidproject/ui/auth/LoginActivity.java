@@ -5,37 +5,29 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-
-import com.example.androidproject.ui.email.MailsActivity;
+import androidx.lifecycle.ViewModelProvider;
 import com.example.androidproject.R;
-import com.example.androidproject.util.TokenManager;
+import com.example.androidproject.data.models.User;
+import com.example.androidproject.ui.email.MailsActivity;
 import com.example.androidproject.util.ValidationUtils;
-import com.example.androidproject.data.remote.net.ApiClient;
-import com.example.androidproject.api.ApiService;
-import com.example.androidproject.model.LoginResponse;
+import com.example.androidproject.viewModel.UserViewModel;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
-import java.io.IOException;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
 /**
  * LoginActivity handles user login functionality.
  * It validates user input, communicates with the backend API,
- * and navigates to the HomeActivity upon successful login.
+ * and navigates to the InboxActivity upon successful login.
  */
 public class LoginActivity extends AppCompatActivity {
 
     private TextInputLayout tilUsername, tilPassword;
     private TextInputEditText etUsername, etPassword;
     private ProgressBar progressBar;
+    private UserViewModel userViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +50,27 @@ public class LoginActivity extends AppCompatActivity {
         btnSignIn.setOnClickListener(v -> validateAndSignIn());
         btnCreateAccount.setOnClickListener(v -> navigateToRegistration());
         btnForgotPassword.setOnClickListener(v -> handleForgotPassword());
+
+        // Initialize ViewModel
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+
+        // If a user exists in Room (auto sign-in via cookie already happened), go to inbox
+        userViewModel.getUser().observe(this, (User user) -> {
+            if (user != null && user.username != null && !user.username.isEmpty()) {
+                // User is already logged in, navigate to InboxActivity
+                showLoading(false);
+                Intent intent = new Intent(this, MailsActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+        // Observe ViewModel LiveData errors
+        userViewModel.getErrorMessage().observe(this, msg -> {
+            showLoading(false);
+            if (msg != null && !msg.isEmpty()) {
+                Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     /**
@@ -85,70 +98,16 @@ public class LoginActivity extends AppCompatActivity {
             tilPassword.setError("Enter a password");
             isValid = false;
         }
-
-        if (isValid) {
-            performLogin(username, password);
-        }
-    }
-
-    /**
-     * Performs the login operation by calling the backend API.
-     * @param username The username entered by the user.
-     * @param password The password entered by the user.
-     */
-    private void performLogin (String username, String password) {
+        if (!isValid) return;
         showLoading(true);
-        ApiService apiService = ApiClient.getClient().create(ApiService.class);
-        Call<LoginResponse> call = apiService.login(username, password);
-        call.enqueue(new Callback<LoginResponse>() {
-            @Override
-            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                showLoading(false);
-                if (response.isSuccessful() && response.body() != null) {
-                    Toast.makeText(LoginActivity.this,
-                            "Login successful", Toast.LENGTH_SHORT).show();
-                    LoginResponse.User user = response.body().getUser();
-                    if (user != null) {
-                        TokenManager.saveUserInfo(
-                                LoginActivity.this,
-                                user.getUsername(),
-                                user.getFirstName(),
-                                user.getSurName(),
-                                user.getPicture()
-                        );
-                    }
-                    // Navigate to the Home activity
-                    ApiClient.initialize(getApplicationContext());
-                    Intent intent = new Intent(LoginActivity.this, MailsActivity.class);
-                    startActivity(intent);
-                    finish();
-                } else {
-                    String errorMsg = "Login failed";
-                    if (response.errorBody() != null) {
-                        try {
-                            errorMsg = response.errorBody().string();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    Toast.makeText(LoginActivity.this, errorMsg, Toast.LENGTH_LONG).show();
-                }
-            }
-            @Override
-            public void onFailure(Call<LoginResponse> call, Throwable t) {
-                showLoading(false);
-                Toast.makeText(LoginActivity.this,
-                        "Network error: " + t.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        });
+        userViewModel.login(username, password);
     }
-
 
     /**
      * Navigates to the registration activity.
      */
     private void navigateToRegistration() {
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, RegisterActivity.class);
         startActivity(intent);
     }
 
@@ -159,20 +118,6 @@ public class LoginActivity extends AppCompatActivity {
     private void handleForgotPassword() {
         // TODO: Implement forgot password flow
         Toast.makeText(this, "Forgot password clicked", Toast.LENGTH_SHORT).show();
-    }
-
-    /**
-     * Parses the error message from the response body.
-     * @param errorBody The response body containing the error.
-     * @return The parsed error message.
-     */
-    private String parseError (ResponseBody errorBody) {
-        try {
-            return errorBody.string();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "An Unknown error occurred";
-        }
     }
 
     /**

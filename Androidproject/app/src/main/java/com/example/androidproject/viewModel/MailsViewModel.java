@@ -1,5 +1,8 @@
 package com.example.androidproject.viewModel;
 
+import android.app.Application;
+
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -12,13 +15,14 @@ import java.util.List;
  * This class interacts with the MailsRepository to supply data to the UI and handle user actions.
  */
 
-public class MailsViewModel extends ViewModel {
+public class MailsViewModel extends AndroidViewModel {
     private final MailsRepository repository;
     private final LiveData<List<Mail>> mails;
     private String selectedLabel;
 
-    public MailsViewModel() {
-        repository = new MailsRepository();
+    public MailsViewModel(Application application) {
+        super(application);
+        repository = new MailsRepository(application);
         mails = repository.getMails();
     }
 

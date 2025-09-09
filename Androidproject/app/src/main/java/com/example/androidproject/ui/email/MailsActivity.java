@@ -3,6 +3,10 @@ package com.example.androidproject.ui.email;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.TextView;
+
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
@@ -10,56 +14,52 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.androidproject.R;
+import com.example.androidproject.data.models.Label;
 import com.example.androidproject.data.models.Mail;
+import com.example.androidproject.ui.adapters.DrawerAdapter;
+import com.example.androidproject.ui.adapters.DrawerItem;
 import com.example.androidproject.ui.adapters.MailsListAdapter;
+import com.example.androidproject.viewModel.LabelsViewModel;
 import com.example.androidproject.viewModel.MailsViewModel;
-import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class MailsActivity extends AppCompatActivity {
     private MailsViewModel mailsViewModel;
+    private LabelsViewModel labelsViewModel;
+
     private MailsListAdapter mailsListAdapter;
-    private MaterialToolbar toolbar;
+
     private DrawerLayout drawerLayout;
-    private RecyclerView mailsRecycler;
-    private NavigationView navLabels;
-    private TextInputEditText searchInputText;
-    private FloatingActionButton fabCompose;
+    private RecyclerView drawerRecycler;
+    private DrawerAdapter drawerAdapter;
+
+    private EditText searchInputText;
+    private TextView tvCurrentLabel;
+
+    private static final String DEFAULT_LABEL = "inbox";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.mail_list);
 
-        toolbar = findViewById(R.id.topAppBar);
+//      set up navigation drawer
         drawerLayout = findViewById(R.id.drawerLayout);
-        mailsRecycler = findViewById(R.id.mailsRecycler);
+        ImageButton btnMenu = findViewById(R.id.btnMenu);
+        btnMenu.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
 
+        tvCurrentLabel = findViewById(R.id.tvCurrentLabel);
+        tvCurrentLabel.setText(DEFAULT_LABEL);
+
+//      set up mails emails list
+        RecyclerView mailsRecycler = findViewById(R.id.mailsRecycler);
         mailsRecycler.setLayoutManager(new LinearLayoutManager(this));
-
-        searchInputText = findViewById(R.id.searchEditText);
-        navLabels = findViewById(R.id.navLabels);
-        fabCompose = findViewById(R.id.fabCompose);
-
-        // open/close drawer on menu icon click
-        toolbar.setNavigationOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
-
-        navLabels.post(() -> {
-            int screenW = getResources().getDisplayMetrics().widthPixels;
-            navLabels.getLayoutParams().width = (int) (screenW * 0.75f);
-            navLabels.requestLayout();
-        });
-
-        navLabels.setItemIconTintList(null);
-
-        mailsViewModel = new ViewModelProvider(this).get(MailsViewModel.class);
-
         mailsListAdapter = new MailsListAdapter(new ArrayList<>(), new MailsListAdapter.OnMailsListAdapterListener() {
             @Override
             public void onMailClick(Mail mail) {
@@ -70,32 +70,76 @@ public class MailsActivity extends AppCompatActivity {
 
             @Override
             public void onStarClick(Mail mail) {
-                mailsViewModel.addLabelToMail(mail, "starred");
+                if (mail.getLabels() != null && mail.getLabels().contains("starred"))
+                    mailsViewModel.removeLabelFromMail(mail, "starred");
+                else mailsViewModel.addLabelToMail(mail, "starred");
             }
         });
         mailsRecycler.setAdapter(mailsListAdapter);
 
-        mailsViewModel.getMails().observe(this, mailsList -> {
-            mailsListAdapter.setMails(mailsList);
+        searchInputText = findViewById(R.id.editTextSearch);
+
+//      set up swipe to refresh
+        SwipeRefreshLayout swipeRefreshLayout = findViewById(R.id.swipeRefreshMails);
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            mailsViewModel.refreshCurrentList().observe(this, mailsList -> {
+                mailsListAdapter.setMails(mailsList);
+                swipeRefreshLayout.setRefreshing(false);
+            });
         });
 
-        navLabels.setNavigationItemSelectedListener(item -> {
-            String labelId = menuItemIdToLabel(item.getItemId());
-            if ("all".equals(labelId)) {
+
+//      set up compose email button
+        findViewById(R.id.btnCompose).setOnClickListener(v ->
+                startActivity((new Intent(
+                        MailsActivity.this, ComposeEmailActivity.class))));
+//      set up view models
+        mailsViewModel = new ViewModelProvider(this).get(MailsViewModel.class);
+        labelsViewModel = new ViewModelProvider(this).get(LabelsViewModel.class);
+
+        mailsViewModel.getMails().observe(this, mailsList -> mailsListAdapter.setMails(mailsList));
+
+        drawerRecycler = findViewById(R.id.drawerRecycler);
+        drawerRecycler.setLayoutManager(new LinearLayoutManager(this));
+
+//      set up navigation drawer
+
+        drawerAdapter = new DrawerAdapter(label -> {
+            String name = label.label != null ? label.label.getLabelName() : DEFAULT_LABEL;
+            tvCurrentLabel.setText(name);
+            if ("all".equalsIgnoreCase(name)) {
                 mailsViewModel.getMails();
             } else {
-                mailsViewModel.getMailsByLabel(labelId);
+                mailsViewModel.getMailsByLabel(name);
             }
-            item.setChecked(true);
+            drawerAdapter.setSelectedLabel(name);
             drawerLayout.closeDrawer(GravityCompat.START);
-            return true;
         });
+        drawerRecycler.setAdapter(drawerAdapter);
 
-        fabCompose.setOnClickListener(v -> {
-            Intent intent = new Intent(this, ComposeEmailActivity.class);
-            startActivity(intent);
+
+//      create static items for drawer
+        DrawerItem.HeaderItem headerItem = new DrawerItem.HeaderItem();
+        DrawerItem.SectionItem sectionItem = new DrawerItem.SectionItem();
+
+        List<DrawerItem.LabelItem> systemLabels = buildSystemLabels();
+
+//      set static labels and create new List for user labels
+        drawerAdapter.submitList(
+                DrawerItem.buildDrawerItems(headerItem, systemLabels, sectionItem, new ArrayList<>())
+        );
+        drawerAdapter.setSelectedLabel(DEFAULT_LABEL);
+
+//      observe user labels and update drawer when they change
+        labelsViewModel.getLabels().observe(this, userLabels -> {
+            Log.d("LabelsVM", "observe: size=" + (userLabels == null ? -1 : userLabels.size()));
+            List<DrawerItem.LabelItem> userLabelItems = buildUserLabels(userLabels);
+            drawerAdapter.submitList(
+                    DrawerItem.buildDrawerItems(headerItem, systemLabels, sectionItem, userLabelItems));
         });
+        mailsViewModel.getMailsByLabel(DEFAULT_LABEL);
     }
+
 
     @Override
     protected void onPause() {
@@ -109,11 +153,26 @@ public class MailsActivity extends AppCompatActivity {
         Log.d("MailsActivity", "onDestroy");
     }
 
-    private static String menuItemIdToLabel(int menuId) {
-        if (menuId == R.id.nav_inbox) return "inbox";
-        if (menuId == R.id.nav_starred) return "starred";
-        if (menuId == R.id.nav_sent) return "sent";
-        if (menuId == R.id.nav_all_mails) return "all";
-        return "inbox";
+
+    private List<DrawerItem.LabelItem> buildSystemLabels() {
+        return Arrays.asList(
+                new DrawerItem.LabelItem(new Label("inbox")),
+                new DrawerItem.LabelItem(new Label("starred")),
+                new DrawerItem.LabelItem(new Label("sent")),
+                new DrawerItem.LabelItem(new Label("drafts")),
+                new DrawerItem.LabelItem(new Label("spam")),
+                new DrawerItem.LabelItem(new Label("bin")),
+                new DrawerItem.LabelItem(new Label("all"))
+        );
+    }
+
+    private List<DrawerItem.LabelItem> buildUserLabels(List<Label> userLabels) {
+        List<DrawerItem.LabelItem> items = new ArrayList<>();
+        if (userLabels != null) {
+            for (Label label : userLabels) {
+                items.add(new DrawerItem.LabelItem(label));
+            }
+        }
+        return items;
     }
 }

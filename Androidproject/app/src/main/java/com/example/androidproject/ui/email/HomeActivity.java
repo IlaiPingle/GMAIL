@@ -1,55 +1,16 @@
 package com.example.androidproject.ui.email;
 
-import android.content.Intent;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.Toast;
 
-import androidx.activity.OnBackPressedCallback;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.androidproject.R;
-import com.example.androidproject.api.EmailApiService;
-import com.example.androidproject.data.models.Mail;
-import com.example.androidproject.model.EmailItem;
-import com.example.androidproject.ui.auth.LoginActivity;
 import com.example.androidproject.viewModel.LabelsViewModel;
-import com.example.androidproject.viewModel.MailsViewModel;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.snackbar.Snackbar;
-import com.google.android.material.tabs.TabLayout;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.example.androidproject.model.EmailData;
-import com.example.androidproject.data.remote.net.ApiClient;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 /**
  * HomeActivity displays a list of emails with functionalities like search, refresh, and compose.
@@ -96,7 +57,7 @@ public class HomeActivity extends AppCompatActivity {
             if (labels != null) {
                 int baseId = 1000;
                 for (int i = 0; i < labels.size(); i++) {
-                    String name = labels.get(i).getName();
+                    String name = labels.get(i).getLabelName();
 //                    menu.add(0, baseId + i, Menu.NONE, name).setIcon(R.drawable.ic_label);
                 }
             }

@@ -11,11 +11,11 @@
             android:title="Starred" />
         <item
             android:id="@+id/all"
-            android:icon="@drawable/ic_all_inbox"
+            android:icon="@drawable/ic_inbox"
             android:title="All mail" />
         <item
             android:id="@+id/sent"
-            android:icon="@drawable/ic_send"
+            android:icon="@drawable/ic_sent"
             android:title="Sent" />
         <item
             android:id="@+id/drafts"
@@ -27,7 +27,7 @@
             android:title="Trash" />
         <item
             android:id="@+id/spam"
-            android:icon="@drawable/"
+            android:icon="@drawable/ic_spam"
             android:title="Spam" />
     </group>
 </menu>

@@ -24,19 +24,14 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.androidproject.R;
 import com.example.androidproject.data.remote.net.ApiClient;
-import com.example.androidproject.api.EmailApiService;
-import com.example.androidproject.model.EmailData;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
-import com.google.android.material.snackbar.Snackbar;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import retrofit2.Response;
-import retrofit2.Call;
-import retrofit2.Callback;
 
 /**
  * ComposeEmailActivity provides a rich email composition interface.
@@ -188,7 +183,7 @@ public class ComposeEmailActivity extends AppCompatActivity {
             return;
         }
         String receiver = toList.get(0);
-        createDraftIfNeededAndSend();
+//        createDraftIfNeededAndSend();
     }
 
     /**
@@ -369,35 +364,35 @@ public class ComposeEmailActivity extends AppCompatActivity {
      * Handles API responses and errors, updating UI accordingly.
      * Disables Send button during operation to prevent duplicates.
      */
-    private void createDraftIfNeededAndSend() {
-        if (draftId != null) {
-            sendEmailWithDraftId(draftId);
-            return;
-        }
-        EmailApiService api = ApiClient.getClient().create(EmailApiService.class);
-        Map<String, Object> reqBody = new HashMap<>();
-        reqBody.put("subject", editTextSubject.getText().toString());
-        reqBody.put("body", editTextBody.getText().toString());
-        reqBody.put("receiver", TextUtils.join(",", getChipsEmails(chipGroupTo)));
-
-        api.createDraft(reqBody).enqueue(new Callback<EmailData>() {
-            @Override
-            public void onResponse(Call<EmailData> call, Response<EmailData> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    draftId = response.body().getId();
-                    sendEmailWithDraftId(draftId);
-                } else {
-                    setSendEnabled(true);
-                    Snackbar.make(findViewById(android.R.id.content), "Failed to create draft", Snackbar.LENGTH_LONG).show();
-                }
-            }
-            @Override
-            public void onFailure(Call<EmailData> call, Throwable t) {
-                setSendEnabled(true);
-                Snackbar.make(findViewById(android.R.id.content), "Network error: " + t.getMessage(), Snackbar.LENGTH_LONG).show();
-            }
-        });
-    }
+//    private void createDraftIfNeededAndSend() {
+//        if (draftId != null) {
+//            sendEmailWithDraftId(draftId);
+//            return;
+//        }
+//        EmailApiService api = ApiClient.getClient().create(EmailApiService.class);
+//        Map<String, Object> reqBody = new HashMap<>();
+//        reqBody.put("subject", editTextSubject.getText().toString());
+//        reqBody.put("body", editTextBody.getText().toString());
+//        reqBody.put("receiver", TextUtils.join(",", getChipsEmails(chipGroupTo)));
+//
+//        api.createDraft(reqBody).enqueue(new Callback<EmailData>() {
+//            @Override
+//            public void onResponse(Call<EmailData> call, Response<EmailData> response) {
+//                if (response.isSuccessful() && response.body() != null) {
+//                    draftId = response.body().getId();
+//                    sendEmailWithDraftId(draftId);
+//                } else {
+//                    setSendEnabled(true);
+//                    Snackbar.make(findViewById(android.R.id.content), "Failed to create draft", Snackbar.LENGTH_LONG).show();
+//                }
+//            }
+//            @Override
+//            public void onFailure(Call<EmailData> call, Throwable t) {
+//                setSendEnabled(true);
+//                Snackbar.make(findViewById(android.R.id.content), "Network error: " + t.getMessage(), Snackbar.LENGTH_LONG).show();
+//            }
+//        });
+//    }
 
     /**
      * Sends the email using the existing draft ID.
@@ -405,40 +400,40 @@ public class ComposeEmailActivity extends AppCompatActivity {
      * Disables Send button during operation to prevent duplicates.
      * @param draftId The ID of the draft to send.
      */
-    private void sendEmailWithDraftId(String draftId) {
-        List<String> toList = getChipsEmails(chipGroupTo);
-        if (toList.isEmpty()) {
-            Toast.makeText(this, "Add at least one recipient", Toast.LENGTH_SHORT).show();
-            setSendEnabled(true);
-            return;
-        }
-        String receiver = toList.get(0);
-        String subject = editTextSubject.getText().toString();
-        String body = editTextBody.getText().toString();
-        Map<String, Object> reqBody = new HashMap<>();
-        reqBody.put("receiver", receiver);
-        reqBody.put("subject", editTextSubject.getText().toString());
-        reqBody.put("body", editTextBody.getText().toString());
-
-        EmailApiService api = ApiClient.getClient().create(EmailApiService.class);
-        api.sendMail(draftId, reqBody).enqueue(new Callback<EmailData>() {
-            @Override
-            public void onResponse(Call<EmailData> call, Response<EmailData> response) {
-                setSendEnabled(true);
-                if (response.isSuccessful()) {
-                    clearCompose();
-                    Snackbar.make(findViewById(android.R.id.content), "Email sent", Snackbar.LENGTH_LONG).show();
-                } else {
-                    Snackbar.make(findViewById(android.R.id.content), "Send failed: " + response.code(), Snackbar.LENGTH_LONG).show();
-                }
-            }
-            @Override
-            public void onFailure(Call<EmailData> call, Throwable t) {
-                setSendEnabled(true);
-                Snackbar.make(findViewById(android.R.id.content), "Network error: " + t.getMessage(), Snackbar.LENGTH_LONG).show();
-            }
-        });
-    }
+//    private void sendEmailWithDraftId(String draftId) {
+//        List<String> toList = getChipsEmails(chipGroupTo);
+//        if (toList.isEmpty()) {
+//            Toast.makeText(this, "Add at least one recipient", Toast.LENGTH_SHORT).show();
+//            setSendEnabled(true);
+//            return;
+//        }
+//        String receiver = toList.get(0);
+//        String subject = editTextSubject.getText().toString();
+//        String body = editTextBody.getText().toString();
+//        Map<String, Object> reqBody = new HashMap<>();
+//        reqBody.put("receiver", receiver);
+//        reqBody.put("subject", editTextSubject.getText().toString());
+//        reqBody.put("body", editTextBody.getText().toString());
+//
+//        EmailApiService api = ApiClient.getClient().create(EmailApiService.class);
+//        api.sendMail(draftId, reqBody).enqueue(new Callback<EmailData>() {
+//            @Override
+//            public void onResponse(Call<EmailData> call, Response<EmailData> response) {
+//                setSendEnabled(true);
+//                if (response.isSuccessful()) {
+//                    clearCompose();
+//                    Snackbar.make(findViewById(android.R.id.content), "Email sent", Snackbar.LENGTH_LONG).show();
+//                } else {
+//                    Snackbar.make(findViewById(android.R.id.content), "Send failed: " + response.code(), Snackbar.LENGTH_LONG).show();
+//                }
+//            }
+//            @Override
+//            public void onFailure(Call<EmailData> call, Throwable t) {
+//                setSendEnabled(true);
+//                Snackbar.make(findViewById(android.R.id.content), "Network error: " + t.getMessage(), Snackbar.LENGTH_LONG).show();
+//            }
+//        });
+//    }
 
     /**
      * Schedules an autosave of the draft after a delay.
@@ -461,17 +456,8 @@ public class ComposeEmailActivity extends AppCompatActivity {
             reqBody.put("receiver", TextUtils.join(",", getChipsEmails(chipGroupTo)));
             reqBody.put("subject", editTextSubject.getText().toString());
             reqBody.put("body", editTextBody.getText().toString());
-            EmailApiService api = ApiClient.getClient().create(EmailApiService.class);
-            api.sendMail(draftId, reqBody).enqueue(new Callback<EmailData>() {
-                @Override
-                public void onResponse(Call<EmailData> call, Response<EmailData> response) {
-                    // handle response, show "Draft saved" if successful
-                }
-                @Override
-                public void onFailure(Call<EmailData> call, Throwable t) {
-                    // handle error
-                }
-            });
+//            EmailApiService api = ApiClient.getClient().create(EmailApiService.class);
+
         } else {
             SharedPreferences sp = getSharedPreferences(PREFS, Context.MODE_PRIVATE);
             // Include chips + any pending text
