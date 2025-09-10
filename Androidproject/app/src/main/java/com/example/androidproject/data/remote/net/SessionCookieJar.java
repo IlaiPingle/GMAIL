@@ -1,8 +1,9 @@
-// data/remote/net/TokenCookieJar.java
 package com.example.androidproject.data.remote.net;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+
+import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,7 @@ public final class SessionCookieJar implements CookieJar {
     }
 
     @Override
-    public synchronized void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
+    public synchronized void saveFromResponse(@NonNull HttpUrl url, List<Cookie> cookies) {
         for (Cookie c : cookies) {
             if (!NAME.equalsIgnoreCase(c.name())) continue;
             sp.edit()
@@ -41,19 +42,19 @@ public final class SessionCookieJar implements CookieJar {
                     .putBoolean(K_HTTPONLY,c.httpOnly())
                     .putBoolean(K_HOSTONLY,c.hostOnly())
                     .apply();
-            break; // רק token אחד
+            break;
         }
     }
 
+    @NonNull
     @Override
-    public synchronized List<Cookie> loadForRequest(HttpUrl url) {
+    public synchronized List<Cookie> loadForRequest(@NonNull HttpUrl url) {
         List<Cookie> out = new ArrayList<>();
         Cookie c = read();
         if (c == null) return out;
         long now = System.currentTimeMillis();
         if (c.expiresAt() <= now) { clear(); return out; }
 
-        // התאמת דומיין/נתיב/secure
         boolean domainOk = c.hostOnly() ? url.host().equalsIgnoreCase(c.domain())
                 : url.host().equalsIgnoreCase(c.domain()) || url.host().endsWith("." + c.domain());
         boolean pathOk   = url.encodedPath().startsWith(c.path());

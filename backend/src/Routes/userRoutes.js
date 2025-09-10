@@ -15,9 +15,9 @@ const storage = multer.diskStorage({
 })
 
 const upload = multer({ 
-	storage: storage,
-	 limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
-	})
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+})
 
 router.get('/api/users/me', authMiddleware, userController.isSignedIn);
 router.post('/api/users', upload.single('picture'), userController.registerUser);

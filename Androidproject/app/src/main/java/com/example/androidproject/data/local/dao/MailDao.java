@@ -19,7 +19,7 @@ public interface MailDao {
     void insert(Mail... mails);
 
     @Query("SELECT * FROM mails")
-    List<Mail> getMails();
+    LiveData<List<Mail>> getMails();
 
     @Delete
     void delete(Mail... mails);
@@ -35,5 +35,8 @@ public interface MailDao {
 
     @Query("SELECT * FROM mails WHERE id = :id")
     LiveData<Mail> getMail(String id);
+
+    @Query("SELECT * FROM mails WHERE id = :id")
+    Mail getMailNow(String id);
 }
 

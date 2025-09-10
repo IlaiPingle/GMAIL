@@ -14,7 +14,7 @@ import com.example.androidproject.data.models.Label;
 import com.example.androidproject.data.models.Mail;
 import com.example.androidproject.data.models.User;
 
-@Database(entities = {Mail.class, Label.class, User.class}, version = 5, exportSchema = false)
+@Database(entities = {Mail.class, Label.class, User.class}, version = 6, exportSchema = false)
 @TypeConverters({Converters.class})
 public abstract class AppDB extends RoomDatabase {
     private static AppDB instance;

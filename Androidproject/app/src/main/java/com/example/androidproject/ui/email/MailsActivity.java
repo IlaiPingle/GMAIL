@@ -75,29 +75,32 @@ public class MailsActivity extends AppCompatActivity {
                 else mailsViewModel.addLabelToMail(mail, "starred");
             }
         });
+        mailsListAdapter.setHasStableIds(true);
         mailsRecycler.setAdapter(mailsListAdapter);
 
         searchInputText = findViewById(R.id.editTextSearch);
 
-//      set up swipe to refresh
         SwipeRefreshLayout swipeRefreshLayout = findViewById(R.id.swipeRefreshMails);
-        swipeRefreshLayout.setOnRefreshListener(() -> {
-            mailsViewModel.refreshCurrentList().observe(this, mailsList -> {
-                mailsListAdapter.setMails(mailsList);
-                swipeRefreshLayout.setRefreshing(false);
-            });
+
+//      set up view models
+        mailsViewModel = new ViewModelProvider(this).get(MailsViewModel.class);
+        labelsViewModel = new ViewModelProvider(this).get(LabelsViewModel.class);
+
+        mailsViewModel.observeMailList().observe(this, mailsList -> {
+            mailsListAdapter.setMails(mailsList);
+            // stop refreshing animation when data is loaded
+            if(swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(false);
         });
+
+//      set up swipe to refresh
+        swipeRefreshLayout.setOnRefreshListener(() -> mailsViewModel.loadMails());
 
 
 //      set up compose email button
         findViewById(R.id.btnCompose).setOnClickListener(v ->
                 startActivity((new Intent(
                         MailsActivity.this, ComposeEmailActivity.class))));
-//      set up view models
-        mailsViewModel = new ViewModelProvider(this).get(MailsViewModel.class);
-        labelsViewModel = new ViewModelProvider(this).get(LabelsViewModel.class);
 
-        mailsViewModel.getMails().observe(this, mailsList -> mailsListAdapter.setMails(mailsList));
 
         drawerRecycler = findViewById(R.id.drawerRecycler);
         drawerRecycler.setLayoutManager(new LinearLayoutManager(this));
@@ -107,11 +110,9 @@ public class MailsActivity extends AppCompatActivity {
         drawerAdapter = new DrawerAdapter(label -> {
             String name = label.label != null ? label.label.getLabelName() : DEFAULT_LABEL;
             tvCurrentLabel.setText(name);
-            if ("all".equalsIgnoreCase(name)) {
-                mailsViewModel.getMails();
-            } else {
-                mailsViewModel.getMailsByLabel(name);
-            }
+
+            mailsViewModel.getMailsByLabel(name);
+
             drawerAdapter.setSelectedLabel(name);
             drawerLayout.closeDrawer(GravityCompat.START);
         });
@@ -137,7 +138,14 @@ public class MailsActivity extends AppCompatActivity {
             drawerAdapter.submitList(
                     DrawerItem.buildDrawerItems(headerItem, systemLabels, sectionItem, userLabelItems));
         });
-        mailsViewModel.getMailsByLabel(DEFAULT_LABEL);
+
+//      set up search button
+        ImageButton btnSearch = findViewById(R.id.btnSearch);
+        btnSearch.setOnClickListener(v -> {
+            mailsViewModel.getMailsByLabel(DEFAULT_LABEL);
+            String query = searchInputText.getText().toString();
+            mailsViewModel.searchMails(query);
+        });
     }
 
 
