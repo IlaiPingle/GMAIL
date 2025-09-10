@@ -6,11 +6,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <application
-<<<<<<< HEAD
         android:name=".data.local.db.MyApplication"
-=======
-        android:name="com.example.androidproject.data.local.db.MyApplication"
->>>>>>> 4de23c1b93db2e3c866e87da5b9e8a68b48cbb17
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -29,22 +25,15 @@
             </intent-filter>
         </activity>
         <activity
-<<<<<<< HEAD
-            android:name=".ui.email.MailsActivity"
-=======
             android:name=".ui.auth.LoginActivity"
->>>>>>> 4de23c1b93db2e3c866e87da5b9e8a68b48cbb17
             android:exported="false">
         </activity>
         <activity
             android:name=".ui.auth.RegisterActivity"
-<<<<<<< HEAD
-=======
             android:exported="false">
         </activity>
         <activity
             android:name=".ui.email.InboxActivity"
->>>>>>> 4de23c1b93db2e3c866e87da5b9e8a68b48cbb17
             android:exported="false">
         </activity>
         <activity

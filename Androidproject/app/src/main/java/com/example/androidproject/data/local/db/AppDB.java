@@ -19,7 +19,7 @@ import com.example.androidproject.data.models.Label;
  * It includes entities for Mail and User, and provides DAOs for accessing them.
  * The database is a singleton to prevent multiple instances.
  */
-@Database(entities = {Mail.class, User.class, Label.class}, version = 5, exportSchema = false)
+@Database(entities = {Mail.class, User.class, Label.class}, version = 6, exportSchema = false)
 @TypeConverters({Converters.class})
 public abstract class AppDB extends RoomDatabase {
     private static AppDB instance;

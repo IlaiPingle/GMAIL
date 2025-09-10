@@ -2,18 +2,21 @@ package com.example.androidproject.data.repository;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.MediatorLiveData;
 
 import com.example.androidproject.data.local.dao.MailDao;
 import com.example.androidproject.data.local.db.AppDB;
-import com.example.androidproject.data.local.db.MyApplication;
 import com.example.androidproject.data.models.Mail;
 
 import com.example.androidproject.data.remote.net.MailAPIClient;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import retrofit2.Callback;
 import retrofit2.Call;
@@ -28,52 +31,41 @@ import retrofit2.Response;
 public class MailsRepository {
     private final MailDao mailDao;
     private final MailAPIClient mailApi;
-    private final MutableLiveData<List<Mail>> mails = new MutableLiveData<>();
-
+    private final Executor executor = Executors.newSingleThreadExecutor();
 
     public MailsRepository(Context context) {
-        Context ctx = context.getApplicationContext();
-        AppDB db = AppDB.getInstance(ctx);
+        AppDB db = AppDB.getInstance(context.getApplicationContext());
         this.mailDao = db.mailDao();
-        this.mailApi = new MailAPIClient(ctx);
+        this.mailApi = new MailAPIClient(context);
     }
 
     public LiveData<List<Mail>> getMails() {
-        new Thread(() -> mails.postValue(mailDao.getMails())).start();
-
+        LiveData<List<Mail>> localMails = mailDao.getMails();
         mailApi.getMails(new Callback<List<Mail>>() {
             @Override
-            public void onResponse(Call<List<Mail>> call, Response<List<Mail>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    new Thread(() -> {
-                        mailDao.clear();
-                        mailDao.insertList(response.body());
-                        mails.postValue(mailDao.getMails());
-                    }).start();
-                }
+            public void onResponse(@NonNull Call<List<Mail>> call, @NonNull Response<List<Mail>> response) {
+                if (response.isSuccessful() && response.body() != null) executor.execute(() -> {
+                    mailDao.insertList(response.body());
+                });
             }
 
             @Override
-            public void onFailure(Call<List<Mail>> call, Throwable t) {
-                t.printStackTrace();
+            public void onFailure(@NonNull Call<List<Mail>> call, @NonNull Throwable t) {
+
             }
         });
-        return mails;
+        return localMails;
     }
     public void createDraft(Mail mail) {
         mailApi.createDraft(mail, new Callback<Mail>() {
             @Override
-            public void onResponse(Call<Mail> call, Response<Mail> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    new Thread(() -> {
-                        mailDao.insert(response.body());
-                        mails.postValue(mailDao.getMails());
-                    }).start();
-                }
+            public void onResponse(@NonNull Call<Mail> call, @NonNull Response<Mail> response) {
+                if (response.isSuccessful() && response.body() != null)
+                    executor.execute(() -> mailDao.insert(response.body()));
             }
 
             @Override
-            public void onFailure(Call<Mail> call, Throwable t) {
+            public void onFailure(@NonNull Call<Mail> call, @NonNull Throwable t) {
                 t.printStackTrace();
             }
         });
@@ -82,17 +74,13 @@ public class MailsRepository {
     public void sendMail(Mail mail) {
         mailApi.sendMail(mail.getId(), mail, new Callback<Mail>() {
             @Override
-            public void onResponse(Call<Mail> call, Response<Mail> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    new Thread(() -> {
-                        mailDao.update(response.body());
-                        mails.postValue(mailDao.getMails());
-                    }).start();
-                }
+            public void onResponse(@NonNull Call<Mail> call, @NonNull Response<Mail> response) {
+                if (response.isSuccessful() && response.body() != null)
+                    executor.execute(() -> mailDao.insert(response.body()));
             }
 
             @Override
-            public void onFailure(Call<Mail> call, Throwable t) {
+            public void onFailure(@NonNull Call<Mail> call, Throwable t) {
                 t.printStackTrace();
             }
         });
@@ -101,17 +89,14 @@ public class MailsRepository {
     public void updateMail(Mail mail) {
         mailApi.updateMail(mail.getId(), mail, new Callback<Void>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                 if (response.isSuccessful()) {
-                    new Thread(() -> {
-                        mailDao.update(mail);
-                        mails.postValue(mailDao.getMails());
-                    }).start();
+                    executor.execute(() -> mailDao.update(mail));
                 }
             }
 
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                 t.printStackTrace();
             }
         });
@@ -120,79 +105,59 @@ public class MailsRepository {
     public void deleteMail(Mail mail) {
         mailApi.deleteMail(mail.getId(), new Callback<Void>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                if (response.isSuccessful()) {
-                    new Thread(() -> {
-                        mailDao.delete(mail);
-                        mails.postValue(mailDao.getMails());
-                    }).start();
-                }
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                if (response.isSuccessful())
+                    executor.execute(() -> mailDao.delete(mail));
             }
 
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                 t.printStackTrace();
             }
         });
     }
 
     public LiveData<List<Mail>> searchMails(String query) {
-        MutableLiveData<List<Mail>> searchResults = new MutableLiveData<>();
+        MediatorLiveData<List<Mail>> searchResults = new MediatorLiveData<>();
+        LiveData<List<Mail>> allLocalMails = mailDao.getMails();
+        searchResults.addSource(allLocalMails, all -> {
+            executor.execute(() -> searchResults.postValue(filterByQuery(all, query)));
+        });
+
         mailApi.searchMails(query, new Callback<List<Mail>>() {
             @Override
-            public void onResponse(Call<List<Mail>> call, Response<List<Mail>> response) {
+            public void onResponse(@NonNull Call<List<Mail>> call, @NonNull Response<List<Mail>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    searchResults.postValue(response.body());
+                    List<Mail> remoteMails = response.body();
+                    searchResults.postValue(remoteMails);
+                    executor.execute(() -> mailDao.insertList(remoteMails));
                 }
             }
 
             @Override
-            public void onFailure(Call<List<Mail>> call, Throwable t) {
+            public void onFailure(@NonNull Call<List<Mail>> call, @NonNull Throwable t) {
                 t.printStackTrace();
             }
         });
-
         return searchResults;
     }
 
     public LiveData<List<Mail>> getMailsByLabel(String label) {
-        MutableLiveData<List<Mail>> filteredMails = new MutableLiveData<>();
-        new Thread(() -> {
-            List<Mail> allMails = mailDao.getMails();
-            List<Mail> result = new ArrayList<>();
-            boolean isBin = "bin".equalsIgnoreCase(label);
-            for (Mail m : allMails) {
-                boolean has = m.getLabels() != null && m.getLabels().contains(label);
-                boolean inBin = m.getLabels() != null && m.getLabels().contains("bin");
-                if (has && (isBin || !inBin)) {
-                    result.add(m);
-                }
-            }
-            filteredMails.postValue(result);
-        }).start();
-        mailApi.getMails(new Callback<List<Mail>>() {
+        MediatorLiveData<List<Mail>> filteredMails = new MediatorLiveData<>();
+        LiveData<List<Mail>> allLocalMails = mailDao.getMails();
+        filteredMails.addSource(allLocalMails, all -> {
+            executor.execute(() -> filteredMails.postValue(filterByLabel(all, label)));
+        });
+        mailApi.getMailsByLabel(label, new Callback<List<Mail>>() {
             @Override
-            public void onResponse(Call<List<Mail>> call, Response<List<Mail>> response) {
+            public void onResponse(@NonNull Call<List<Mail>> call, @NonNull Response<List<Mail>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    new Thread(() -> {
-                        mailDao.clear();
-                        mailDao.insertList(response.body());
-                        List<Mail> allMails = mailDao.getMails();
-                        List<Mail> result = new ArrayList<>();
-                        boolean isBin = "bin".equalsIgnoreCase(label);
-                        for (Mail m : allMails) {
-                            boolean has = m.getLabels() != null && m.getLabels().contains(label);
-                            boolean inBin = m.getLabels() != null && m.getLabels().contains("bin");
-                            if (has && (isBin || !inBin)) {
-                                result.add(m);
-                            }
-                        }
-                        filteredMails.postValue(result);
-                    }).start();
+                    filteredMails.postValue(response.body());
+                    executor.execute(() -> mailDao.insertList(response.body()));
                 }
             }
             @Override
-            public void onFailure(Call<List<Mail>> call, Throwable t) {
+            public void onFailure(@NonNull Call<List<Mail>> call, @NonNull Throwable t) {
                 t.printStackTrace();
             }
         });
@@ -226,71 +191,84 @@ public class MailsRepository {
     public void addLabelToMail(String mailId, String labelName) {
         mailApi.addLabelToMail(mailId, labelName, new Callback<Void>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                if (response.isSuccessful()) {
-                    // Optionally refresh the mail to get updated labels
-                    refreshMail(mailId);
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                if(response.isSuccessful()) {
+                    executor.execute(() -> {
+                        Mail mail = mailDao.getMailNow(mailId);
+                        if (mail != null) {
+                            List<String> labels = mail.getLabels();
+                            if (labels == null) {
+                                labels = new ArrayList<>();
+                            }
+                            if (!labels.contains(labelName)) {
+                                labels.add(labelName);
+                                mail.setLabels(labels);
+                                mailDao.update(mail);
+                            }
+                        }
+                    });
                 }
             }
-
             @Override
-            public void onFailure(Call<Void> c, Throwable t) {
+            public void onFailure(@NonNull Call<Void> c, @NonNull Throwable t) {
                 t.printStackTrace();
             }
         });
     }
 
     public void removeLabelFromMail(String mailId, String labelName) {
-        mailApi.removeLabelFromMail(mailId,  labelName, new Callback<Void>() {
+        mailApi.removeLabelFromMail(mailId, labelName, new Callback<Void>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                 if (response.isSuccessful()) {
-                    // Optionally refresh the mail to get updated labels
-                    refreshMail(mailId);
+                    executor.execute(() -> {
+                        Mail mail = mailDao.getMailNow(mailId);
+                        if (mail != null) {
+                            List<String> labels = mail.getLabels();
+                            if (labels != null && labels.contains(labelName)) {
+                                labels.remove(labelName);
+                                mail.setLabels(labels);
+                                mailDao.update(mail);
+                            }
+                        }
+                    });
                 }
             }
 
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                 t.printStackTrace();
             }
         });
     }
 
-    public LiveData<Mail> getMailById(String mailId) {
-        LiveData<Mail> live = mailDao.getMail(mailId);
-        mailApi.getMailById(mailId, new Callback<Mail>() {
-            @Override
-            public void onResponse(Call<Mail> call, Response<Mail> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    new Thread(() -> mailDao.insert(response.body())).start();
-                }
-            }
-            @Override
-            public void onFailure(Call<Mail> call, Throwable t) {
-                t.printStackTrace();
-            }
-        });
-        return live;
+    // Helper methods for filtering and searching mails locally
+    private List<Mail> filterByLabel(List<Mail> all, String label) {
+        if (all == null) return Collections.emptyList();
+        if (label == null || "all".equalsIgnoreCase(label)) return all;
+        List<Mail> filtered = new ArrayList<>();
+        for (Mail mail : all) {
+            List<String> labels = mail.getLabels();
+            if (labels != null && labels.contains(label)) filtered.add(mail);
+        }
+        return filtered;
     }
 
-    public void deleteMailById(String mailId) {
-        mailApi.deleteMail(mailId, new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                if (response.isSuccessful()) {
-                    new Thread(() -> {
-                        mailDao.deleteById(mailId);
-                        mails.postValue(mailDao.getMails());
-                    }).start();
-                }
+    private List<Mail> filterByQuery(List<Mail> all, String query) {
+        if (all == null) return Collections.emptyList();
+        if (query == null || query.trim().isEmpty()) return all;
+        String searchQuery = query.trim().toLowerCase();
+        List<Mail> res = new ArrayList<>();
+        for (Mail mail : all) {
+            if (contains(mail.getSender(), searchQuery) ||
+                    contains(mail.getSubject(), searchQuery) ||
+                    contains(mail.getBody(), searchQuery)) {
+                res.add(mail);
             }
-
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                t.printStackTrace();
-            }
-        });
+        }
+        return res;
+    }
+    private boolean contains(String field, String searchQuery) {
+        return field != null && field.toLowerCase().contains(searchQuery);
     }
 }
-

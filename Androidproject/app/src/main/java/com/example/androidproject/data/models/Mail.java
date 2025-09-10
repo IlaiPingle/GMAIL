@@ -6,6 +6,7 @@ import androidx.room.PrimaryKey;
 
 
 import java.util.List;
+import java.util.Objects;
 
 @Entity(tableName = "mails")
 public class Mail {
@@ -78,5 +79,28 @@ public class Mail {
 
     public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, sender, receiver, subject, body, createdAt, labels != null ? labels.size() : 0);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Mail)) return false;
+        Mail mail = (Mail) o;
+
+        return Objects.equals(id, mail.id) &&
+                Objects.equals(sender, mail.sender) &&
+                Objects.equals(receiver, mail.receiver) &&
+                Objects.equals(subject, mail.subject) &&
+                Objects.equals(body, mail.body) &&
+                Objects.equals(createdAt, mail.createdAt) &&
+                ((labels == null && mail.labels == null) ||
+                        (labels != null && mail.labels != null &&
+                                labels.size() == mail.labels.size() &&
+                                labels.containsAll(mail.labels)));
     }
 }

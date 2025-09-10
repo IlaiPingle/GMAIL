@@ -3,7 +3,6 @@ package com.example.androidproject.data.remote.net;
 
 import android.content.Context;
 
-import com.example.androidproject.data.local.db.MyApplication;
 import com.example.androidproject.data.models.Mail;
 import com.example.androidproject.data.remote.api.WebServiceAPI;
 import java.util.List;

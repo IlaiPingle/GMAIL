@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.androidproject.R;
@@ -25,6 +26,7 @@ public class MailsListAdapter extends RecyclerView.Adapter<MailsListAdapter.Mail
     public MailsListAdapter(List<Mail> mailsList, OnMailsListAdapterListener listener) {
         this.mailsList = (mailsList != null) ? mailsList : new ArrayList<>();
         this.listener = listener;
+        setHasStableIds(true);
     }
 
     public interface OnMailsListAdapterListener {
@@ -57,7 +59,7 @@ public class MailsListAdapter extends RecyclerView.Adapter<MailsListAdapter.Mail
             boolean isStarred = labels != null && labels.contains("starred");
             boolean isUnread = labels != null && labels.contains("unread");
 
-            imgStar.setImageResource(isStarred ? R.drawable.ic_star_filled : R.drawable.ic_star_outline);
+            imgStar.setImageResource(isStarred ? R.drawable.ic_star_filled : R.drawable.ic_star);
             tvSender.setTypeface(null, isUnread ? Typeface.BOLD : Typeface.NORMAL);
             tvSubject.setTypeface(null, isUnread ? Typeface.BOLD : Typeface.NORMAL);
 
@@ -82,6 +84,7 @@ public class MailsListAdapter extends RecyclerView.Adapter<MailsListAdapter.Mail
         }
     }
 
+    @NonNull
     @Override
     public MailsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
@@ -112,9 +115,25 @@ public class MailsListAdapter extends RecyclerView.Adapter<MailsListAdapter.Mail
     }
 
     public void setMails(List<Mail> newData) {
+        final List<Mail> finalNewData = newData;
+        if (newData == null) newData = new ArrayList<>();
+        DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override public int getOldListSize() { return mailsList.size(); }
+            @Override public int getNewListSize() { return finalNewData.size(); }
+            @Override public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                return mailsList.get(oldItemPosition).getId()
+                        .equals(finalNewData.get(newItemPosition).getId());
+            }
+            @Override public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                Mail oldM = mailsList.get(oldItemPosition);
+                Mail newM = finalNewData.get(newItemPosition);
+                return oldM.equals(newM);
+            }
+        });
+
         mailsList.clear();
-        if (newData != null) mailsList.addAll(newData);
-        notifyDataSetChanged();
+        mailsList.addAll(newData);
+        diff.dispatchUpdatesTo(this);
     }
 
     public Mail getItemAt(int position) {
