@@ -31,7 +31,7 @@ public class LabelAPIClient {
         labelApi.createLabel(labelName).enqueue(callback);
     }
 
-    public void updateLabel(String oldName, String newName, Callback<Label> callback) {
+    public void updateLabel(String oldName, String newName, Callback<Void> callback) {
         labelApi.updateLabel(oldName, newName).enqueue(callback);
     }
 

@@ -84,27 +84,7 @@ public class AddLabelBottomSheet extends BottomSheetDialogFragment {
             btnCreate.setEnabled(false);
 
             // Call backend via repository; Room will update and observers will refresh the drawer.
-            labelsViewModel.createLabel(name, new Callback<Label>() {
-                @Override
-                public void onResponse(Call<Label> call, Response<Label> response) {
-                    btnCreate.setEnabled(true);
-                    if(response.isSuccessful() && response.body() != null){
-                        dismiss();
-                    } else {
-                        til.setError(response.code() == 409 ?
-                                getString(R.string.error_label_exists) :
-                                getString(R.string.error_required));
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<Label> call, Throwable t) {
-                    btnCreate.setEnabled(true);
-                    til.setError(t.getMessage() == null ?
-                            "Network error" :
-                            t.getMessage());
-                }
-            });
+            labelsViewModel.createLabel(name);
         });
 
         btnCancel.setOnClickListener(v12 -> dismiss());

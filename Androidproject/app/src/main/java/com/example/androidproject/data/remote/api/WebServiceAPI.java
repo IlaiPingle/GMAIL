@@ -72,7 +72,7 @@ public interface WebServiceAPI {
     Call<Label> createLabel(@Body String labelName);
 
     @PATCH("labels/{labelName}")
-    Call<Label> updateLabel(@Path("labelName") String labelName, @Body String newName);
+    Call<Void> updateLabel(@Path("labelName") String labelName, @Body String newName);
 
     @DELETE("labels/{labelName}")
     Call<Void> deleteLabel(@Path("labelName") String labelName);

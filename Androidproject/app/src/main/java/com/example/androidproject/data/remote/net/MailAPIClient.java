@@ -51,7 +51,7 @@ public class MailAPIClient {
     }
 
     public void addLabelToMail(String mailId, String labelName, Callback<Void> callback) {
-        mailApi.addLabelToMail(mailId, Map.of("labelName", labelName)).enqueue(callback);
+        mailApi.addLabelToMail(mailId, labelName).enqueue(callback);
     }
 
     public void removeLabelFromMail(String mailId, String labelName, Callback<Void> callback) {

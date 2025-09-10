@@ -18,7 +18,7 @@ import retrofit2.Callback;
  * It interacts with the LabelRepository to fetch, create, update, and delete labels.
  * The ViewModel provides LiveData for observing label data changes.
  */
-public class LabelsViewModel extends ViewModel {
+public class LabelsViewModel extends AndroidViewModel {
     private final LabelRepository repository;
     private final LiveData<List<Label>> labels;
 
@@ -41,28 +41,23 @@ public class LabelsViewModel extends ViewModel {
         repository.fetchLabelsFromServer();
     }
 
-    public void createLabel(String labelName) {
-        repository.createLabel(labelName);
-    }
 
     /**
      * Creates a new label with the given name.
      * The result of the operation is provided via the Callback parameter.
      * @param labelName The name of the label to be created.
-     * @param cb Callback to handle the response or failure of the create operation.
      */
-    public void createLabel(String labelName, Callback<Label> cb) {
-        repository.createLabel(labelName, cb);
+    public void createLabel(String labelName) {
+        repository.createLabel(labelName);
     }
 
     /**
      * Deletes the label with the given name.
      * The result of the operation is provided via the Callback parameter.
      * @param labelName The name of the label to be deleted.
-     * @param cb Callback to handle the response or failure of the delete operation.
      */
-    public void deleteLabel(String labelName, Callback<Void> cb) {
-        repository.deleteLabel(labelName, cb);
+    public void deleteLabel(String labelName {
+        repository.deleteLabel(labelName);
     }
 
     /**
@@ -72,7 +67,7 @@ public class LabelsViewModel extends ViewModel {
      * @param newName The new name for the label.
      * @param cb Callback to handle the response or failure of the update operation.
      */
-    public void updateLabel(String oldName, String newName, Callback<Void> cb) {
-        repository.updateLabel(oldName, newName, cb);
+    public void updateLabel(String oldName, String newName) {
+        repository.updateLabel(oldName, newName);
     }
 }

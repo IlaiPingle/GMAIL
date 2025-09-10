@@ -82,7 +82,7 @@ public class LabelRepository {
         });
     }
 
-    public void deleteLabel(String labelName, Callback<Void> cb) {
+    public void deleteLabel(String labelName) {
         labelApi.deleteLabel(labelName, new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
@@ -99,25 +99,6 @@ public class LabelRepository {
     }
 
     public void updateLabel(String oldName, String newName) {
-        labelApi.updateLabel(oldName, newName, new Callback<Label>() {
-            @Override
-            public void onResponse(Call<Label> call, Response<Label> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    new Thread(() -> {
-                        labelDao.deleteByName(oldName);
-                        labelDao.insert(response.body());
-                    }).start();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-				t.printStackTrace();
-            }
-        });
-    }
-
-    public void updateLabel(String oldName, String newName, Callback<Void> cb) {
         labelApi.updateLabel(oldName, newName, new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
@@ -127,16 +108,11 @@ public class LabelRepository {
                         labelDao.insert(new Label(newName));
                     }).start();
                 }
-                if (cb != null) {
-                    cb.onResponse(call, response);
-                }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                if (cb != null) {
-                    cb.onFailure(call, t);
-                }
+				t.printStackTrace();
             }
         });
     }

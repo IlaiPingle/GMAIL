@@ -1,11 +1,11 @@
-package com.example.androidproject.ui;
+package com.example.androidproject.ui.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
-import com.example.androidproject.ui.auth.LoginActivity;
-import com.example.androidproject.ui.email.InboxActivity;
+
+import com.example.androidproject.ui.email.MailsActivity;
 import com.example.androidproject.viewModel.SplashViewModel;
 
 public class SplashActivity extends AppCompatActivity {
@@ -17,7 +17,7 @@ public class SplashActivity extends AppCompatActivity {
         vm.isSignedIn.observe(this, ok -> {
             if (hasNavigated) return;
             hasNavigated = true;
-            Intent intent = new Intent(this, Boolean.TRUE.equals(ok) ? InboxActivity.class : LoginActivity.class);
+            Intent intent = new Intent(this, Boolean.TRUE.equals(ok) ? MailsActivity.class : LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
