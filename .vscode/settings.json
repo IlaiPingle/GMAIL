@@ -76,5 +76,6 @@
         "filesystem": "cpp",
         "forward_list": "cpp"
     },
-    "C_Cpp.dimInactiveRegions": false
+	"C_Cpp.dimInactiveRegions": false,
+	"java.configuration.updateBuildConfiguration": "interactive"
 }

@@ -34,6 +34,15 @@ public class MailsViewModel extends AndroidViewModel {
     public LiveData<Mail> getMailById(String mailId) {
         return repository.getMailById(mailId);
     }
+    public void refreshMail(String mailId) {
+        repository.refreshMail(mailId);
+    }
+    public void toggleStar(String mailId, boolean isStarred) {
+        repository.toggleStar(mailId, isStarred);
+    }
+    public void deleteMailById(String mailId) {
+        repository.deleteMailById(mailId);
+    }
 
     public void createDraft(Mail mail) {
         repository.createDraft(mail);

@@ -4,20 +4,21 @@ import android.content.Context;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-
 import com.example.androidproject.data.local.dao.LabelDao;
 import com.example.androidproject.data.local.db.AppDB;
 import com.example.androidproject.data.local.db.MyApplication;
 import com.example.androidproject.data.models.Label;
 import com.example.androidproject.data.remote.net.LabelAPIClient;
-
+import java.util.ArrayList;
 import java.util.List;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/**
+ * Repository class for managing Label data from both local database and remote API.
+ * It provides methods to fetch, create, update, and delete labels.
+ */
 public class LabelRepository {
     private final LabelDao labelDao;
     private final LabelAPIClient labelApi;
@@ -30,6 +31,10 @@ public class LabelRepository {
         fetchLabelsFromServer();
     }
 
+    /**
+     * Fetches all labels from the local database and refreshes them from the remote API.
+     * @return LiveData list of labels.
+     */
     public LiveData<List<Label>> getLabels() {
         return labelDao.getAllLabels();
     }
@@ -77,7 +82,7 @@ public class LabelRepository {
         });
     }
 
-    public void deleteLabel(String labelName) {
+    public void deleteLabel(String labelName, Callback<Void> cb) {
         labelApi.deleteLabel(labelName, new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
@@ -106,8 +111,32 @@ public class LabelRepository {
             }
 
             @Override
-            public void onFailure(Call<Label> call, Throwable t) {
-                t.printStackTrace();
+            public void onFailure(Call<Void> call, Throwable t) {
+				t.printStackTrace();
+            }
+        });
+    }
+
+    public void updateLabel(String oldName, String newName, Callback<Void> cb) {
+        labelApi.updateLabel(oldName, newName, new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    new Thread(() -> {
+                        labelDao.deleteByName(oldName);
+                        labelDao.insert(new Label(newName));
+                    }).start();
+                }
+                if (cb != null) {
+                    cb.onResponse(call, response);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                if (cb != null) {
+                    cb.onFailure(call, t);
+                }
             }
         });
     }

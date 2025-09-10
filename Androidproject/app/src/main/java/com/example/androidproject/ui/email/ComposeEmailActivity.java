@@ -456,8 +456,17 @@ public class ComposeEmailActivity extends AppCompatActivity {
             reqBody.put("receiver", TextUtils.join(",", getChipsEmails(chipGroupTo)));
             reqBody.put("subject", editTextSubject.getText().toString());
             reqBody.put("body", editTextBody.getText().toString());
-//            EmailApiService api = ApiClient.getClient().create(EmailApiService.class);
-
+            EmailApiService api = ApiClient.getClient().create(EmailApiService.class);
+            api.updateMail(draftId, reqBody).enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    // handle response, show "Draft saved" if successful
+                }
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    // handle error
+                }
+            });
         } else {
             SharedPreferences sp = getSharedPreferences(PREFS, Context.MODE_PRIVATE);
             // Include chips + any pending text

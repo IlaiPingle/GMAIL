@@ -28,7 +28,6 @@ import retrofit2.Response;
 public class MailsRepository {
     private final MailDao mailDao;
     private final MailAPIClient mailApi;
-
     private final MutableLiveData<List<Mail>> mails = new MutableLiveData<>();
 
 
@@ -61,12 +60,6 @@ public class MailsRepository {
         });
         return mails;
     }
-
-    public LiveData<Mail> getMailById(String mailId) {
-        return mailDao.getMail(mailId);
-    }
-
-
     public void createDraft(Mail mail) {
         mailApi.createDraft(mail, new Callback<Mail>() {
             @Override
@@ -167,18 +160,35 @@ public class MailsRepository {
         new Thread(() -> {
             List<Mail> allMails = mailDao.getMails();
             List<Mail> result = new ArrayList<>();
+            boolean isBin = "bin".equalsIgnoreCase(label);
             for (Mail m : allMails) {
-                if (m.getLabels() != null && m.getLabels().contains(label)) {
+                boolean has = m.getLabels() != null && m.getLabels().contains(label);
+                boolean inBin = m.getLabels() != null && m.getLabels().contains("bin");
+                if (has && (isBin || !inBin)) {
                     result.add(m);
                 }
             }
             filteredMails.postValue(result);
         }).start();
-        mailApi.getMailsByLabel(label, new Callback<List<Mail>>() {
+        mailApi.getMails(new Callback<List<Mail>>() {
             @Override
             public void onResponse(Call<List<Mail>> call, Response<List<Mail>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    filteredMails.postValue(response.body());
+                    new Thread(() -> {
+                        mailDao.clear();
+                        mailDao.insertList(response.body());
+                        List<Mail> allMails = mailDao.getMails();
+                        List<Mail> result = new ArrayList<>();
+                        boolean isBin = "bin".equalsIgnoreCase(label);
+                        for (Mail m : allMails) {
+                            boolean has = m.getLabels() != null && m.getLabels().contains(label);
+                            boolean inBin = m.getLabels() != null && m.getLabels().contains("bin");
+                            if (has && (isBin || !inBin)) {
+                                result.add(m);
+                            }
+                        }
+                        filteredMails.postValue(result);
+                    }).start();
                 }
             }
             @Override
@@ -189,10 +199,38 @@ public class MailsRepository {
         return filteredMails;
     }
 
+    public void refreshMail(String mailId) {
+        mailApi.getMailById(mailId, new Callback<Mail>() {
+            @Override
+            public void onResponse(Call<Mail> call, Response<Mail> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    new Thread(() -> mailDao.insert(response.body())).start();
+                }
+            }
+            @Override
+            public void onFailure(Call<Mail> call, Throwable t) {
+                t.printStackTrace();
+            }
+        });
+    }
+
+    public void toggleStar(String mailId, boolean isStarred) {
+        if (isStarred) {
+            addLabelToMail(mailId, "starred");
+        } else {
+            removeLabelFromMail(mailId, "starred");
+        }
+        refreshMail(mailId);
+    }
+
     public void addLabelToMail(String mailId, String labelName) {
         mailApi.addLabelToMail(mailId, labelName, new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    // Optionally refresh the mail to get updated labels
+                    refreshMail(mailId);
+                }
             }
 
             @Override
@@ -206,6 +244,46 @@ public class MailsRepository {
         mailApi.removeLabelFromMail(mailId,  labelName, new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    // Optionally refresh the mail to get updated labels
+                    refreshMail(mailId);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                t.printStackTrace();
+            }
+        });
+    }
+
+    public LiveData<Mail> getMailById(String mailId) {
+        LiveData<Mail> live = mailDao.getMail(mailId);
+        mailApi.getMailById(mailId, new Callback<Mail>() {
+            @Override
+            public void onResponse(Call<Mail> call, Response<Mail> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    new Thread(() -> mailDao.insert(response.body())).start();
+                }
+            }
+            @Override
+            public void onFailure(Call<Mail> call, Throwable t) {
+                t.printStackTrace();
+            }
+        });
+        return live;
+    }
+
+    public void deleteMailById(String mailId) {
+        mailApi.deleteMail(mailId, new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    new Thread(() -> {
+                        mailDao.deleteById(mailId);
+                        mails.postValue(mailDao.getMails());
+                    }).start();
+                }
             }
 
             @Override

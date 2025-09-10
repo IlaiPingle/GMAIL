@@ -11,8 +11,14 @@ import com.example.androidproject.data.repository.LabelRepository;
 
 import java.util.List;
 
-public class LabelsViewModel extends AndroidViewModel {
+import retrofit2.Callback;
 
+/**
+ * ViewModel class for managing Label data.
+ * It interacts with the LabelRepository to fetch, create, update, and delete labels.
+ * The ViewModel provides LiveData for observing label data changes.
+ */
+public class LabelsViewModel extends ViewModel {
     private final LabelRepository repository;
     private final LiveData<List<Label>> labels;
 
@@ -23,8 +29,12 @@ public class LabelsViewModel extends AndroidViewModel {
         repository.fetchLabelsFromServer();
     }
 
+    /**
+     * Gets the LiveData list of labels.
+     * @return LiveData list of labels.
+     */
     public LiveData<List<Label>> getLabels() {
-        return labels;
+        return repository.getLabels();
     }
 
     public void refreshLabels() {
@@ -35,11 +45,34 @@ public class LabelsViewModel extends AndroidViewModel {
         repository.createLabel(labelName);
     }
 
-    public void deleteLabel(String labelName) {
-        repository.deleteLabel(labelName);
+    /**
+     * Creates a new label with the given name.
+     * The result of the operation is provided via the Callback parameter.
+     * @param labelName The name of the label to be created.
+     * @param cb Callback to handle the response or failure of the create operation.
+     */
+    public void createLabel(String labelName, Callback<Label> cb) {
+        repository.createLabel(labelName, cb);
     }
 
-    public void updateLabel(String oldName, String newName) {
-        repository.updateLabel(oldName, newName);
+    /**
+     * Deletes the label with the given name.
+     * The result of the operation is provided via the Callback parameter.
+     * @param labelName The name of the label to be deleted.
+     * @param cb Callback to handle the response or failure of the delete operation.
+     */
+    public void deleteLabel(String labelName, Callback<Void> cb) {
+        repository.deleteLabel(labelName, cb);
+    }
+
+    /**
+     * Updates the name of an existing label.
+     * The result of the operation is provided via the Callback parameter.
+     * @param oldName The current name of the label to be updated.
+     * @param newName The new name for the label.
+     * @param cb Callback to handle the response or failure of the update operation.
+     */
+    public void updateLabel(String oldName, String newName, Callback<Void> cb) {
+        repository.updateLabel(oldName, newName, cb);
     }
 }

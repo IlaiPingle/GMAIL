@@ -59,6 +59,7 @@ public class LoginActivity extends AppCompatActivity {
             if (user != null && user.username != null && !user.username.isEmpty()) {
                 // User is already logged in, navigate to InboxActivity
                 showLoading(false);
+				Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(this, MailsActivity.class);
                 startActivity(intent);
                 finish();

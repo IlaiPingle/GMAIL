@@ -3,10 +3,11 @@ package com.example.androidproject.data.remote.net;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-
+import java.util.Map;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.HttpUrl;
@@ -90,4 +91,5 @@ public final class SessionCookieJar implements CookieJar {
         if (httpO) b.httpOnly();
         return b.build();
     }
+	
 }

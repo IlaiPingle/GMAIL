@@ -33,12 +33,14 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardElevation="0dp">
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@color/md_theme_light_primaryContainer">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:background="@color/md_theme_light_primaryContainer">
 
                     <!-- From field (showing current account) -->
                     <LinearLayout
@@ -46,12 +48,14 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
+                        android:background="@color/md_theme_light_primaryContainer"
                         android:padding="8dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="From"
+                            android:textColor="@color/md_theme_light_onSurface"
                             android:minWidth="50dp"/>
 
                         <Spinner
@@ -63,7 +67,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#E0E0E0"/>
+                        android:background="@color/md_theme_light_outline"/>
 
                     <!-- To field with chips -->
                     <LinearLayout
@@ -71,12 +75,14 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
+                        android:background="@color/md_theme_light_primaryContainer"
                         android:padding="8dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="To"
+                            android:textColor="@color/md_theme_light_onSurface"
                             android:minWidth="50dp"/>
 
                         <com.google.android.material.chip.ChipGroup
@@ -97,14 +103,15 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#E0E0E0"/>
+                        android:background="@color/md_theme_light_outline"/>
 
                     <!-- Subject field -->
                     <EditText
                         android:id="@+id/editTextSubject"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@null"
+                        android:textColor="@color/md_theme_light_onSurface"
+                        android:background="@color/md_theme_light_primaryContainer"
                         android:hint="Subject"
                         android:padding="16dp"
                         android:inputType="textCapSentences"/>
@@ -112,14 +119,15 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#E0E0E0"/>
+                        android:background="@color/md_theme_light_outline"/>
 
                     <!-- Message body -->
                     <EditText
                         android:id="@+id/editTextBody"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@null"
+                        android:background="@color/md_theme_light_primaryContainer"
+                        android:textColor="@color/md_theme_light_onSurface"
                         android:gravity="top"
                         android:hint="Compose email"
                         android:inputType="textMultiLine|textCapSentences"
