@@ -1,3 +1,4 @@
+
 package com.example.androidproject.ui.email;
 
 import android.os.Bundle;
@@ -11,14 +12,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.androidproject.R;
 import com.example.androidproject.data.models.Mail;
-import com.example.androidproject.viewModel.EmailDetailViewModel;
+import com.example.androidproject.viewModel.MailsViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class EmailDetailActivity extends AppCompatActivity {
     public static final String EXTRA_MAIL_ID = "extra_mail_id";
 
-    private EmailDetailViewModel viewModel;
+    private MailsViewModel viewModel;
     @Nullable private Mail currentMail;
 
     @Override
@@ -46,8 +47,8 @@ public class EmailDetailActivity extends AppCompatActivity {
         TextView tvLabels = findViewById(R.id.tvLabels);
         TextView tvSpamWarning = findViewById(R.id.tvSpamWarning);
 
-        viewModel = new ViewModelProvider(this).get(EmailDetailViewModel.class);
-        viewModel.getMail(mailId).observe(this, mail -> {
+        viewModel = new ViewModelProvider(this).get(MailsViewModel.class);
+        viewModel.getMailById(mailId).observe(this, mail -> {
             currentMail = mail;
             if (mail == null) return;
             tvFrom.setText(mail.getSender() == null ? "" : mail.getSender());
@@ -76,7 +77,7 @@ public class EmailDetailActivity extends AppCompatActivity {
 
         findViewById(R.id.btnDelete).setOnClickListener(v -> {
             if (currentMail == null) return;
-            viewModel.deleteMailById(currentMail.getId());
+            viewModel.deleteMail(currentMail);
             Toast.makeText(this, "Deleted", Toast.LENGTH_SHORT).show();
             finish();
         });

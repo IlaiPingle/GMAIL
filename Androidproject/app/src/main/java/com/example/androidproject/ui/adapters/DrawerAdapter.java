@@ -52,7 +52,7 @@ public class DrawerAdapter extends ListAdapter<DrawerItem, RecyclerView.ViewHold
                     newItem instanceof DrawerItem.LabelItem) {
                 Label oldLabel = ((DrawerItem.LabelItem) oldItem).label;
                 Label newLabel = ((DrawerItem.LabelItem) newItem).label;
-                return oldLabel.getLabelName().equals(newLabel.getLabelName());
+                return oldLabel.getName().equals(newLabel.getName());
             }
             return false;
         }
@@ -71,7 +71,7 @@ public class DrawerAdapter extends ListAdapter<DrawerItem, RecyclerView.ViewHold
                     newItem instanceof DrawerItem.LabelItem) {
                 Label oldLabel = ((DrawerItem.LabelItem) oldItem).label;
                 Label newLabel = ((DrawerItem.LabelItem) newItem).label;
-                return oldLabel.getLabelName().equals(newLabel.getLabelName());
+                return oldLabel.getName().equals(newLabel.getName());
             }
             return false;
         }
@@ -97,8 +97,8 @@ public class DrawerAdapter extends ListAdapter<DrawerItem, RecyclerView.ViewHold
 
         void bind(DrawerItem.LabelItem labelItem, boolean selected, OnLabelClickListener listener) {
             Label label = labelItem.label;
-            LabelName.setText(label != null ? label.getLabelName() : "");
-            int iconRes = getLabelIcon(label.getLabelName());
+            LabelName.setText(label != null ? label.getName() : "");
+            int iconRes = getLabelIcon(label.getName());
             LabelIcon.setImageResource(iconRes);
             root.setActivated(selected);
             itemView.setOnClickListener(v -> {
@@ -143,8 +143,8 @@ public class DrawerAdapter extends ListAdapter<DrawerItem, RecyclerView.ViewHold
         if (holder instanceof LabelViewHolder && item instanceof DrawerItem.LabelItem) {
             DrawerItem.LabelItem labelItem = (DrawerItem.LabelItem) item;
             boolean selected = labelItem.label != null &&
-                    labelItem.label.getLabelName() != null &&
-                    labelItem.label.getLabelName().equals(selectedLabel);
+                    labelItem.label.getName() != null &&
+                    labelItem.label.getName().equals(selectedLabel);
             ((LabelViewHolder) holder).bind(labelItem, selected, listener);
         }
     }

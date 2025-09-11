@@ -32,5 +32,7 @@
     <color name="navbar_background">#FFFFFF</color>
     <color name="selected_icon_tint">#D13624</color>
     <color name="pressed_background_color">#BDBDBD</color>
-
+    <!--    star colors-->
+    <color name="star_yellow">#F7FBC02D</color>
+    <color name="icon_default">#80868B</color>
 </resources>
