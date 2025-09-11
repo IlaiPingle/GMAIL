@@ -6,11 +6,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 
@@ -28,6 +30,7 @@ import com.example.androidproject.data.models.Mail;
 import com.example.androidproject.ui.adapters.DrawerAdapter;
 import com.example.androidproject.ui.adapters.DrawerItem;
 import com.example.androidproject.ui.adapters.MailsListAdapter;
+import com.example.androidproject.ui.auth.LoginActivity;
 import com.example.androidproject.ui.label.AddLabelBottomSheet;
 import com.example.androidproject.ui.label.EditLabelBottomSheet;
 import com.example.androidproject.viewModel.LabelsViewModel;
@@ -61,8 +64,9 @@ public class MailsActivity extends AppCompatActivity {
 
 //      set up navigation drawer
         drawerLayout = findViewById(R.id.drawerLayout);
-        ImageView avatarButton = findViewById(R.id.toolbarAvatar);
+        ImageButton avatarButton = findViewById(R.id.toolbarAvatar);
         ImageButton btnMenu = findViewById(R.id.btnMenu);
+        avatarButton.setOnClickListener(v -> showAvatarMenu(v));
         btnMenu.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
         ImageButton btnCompose = findViewById(R.id.btnCompose);
 
@@ -238,5 +242,26 @@ public class MailsActivity extends AppCompatActivity {
             }
         }
         return items;
+    }
+    private void showAvatarMenu(View anchor) {
+        PopupMenu popup = new PopupMenu(this, anchor);
+        popup.getMenuInflater().inflate(R.menu.user_settings, popup.getMenu());
+
+        popup.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_logout) {
+                handleLogout();
+                return true;
+            }
+            return false;
+        });
+        popup.show();
+    }
+    private void handleLogout() {
+        userViewModel.logout();
+
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 }

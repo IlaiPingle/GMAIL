@@ -44,8 +44,9 @@
                 android:paddingEnd="8dp"
                 android:singleLine="true" />
 
-            <ImageView
+            <ImageButton
                 android:id="@+id/toolbarAvatar"
+                android:contentDescription="@string/user_settings"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:src="@android:drawable/sym_def_app_icon"
