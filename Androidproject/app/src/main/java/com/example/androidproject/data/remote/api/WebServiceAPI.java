@@ -66,7 +66,7 @@ public interface WebServiceAPI {
 
     /* labels endpoints */
     @GET("labels")
-    Call<List<Label>> getLabels();
+    Call<List<String>> getLabels();
 
     @POST("labels")
     Call<Label> createLabel(@Body String labelName);

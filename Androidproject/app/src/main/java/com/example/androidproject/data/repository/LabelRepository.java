@@ -44,9 +44,9 @@ public class LabelRepository {
     }
 
     public void fetchLabelsFromServer() {
-        labelApi.getLabels(new retrofit2.Callback<List<Label>>() {
+        labelApi.getLabels(new retrofit2.Callback<List<String>>() {
             @Override
-            public void onResponse(Call<List<Label>> call, Response<List<Label>> resp) {
+            public void onResponse(Call<List<String>> call, Response<List<String>> resp) {
                 int code = resp.code();
                 android.util.Log.d("LabelRepo", "code=" + code);
                 if (!resp.isSuccessful() || resp.body() == null) {
@@ -56,15 +56,18 @@ public class LabelRepository {
                     }
                     return; // early return on error
                 }
-                List<Label> fresh = resp.body();
+                List<String> res = resp.body();
+                List<Label> fresh = new ArrayList<>();
+                for (String name : res) {
+                    fresh.add(new Label(name));
+                }
                 new Thread(() -> {
                     labelDao.clear();
                     labelDao.insertAll(fresh);
                 }).start();
             }
-
             @Override
-            public void onFailure(Call<List<Label>> call, Throwable t) {
+            public void onFailure(Call<List<String>> call, Throwable t) {
                 Log.e("LabelRepo", "api failed", t);
             }
         });
