@@ -34,4 +34,5 @@
     <string name="edit_label">Edit label</string>
     <string name="delete">Delete</string>
     <string name="save">Save</string>
+    <string name="menu_button">menu-button</string>
 </resources>
