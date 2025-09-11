@@ -62,13 +62,6 @@ public class ComposeEmailActivity extends AppCompatActivity {
     // ViewModel for email operations
     private MailsViewModel viewModel;
 
-//    // Snapshot for Undo
-//    private static class DraftSnapshot {
-//        List<String> to = new ArrayList<>();
-//        String subject = "";
-//        CharSequence body = "";
-//    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

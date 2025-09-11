@@ -5,8 +5,6 @@ import android.app.Application;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
 import com.example.androidproject.data.models.Mail;
 import com.example.androidproject.data.repository.MailsRepository;
@@ -59,10 +57,6 @@ public class MailsViewModel extends AndroidViewModel {
     public void toggleStar(String mailId, boolean isStarred) {
         repository.toggleStar(mailId, isStarred);
     }
-    public void deleteMailById(String mailId) {
-        repository.deleteMailById(mailId);
-    }
-
     public void createDraft(Mail mail) {
         repository.createDraft(mail);
     }

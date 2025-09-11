@@ -5,25 +5,28 @@ import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
+import com.google.gson.annotations.SerializedName;
+
 @Entity(tableName = "labels")
 public class Label {
     @PrimaryKey
     @NonNull
-    private String labelName;
-    public Label(@NonNull String labelName) {
-        this.labelName = labelName;
+    @SerializedName("name")
+    private String name;
+    public Label(@NonNull String name) {
+        this.name = name;
     }
     @Ignore
     public Label() {
-        labelName = "";
+        name = "";
     }
     @NonNull
-    public String getLabelName() {
-        return labelName;
+    public String getName() {
+        return name;
     }
 
-    public void setLabelName(@NonNull String labelName) {
-        this.labelName = this.labelName;
+    public void setName(@NonNull String name) {
+        this.name = name;
     }
 }
 

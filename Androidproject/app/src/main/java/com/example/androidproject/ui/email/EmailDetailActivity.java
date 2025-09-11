@@ -1,3 +1,4 @@
+
 package com.example.androidproject.ui.email;
 
 import android.os.Bundle;
@@ -47,7 +48,7 @@ public class EmailDetailActivity extends AppCompatActivity {
         TextView tvSpamWarning = findViewById(R.id.tvSpamWarning);
 
         viewModel = new ViewModelProvider(this).get(MailsViewModel.class);
-        viewModel.getMail(mailId).observe(this, mail -> {
+        viewModel.getMailById(mailId).observe(this, mail -> {
             currentMail = mail;
             if (mail == null) return;
             tvFrom.setText(mail.getSender() == null ? "" : mail.getSender());
@@ -76,7 +77,7 @@ public class EmailDetailActivity extends AppCompatActivity {
 
         findViewById(R.id.btnDelete).setOnClickListener(v -> {
             if (currentMail == null) return;
-            viewModel.deleteMailById(currentMail.getId());
+            viewModel.deleteMail(currentMail);
             Toast.makeText(this, "Deleted", Toast.LENGTH_SHORT).show();
             finish();
         });

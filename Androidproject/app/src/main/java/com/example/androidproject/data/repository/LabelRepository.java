@@ -4,13 +4,16 @@ import android.content.Context;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
+
 import com.example.androidproject.data.local.dao.LabelDao;
 import com.example.androidproject.data.local.db.AppDB;
 import com.example.androidproject.data.local.db.MyApplication;
 import com.example.androidproject.data.models.Label;
 import com.example.androidproject.data.remote.net.LabelAPIClient;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -33,6 +36,7 @@ public class LabelRepository {
 
     /**
      * Fetches all labels from the local database and refreshes them from the remote API.
+     *
      * @return LiveData list of labels.
      */
     public LiveData<List<Label>> getLabels() {
@@ -40,9 +44,9 @@ public class LabelRepository {
     }
 
     public void fetchLabelsFromServer() {
-        labelApi.getLabels(new retrofit2.Callback<List<Label>>() {
+        labelApi.getLabels(new retrofit2.Callback<List<String>>() {
             @Override
-            public void onResponse(Call<List<Label>> call, Response<List<Label>> resp) {
+            public void onResponse(Call<List<String>> call, Response<List<String>> resp) {
                 int code = resp.code();
                 android.util.Log.d("LabelRepo", "code=" + code);
                 if (!resp.isSuccessful() || resp.body() == null) {
@@ -52,15 +56,18 @@ public class LabelRepository {
                     }
                     return; // early return on error
                 }
-                List<Label> fresh = resp.body();
+                List<String> res = resp.body();
+                List<Label> fresh = new ArrayList<>();
+                for (String name : res) {
+                    fresh.add(new Label(name));
+                }
                 new Thread(() -> {
                     labelDao.clear();
                     labelDao.insertAll(fresh);
                 }).start();
             }
-
             @Override
-            public void onFailure(Call<List<Label>> call, Throwable t) {
+            public void onFailure(Call<List<String>> call, Throwable t) {
                 Log.e("LabelRepo", "api failed", t);
             }
         });
@@ -112,7 +119,7 @@ public class LabelRepository {
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-				t.printStackTrace();
+                t.printStackTrace();
             }
         });
     }

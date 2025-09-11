@@ -1,5 +1,6 @@
 package com.example.androidproject.ui.adapters;
 
+import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,15 +9,20 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.core.widget.ImageViewCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.androidproject.R;
 import com.example.androidproject.data.models.Mail;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 
 public class MailsListAdapter extends RecyclerView.Adapter<MailsListAdapter.MailsViewHolder> {
@@ -67,6 +73,18 @@ public class MailsListAdapter extends RecyclerView.Adapter<MailsListAdapter.Mail
                 if (listener != null) listener.onMailClick(mail);
             });
             imgStar.setOnClickListener(v -> {
+                boolean newStar = !(labels != null && labels.contains("starred"));
+                imgStar.setImageResource(newStar ? R.drawable.ic_star_filled : R.drawable.ic_star);
+                int newTint = ContextCompat.getColor(itemView.getContext(),
+                        newStar ? R.color.star_yellow : R.color.icon_default);
+                ImageViewCompat.setImageTintList(imgStar, ColorStateList.valueOf(newTint));
+
+                if (mail.getLabels() == null) mail.setLabels(new ArrayList<>());
+                if (newStar) {
+                    if (!mail.getLabels().contains("starred")) mail.getLabels().add("starred");
+                } else {
+                    mail.getLabels().remove("starred");
+                }
                 if (listener != null) listener.onStarClick(mail);
             });
         }
@@ -74,12 +92,15 @@ public class MailsListAdapter extends RecyclerView.Adapter<MailsListAdapter.Mail
         @NonNull
         private String formatDate(String createdAt) {
             try {
-                if (createdAt != null && !createdAt.isEmpty()) {
-                    return new Date(createdAt).toString();
-                }
-                return "Unknown Date";
+                SimpleDateFormat iso = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX", Locale.US);
+                iso.setTimeZone(TimeZone.getTimeZone("UTC"));
+                Date d = iso.parse(createdAt);
+                if (d == null) return "";
+                SimpleDateFormat timeFmt = new SimpleDateFormat("HH:mm", Locale.getDefault());
+                SimpleDateFormat dateFmt = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault());
+                return dateFmt.format(d);
             } catch (Exception e) {
-                return "Invalid Date";
+                return "";
             }
         }
     }
@@ -118,13 +139,24 @@ public class MailsListAdapter extends RecyclerView.Adapter<MailsListAdapter.Mail
         final List<Mail> finalNewData = newData;
         if (newData == null) newData = new ArrayList<>();
         DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffUtil.Callback() {
-            @Override public int getOldListSize() { return mailsList.size(); }
-            @Override public int getNewListSize() { return finalNewData.size(); }
-            @Override public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+            @Override
+            public int getOldListSize() {
+                return mailsList.size();
+            }
+
+            @Override
+            public int getNewListSize() {
+                return finalNewData.size();
+            }
+
+            @Override
+            public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
                 return mailsList.get(oldItemPosition).getId()
                         .equals(finalNewData.get(newItemPosition).getId());
             }
-            @Override public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+
+            @Override
+            public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
                 Mail oldM = mailsList.get(oldItemPosition);
                 Mail newM = finalNewData.get(newItemPosition);
                 return oldM.equals(newM);
