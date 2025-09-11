@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class DrawerItem {
-    public enum Type {HEADER, SECTION,LABEL}
+    public enum Type {HEADER, SECTION,LABEL, ACTION}
     public abstract Type getType();
 
     public static final class HeaderItem extends DrawerItem {
@@ -31,6 +31,17 @@ public abstract class DrawerItem {
             return Type.LABEL;
         }
     }
+    public static final class ActionItem extends DrawerItem {
+        public enum Action { CREATE, MANAGE }
+        public final Action action;
+        public final int iconRes;
+        public final String title;
+        public ActionItem(Action action, int iconRes, String title) {
+            this.action = action; this.iconRes = iconRes; this.title = title;
+        }
+        @Override public Type getType() { return Type.ACTION; }
+    }
+
     public static List<DrawerItem> buildDrawerItems(
         HeaderItem header,
         List<LabelItem> systemLabels,

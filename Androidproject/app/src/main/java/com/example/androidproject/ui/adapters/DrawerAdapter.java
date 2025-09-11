@@ -18,11 +18,17 @@ public class DrawerAdapter extends ListAdapter<DrawerItem, RecyclerView.ViewHold
     private static final int VT_HEADER = 0;
     private static final int VT_SECTION = 1;
     private static final int VT_LABEL = 2;
+    private static final int VT_ACTION = 3;
 
-    public final OnLabelClickListener listener;
+    public interface OnItemClickListener {
+        void onLabelClick(DrawerItem.LabelItem labelItem);
+        void onCreateLabelClick();
+        void onManageLabelsClick();
+    }
+    private final OnItemClickListener listener;
     private String selectedLabel;
 
-    public DrawerAdapter(OnLabelClickListener listener) {
+    public DrawerAdapter(OnItemClickListener listener) {
         super(DIFF);
         this.listener = listener;
     }
@@ -39,41 +45,31 @@ public class DrawerAdapter extends ListAdapter<DrawerItem, RecyclerView.ViewHold
     private static final DiffUtil.ItemCallback<DrawerItem> DIFF = new DiffUtil.ItemCallback<DrawerItem>() {
         @Override
         public boolean areItemsTheSame(@NonNull DrawerItem oldItem, @NonNull DrawerItem newItem) {
-            if (oldItem instanceof DrawerItem.HeaderItem &&
-                    newItem instanceof DrawerItem.HeaderItem) {
-                return true;
+            if (oldItem.getType() != newItem.getType()) return false;
+            if (oldItem instanceof DrawerItem.LabelItem && newItem instanceof DrawerItem.LabelItem) {
+                Label a = ((DrawerItem.LabelItem) oldItem).label;
+                Label b = ((DrawerItem.LabelItem) newItem).label;
+                return a != null && b != null && a.getName().equals(b.getName());
             }
-            if (oldItem instanceof DrawerItem.SectionItem &&
-                    newItem instanceof DrawerItem.SectionItem) {
-                return true;
-
+            if (oldItem instanceof DrawerItem.ActionItem && newItem instanceof DrawerItem.ActionItem) {
+                return ((DrawerItem.ActionItem) oldItem).action == ((DrawerItem.ActionItem) newItem).action;
             }
-            if (oldItem instanceof DrawerItem.LabelItem &&
-                    newItem instanceof DrawerItem.LabelItem) {
-                Label oldLabel = ((DrawerItem.LabelItem) oldItem).label;
-                Label newLabel = ((DrawerItem.LabelItem) newItem).label;
-                return oldLabel.getName().equals(newLabel.getName());
-            }
-            return false;
+            return true;
         }
 
         @Override
         public boolean areContentsTheSame(@NonNull DrawerItem oldItem, @NonNull DrawerItem newItem) {
-            if (oldItem instanceof DrawerItem.HeaderItem &&
-                    newItem instanceof DrawerItem.HeaderItem) {
-                return true;
+            if (oldItem instanceof DrawerItem.LabelItem && newItem instanceof DrawerItem.LabelItem) {
+                Label a = ((DrawerItem.LabelItem) oldItem).label;
+                Label b = ((DrawerItem.LabelItem) newItem).label;
+                return a.getName().equals(b.getName());
             }
-            if (oldItem instanceof DrawerItem.SectionItem &&
-                    newItem instanceof DrawerItem.SectionItem) {
-                return true;
+            if (oldItem instanceof DrawerItem.ActionItem && newItem instanceof DrawerItem.ActionItem) {
+                DrawerItem.ActionItem A = (DrawerItem.ActionItem) oldItem;
+                DrawerItem.ActionItem B = (DrawerItem.ActionItem) newItem;
+                return A.action == B.action && A.title.equals(B.title) && A.iconRes == B.iconRes;
             }
-            if (oldItem instanceof DrawerItem.LabelItem &&
-                    newItem instanceof DrawerItem.LabelItem) {
-                Label oldLabel = ((DrawerItem.LabelItem) oldItem).label;
-                Label newLabel = ((DrawerItem.LabelItem) newItem).label;
-                return oldLabel.getName().equals(newLabel.getName());
-            }
-            return false;
+            return true;
         }
     };
 
@@ -95,11 +91,10 @@ public class DrawerAdapter extends ListAdapter<DrawerItem, RecyclerView.ViewHold
             LabelName = itemView.findViewById(R.id.tvLabel);
         }
 
-        void bind(DrawerItem.LabelItem labelItem, boolean selected, OnLabelClickListener listener) {
+        void bind(DrawerItem.LabelItem labelItem, boolean selected, OnItemClickListener listener) {
             Label label = labelItem.label;
             LabelName.setText(label != null ? label.getName() : "");
-            int iconRes = getLabelIcon(label.getName());
-            LabelIcon.setImageResource(iconRes);
+            LabelIcon.setImageResource(getLabelIcon(label.getName()));
             root.setActivated(selected);
             itemView.setOnClickListener(v -> {
                 if (listener != null) listener.onLabelClick(labelItem);
@@ -125,6 +120,24 @@ public class DrawerAdapter extends ListAdapter<DrawerItem, RecyclerView.ViewHold
             }
         }
     }
+    static class ActionViewHolder extends RecyclerView.ViewHolder {
+        ImageView img;
+        TextView tv;
+        ActionViewHolder(View itemView) {
+            super(itemView);
+            img = itemView.findViewById(R.id.imgAction);
+            tv  = itemView.findViewById(R.id.tvAction);
+        }
+        void bind(DrawerItem.ActionItem ai, OnItemClickListener listener) {
+            img.setImageResource(ai.iconRes);
+            tv.setText(ai.title);
+            itemView.setOnClickListener(v -> {
+                if (listener == null) return;
+                if (ai.action == DrawerItem.ActionItem.Action.CREATE) listener.onCreateLabelClick();
+                else listener.onManageLabelsClick();
+            });
+        }
+    }
 
     @NonNull
     @Override
@@ -134,6 +147,8 @@ public class DrawerAdapter extends ListAdapter<DrawerItem, RecyclerView.ViewHold
             return new StaticViews(inflater.inflate(R.layout.drawer_header, parent, false));
         if (viewType == VT_SECTION)
             return new StaticViews(inflater.inflate(R.layout.labels_drawer_section, parent, false));
+        if (viewType == VT_ACTION)
+            return new ActionViewHolder(inflater.inflate(R.layout.drawer_action_item, parent, false));
         return new LabelViewHolder(inflater.inflate(R.layout.label_item, parent, false));
     }
 
@@ -145,7 +160,9 @@ public class DrawerAdapter extends ListAdapter<DrawerItem, RecyclerView.ViewHold
             boolean selected = labelItem.label != null &&
                     labelItem.label.getName() != null &&
                     labelItem.label.getName().equals(selectedLabel);
-            ((LabelViewHolder) holder).bind(labelItem, selected, listener);
+                ((LabelViewHolder) holder).bind(labelItem, selected, listener);
+        } else if (holder instanceof ActionViewHolder && item instanceof DrawerItem.ActionItem) {
+            ((ActionViewHolder) holder).bind((DrawerItem.ActionItem) item, listener);
         }
     }
 
@@ -154,6 +171,7 @@ public class DrawerAdapter extends ListAdapter<DrawerItem, RecyclerView.ViewHold
         DrawerItem item = getItem(position);
         if (item.getType() == DrawerItem.Type.HEADER) return VT_HEADER;
         if (item.getType() == DrawerItem.Type.SECTION) return VT_SECTION;
+        if (item.getType() == DrawerItem.Type.ACTION) return VT_ACTION;
         return VT_LABEL;
     }
 }

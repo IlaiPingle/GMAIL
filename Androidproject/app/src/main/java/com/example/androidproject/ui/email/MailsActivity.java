@@ -28,6 +28,8 @@ import com.example.androidproject.data.models.Mail;
 import com.example.androidproject.ui.adapters.DrawerAdapter;
 import com.example.androidproject.ui.adapters.DrawerItem;
 import com.example.androidproject.ui.adapters.MailsListAdapter;
+import com.example.androidproject.ui.label.AddLabelBottomSheet;
+import com.example.androidproject.ui.label.EditLabelBottomSheet;
 import com.example.androidproject.viewModel.LabelsViewModel;
 import com.example.androidproject.viewModel.MailsViewModel;
 import com.example.androidproject.viewModel.UserViewModel;
@@ -84,8 +86,7 @@ public class MailsActivity extends AppCompatActivity {
             public void onStarClick(Mail mail) {
                 if (mail.getLabels() != null && mail.getLabels().contains("starred")) {
                     mailsViewModel.removeLabelFromMail(mail, "starred");
-                }
-                else mailsViewModel.addLabelToMail(mail, "starred");
+                } else mailsViewModel.addLabelToMail(mail, "starred");
             }
         });
         mailsListAdapter.setHasStableIds(true);
@@ -103,7 +104,7 @@ public class MailsActivity extends AppCompatActivity {
         mailsViewModel.observeMailList().observe(this, mailsList -> {
             mailsListAdapter.setMails(mailsList);
             // stop refreshing animation when data is loaded
-            if(swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(false);
+            if (swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(false);
         });
         userViewModel.getUser().observe(this, user -> {
             if (user != null && user.getPicture() != null) {
@@ -129,14 +130,27 @@ public class MailsActivity extends AppCompatActivity {
 
 //      set up navigation drawer
 
-        drawerAdapter = new DrawerAdapter(label -> {
-            String name = label.label != null ? label.label.getName() : DEFAULT_LABEL;
-            tvCurrentLabel.setText(name);
+        drawerAdapter = new DrawerAdapter(new DrawerAdapter.OnItemClickListener() {
+            @Override
+            public void onLabelClick(DrawerItem.LabelItem labelItem) {
+                String name = labelItem.label != null ? labelItem.label.getName() : DEFAULT_LABEL;
+                tvCurrentLabel.setText(name);
 
-            mailsViewModel.getMailsByLabel(name);
+                mailsViewModel.getMailsByLabel(name);
 
-            drawerAdapter.setSelectedLabel(name);
-            drawerLayout.closeDrawer(GravityCompat.START);
+                drawerAdapter.setSelectedLabel(name);
+                drawerLayout.closeDrawer(GravityCompat.START);
+            }
+
+            @Override
+            public void onCreateLabelClick() {
+                startActivity(new Intent(MailsActivity.this, AddLabelBottomSheet.class));
+            }
+
+            @Override
+            public void onManageLabelsClick() {
+                startActivity(new Intent(MailsActivity.this, EditLabelBottomSheet.class));
+            }
         });
         drawerRecycler.setAdapter(drawerAdapter);
 
@@ -158,24 +172,35 @@ public class MailsActivity extends AppCompatActivity {
         labelsViewModel.getLabels().observe(this, userLabels -> {
             Log.d("LabelsVM", "observe: size=" + (userLabels == null ? -1 : userLabels.size()));
             List<DrawerItem.LabelItem> userLabelItems = buildUserLabels(userLabels);
-            drawerAdapter.submitList(
-                    DrawerItem.buildDrawerItems(headerItem, systemLabels, sectionItem, userLabelItems));
+
+            List<DrawerItem> items = DrawerItem.buildDrawerItems(headerItem, systemLabels, sectionItem, userLabelItems);
+            items.add(new DrawerItem.ActionItem(
+                    DrawerItem.ActionItem.Action.CREATE,
+                    R.drawable.ic_add,
+                    getString(R.string.create_new_label)
+            ));
+            items.add(new DrawerItem.ActionItem(
+                    DrawerItem.ActionItem.Action.MANAGE,
+                    R.drawable.ic_edit,
+                    getString(R.string.manage_labels)
+            ));
+            drawerAdapter.submitList(items);
         });
 
 
 //      set up search button
         searchInputText.setOnEditorActionListener((v, actionId, event) -> {
-           if (actionId == EditorInfo.IME_ACTION_SEARCH ||
-                   actionId == EditorInfo.IME_ACTION_DONE ||
-                   (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)){
-               String query = searchInputText.getText().toString();
-               mailsViewModel.searchMails(query);
-               // hide keyboard
-               InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-               imm.hideSoftInputFromWindow(searchInputText.getWindowToken(), 0);
-               return true; // event handled
-           }
-              return false;
+            if (actionId == EditorInfo.IME_ACTION_SEARCH ||
+                    actionId == EditorInfo.IME_ACTION_DONE ||
+                    (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
+                String query = searchInputText.getText().toString();
+                mailsViewModel.searchMails(query);
+                // hide keyboard
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(searchInputText.getWindowToken(), 0);
+                return true; // event handled
+            }
+            return false;
         });
     }
 
