@@ -56,6 +56,25 @@ public class MailsRepository {
         });
         return localMails;
     }
+
+    public LiveData<Mail> getMailById(String mailId) {
+        LiveData<Mail> localMail = mailDao.getMail(mailId);
+        mailApi.getMailById(mailId, new Callback<Mail>() {
+            @Override
+            public void onResponse(@NonNull Call<Mail> call, @NonNull Response<Mail> response) {
+                if (response.isSuccessful() && response.body() != null) executor.execute(() -> {
+                    mailDao.insert(response.body());
+                });
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Mail> call, @NonNull Throwable t) {
+
+            }
+        });
+        return localMail;
+    }
+
     public void createDraft(Mail mail) {
         mailApi.createDraft(mail, new Callback<Mail>() {
             @Override
@@ -108,6 +127,27 @@ public class MailsRepository {
             public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                 if (response.isSuccessful())
                     executor.execute(() -> mailDao.delete(mail));
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                t.printStackTrace();
+            }
+        });
+    }
+
+    public void deleteMailById(String mailId) {
+        mailApi.deleteMail(mailId, new Callback<Void>() {
+            @Override
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                if (response.isSuccessful()) {
+                    executor.execute(() -> {
+                        Mail mail = mailDao.getMailNow(mailId);
+                        if (mail != null) {
+                            mailDao.delete(mail);
+                        }
+                    });
+                }
             }
 
             @Override

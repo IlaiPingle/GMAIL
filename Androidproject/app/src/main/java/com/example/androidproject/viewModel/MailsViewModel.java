@@ -50,7 +50,7 @@ public class MailsViewModel extends AndroidViewModel {
     }
 
 
-    public LiveData<Mail> getMailById(String mailId) {
+    public LiveData<Mail> getMail(String mailId) {
         return repository.getMailById(mailId);
     }
     public void refreshMail(String mailId) {

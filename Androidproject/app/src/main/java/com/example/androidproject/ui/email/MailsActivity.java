@@ -1,8 +1,12 @@
 package com.example.androidproject.ui.email;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -139,12 +143,18 @@ public class MailsActivity extends AppCompatActivity {
                     DrawerItem.buildDrawerItems(headerItem, systemLabels, sectionItem, userLabelItems));
         });
 
-//      set up search button
-        ImageButton btnSearch = findViewById(R.id.btnSearch);
-        btnSearch.setOnClickListener(v -> {
-            mailsViewModel.getMailsByLabel(DEFAULT_LABEL);
-            String query = searchInputText.getText().toString();
-            mailsViewModel.searchMails(query);
+      searchInputText.setOnEditorActionListener((v, actionId, event) -> {
+           if (actionId == EditorInfo.IME_ACTION_SEARCH ||
+                   actionId == EditorInfo.IME_ACTION_DONE ||
+                   (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)){
+               String query = searchInputText.getText().toString();
+               mailsViewModel.searchMails(query);
+               // hide keyboard
+               InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+               imm.hideSoftInputFromWindow(searchInputText.getWindowToken(), 0);
+               return true; // event handled
+           }
+              return false;
         });
     }
 

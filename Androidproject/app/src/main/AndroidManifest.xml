@@ -33,7 +33,7 @@
             android:exported="false">
         </activity>
         <activity
-            android:name=".ui.email.InboxActivity"
+            android:name=".ui.email.MailsActivity"
             android:exported="false">
         </activity>
         <activity

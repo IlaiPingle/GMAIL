@@ -55,8 +55,9 @@ public class LabelsViewModel extends AndroidViewModel {
      * Deletes the label with the given name.
      * The result of the operation is provided via the Callback parameter.
      * @param labelName The name of the label to be deleted.
+     * @param callback The callback to handle the result of the delete operation.
      */
-    public void deleteLabel(String labelName {
+    public void deleteLabel(String labelName, Callback<Void> callback) {
         repository.deleteLabel(labelName);
     }
 
@@ -65,9 +66,9 @@ public class LabelsViewModel extends AndroidViewModel {
      * The result of the operation is provided via the Callback parameter.
      * @param oldName The current name of the label to be updated.
      * @param newName The new name for the label.
-     * @param cb Callback to handle the response or failure of the update operation.
+     * @param callback The callback to handle the result of the update operation.
      */
-    public void updateLabel(String oldName, String newName) {
+    public void updateLabel(String oldName, String newName, Callback<Void> callback) {
         repository.updateLabel(oldName, newName);
     }
 }

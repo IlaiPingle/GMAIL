@@ -64,7 +64,7 @@ public class EditLabelBottomSheet extends BottomSheetDialogFragment {
         final Set<String> existing = new HashSet<>();
         labelsViewModel.getLabels().observe(getViewLifecycleOwner(), list -> {
             existing.clear();
-            if (list != null) for (Label l : list) existing.add(l.getName().toLowerCase());
+            if (list != null) for (Label l : list) existing.add(l.getLabelName().toLowerCase());
         });
 
         final Set<String> system = new HashSet<>(Arrays.asList(

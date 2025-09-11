@@ -6,22 +6,34 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.androidproject.ui.email.MailsActivity;
-import com.example.androidproject.viewModel.SplashViewModel;
+import com.example.androidproject.viewModel.UserViewModel;
 
 public class SplashActivity extends AppCompatActivity {
     private boolean hasNavigated = false;
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        SplashViewModel vm = new ViewModelProvider(this).get(SplashViewModel.class);
-        vm.isSignedIn.observe(this, ok -> {
+        UserViewModel vm = new ViewModelProvider(this).get(UserViewModel.class);
+        vm.getUser().observe(this, user -> {
             if (hasNavigated) return;
             hasNavigated = true;
-            Intent intent = new Intent(this, Boolean.TRUE.equals(ok) ? MailsActivity.class : LoginActivity.class);
+            Intent intent = new Intent(this, user != null ? MailsActivity.class : LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
         });
-        vm.checkSession();
+        vm.getErrorMessage().observe(this, err -> {
+            if (hasNavigated) return;
+            hasNavigated = true;
+            Intent intent = new Intent(this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+        });
+        if (vm.hasSession()) {
+            vm.refreshMe();
+        } else {
+            vm.logout();
+        }
     }
 }

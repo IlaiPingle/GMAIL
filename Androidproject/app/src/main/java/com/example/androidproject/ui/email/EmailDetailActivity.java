@@ -11,14 +11,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.androidproject.R;
 import com.example.androidproject.data.models.Mail;
-import com.example.androidproject.viewModel.EmailDetailViewModel;
+import com.example.androidproject.viewModel.MailsViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class EmailDetailActivity extends AppCompatActivity {
     public static final String EXTRA_MAIL_ID = "extra_mail_id";
 
-    private EmailDetailViewModel viewModel;
+    private MailsViewModel viewModel;
     @Nullable private Mail currentMail;
 
     @Override
@@ -46,7 +46,7 @@ public class EmailDetailActivity extends AppCompatActivity {
         TextView tvLabels = findViewById(R.id.tvLabels);
         TextView tvSpamWarning = findViewById(R.id.tvSpamWarning);
 
-        viewModel = new ViewModelProvider(this).get(EmailDetailViewModel.class);
+        viewModel = new ViewModelProvider(this).get(MailsViewModel.class);
         viewModel.getMail(mailId).observe(this, mail -> {
             currentMail = mail;
             if (mail == null) return;

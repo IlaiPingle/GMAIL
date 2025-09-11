@@ -52,7 +52,7 @@ public class AddLabelBottomSheet extends BottomSheetDialogFragment {
         labelsViewModel.getLabels().observe(getViewLifecycleOwner(), list -> {
             existing.clear();
             if (list != null) {
-                for (Label l : list) existing.add(l.getName().toLowerCase());
+                for (Label l : list) existing.add(l.getLabelName().toLowerCase());
             }
         });
 
