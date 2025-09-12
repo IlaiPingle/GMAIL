@@ -17,36 +17,36 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <ImageButton
-            android:id="@+id/btnBold"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_format_bold"
-            android:contentDescription="Bold"/>
+<!--        <ImageButton-->
+<!--            android:id="@+id/btnBold"-->
+<!--            android:layout_width="48dp"-->
+<!--            android:layout_height="48dp"-->
+<!--            android:background="?attr/selectableItemBackgroundBorderless"-->
+<!--            android:src="@drawable/ic_format_bold"-->
+<!--            android:contentDescription="Bold"/>-->
 
-        <ImageButton
-            android:id="@+id/btnItalic"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_format_italic"
-            android:contentDescription="Italic"/>
+<!--        <ImageButton-->
+<!--            android:id="@+id/btnItalic"-->
+<!--            android:layout_width="48dp"-->
+<!--            android:layout_height="48dp"-->
+<!--            android:background="?attr/selectableItemBackgroundBorderless"-->
+<!--            android:src="@drawable/ic_format_italic"-->
+<!--            android:contentDescription="Italic"/>-->
 
-        <ImageButton
-            android:id="@+id/btnUnderline"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_format_underlined"
-            android:contentDescription="Underline"/>
+<!--        <ImageButton-->
+<!--            android:id="@+id/btnUnderline"-->
+<!--            android:layout_width="48dp"-->
+<!--            android:layout_height="48dp"-->
+<!--            android:background="?attr/selectableItemBackgroundBorderless"-->
+<!--            android:src="@drawable/ic_format_underlined"-->
+<!--            android:contentDescription="Underline"/>-->
 
-        <ImageButton
-            android:id="@+id/btnTextColor"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_format_color_text"
-            android:contentDescription="Text color"/>
+<!--        <ImageButton-->
+<!--            android:id="@+id/btnTextColor"-->
+<!--            android:layout_width="48dp"-->
+<!--            android:layout_height="48dp"-->
+<!--            android:background="?attr/selectableItemBackgroundBorderless"-->
+<!--            android:src="@drawable/ic_format_color_text"-->
+<!--            android:contentDescription="Text color"/>-->
     </LinearLayout>
 </LinearLayout>

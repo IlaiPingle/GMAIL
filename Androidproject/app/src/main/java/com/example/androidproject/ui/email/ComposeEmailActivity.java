@@ -1,61 +1,46 @@
 // java
 package com.example.androidproject.ui.email;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.provider.OpenableColumns;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Patterns;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.lifecycle.ViewModelProvider;
 import com.example.androidproject.R;
-import com.example.androidproject.api.ApiClient;
-import com.example.androidproject.api.EmailApiService;
-import com.example.androidproject.model.EmailData;
+import com.example.androidproject.data.models.Mail;
+import com.example.androidproject.viewModel.MailsViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
-import com.google.android.material.snackbar.Snackbar;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import retrofit2.Response;
-import retrofit2.Call;
-import retrofit2.Callback;
 
 /**
- * ComposeEmailActivity provides a rich email composition interface.
- * Features include:
- * - Recipient chips with To/Cc/Bcc fields
- * - Subject and body with basic rich text formatting (bold, italic, underline, color)
- * - Attachment support with image previews
- * - Autosave drafts locally and on backend
- * - Send email via backend API
- * - Gmail-like exit confirmation (Save/Discard/Cancel)
+ * Activity for composing a new email.
+ * Features:
+ * - Recipient input with chips (To field)
+ * - Subject and body input
+ * - Save draft to backend when "Save" is clicked
+ * - Send email, creating draft on backend if needed
+ * - Discard draft with confirmation
+ * - Exit with confirmation if draft has content
  */
 public class ComposeEmailActivity extends AppCompatActivity {
     // UI elements
@@ -66,21 +51,16 @@ public class ComposeEmailActivity extends AppCompatActivity {
     @Nullable private MenuItem sendMenuItem;
 
     // Draft autosave
-    private final Handler autoSaveHandler = new Handler(Looper.getMainLooper());
-    private static final long AUTO_SAVE_MS = 5000L;
+//    private final Handler autoSaveHandler = new Handler(Looper.getMainLooper());
+//    private static final long AUTO_SAVE_MS = 5000L;
     private static final String PREFS = "compose_prefs";
     private static final String DRAFT_TO = "draft_to";
     private static final String DRAFT_SUBJECT = "draft_subject";
     private static final String DRAFT_BODY = "draft_body";
     @Nullable private String draftId = null; // Set when draft is created on server
 
-    // Snapshot for Undo
-    private static class DraftSnapshot {
-        List<String> to = new ArrayList<>();
-        String subject = "";
-        CharSequence body = "";
-    }
-    @Nullable private DraftSnapshot lastSentSnapshot;
+    // ViewModel for email operations
+    private MailsViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,12 +91,15 @@ public class ComposeEmailActivity extends AppCompatActivity {
         editTextSubject = findViewById(R.id.editTextSubject);
         editTextBody = findViewById(R.id.editTextBody);
 
+        // ViewModel
+        viewModel = new ViewModelProvider(this).get(MailsViewModel.class);
+
         // Recipient chips
         setupRecipientChipField(editTextTo, chipGroupTo);
 
         // Watchers for autosave and Send enablement
-        editTextSubject.addTextChangedListener(new SimpleTextWatcher(this::scheduleAutoSave));
-        editTextBody.addTextChangedListener(new SimpleTextWatcher(this::scheduleAutoSave));
+//        editTextSubject.addTextChangedListener(new SimpleTextWatcher(this::scheduleAutoSave));
+//        editTextBody.addTextChangedListener(new SimpleTextWatcher(this::scheduleAutoSave));
         chipGroupTo.setOnHierarchyChangeListener(simpleChipHierarchyWatcher());
 
         // Load draft
@@ -214,31 +197,6 @@ public class ComposeEmailActivity extends AppCompatActivity {
     }
 
     /**
-     * Updates the Send button enabled state based on whether there is at least one recipient.
-     * @return the current enabled state.
-     */
-    private DraftSnapshot captureSnapshot() {
-        DraftSnapshot s = new DraftSnapshot();
-        s.to = getChipsEmails(chipGroupTo);
-        s.subject = safe(editTextSubject.getText());
-        s.body = safe(editTextBody.getText());
-        return s;
-    }
-
-    /**
-     * Restores the draft from a snapshot.
-     * @param s The snapshot to restore from. If null, does nothing.
-     */
-    private void restoreSnapshot(@Nullable DraftSnapshot s) {
-        if (s == null) return;
-        chipGroupTo.removeAllViews();
-        for (String e : s.to) addChip(e, chipGroupTo);
-        editTextSubject.setText(s.subject);
-        editTextBody.setText(s.body);
-        updateSendEnabled();
-    }
-
-    /**
      * Used to discard the current draft after user confirmation.
      */
     private void confirmDiscard() {
@@ -302,7 +260,7 @@ public class ComposeEmailActivity extends AppCompatActivity {
             }
             @Override public void afterTextChanged(Editable s) {
                 updateSendEnabled();
-                scheduleAutoSave();
+//                scheduleAutoSave();
             }
         });
 
@@ -322,7 +280,7 @@ public class ComposeEmailActivity extends AppCompatActivity {
             field.setText("");
         }
         updateSendEnabled();
-        scheduleAutoSave();
+//        scheduleAutoSave();
     }
 
     /**
@@ -350,7 +308,7 @@ public class ComposeEmailActivity extends AppCompatActivity {
         chip.setOnCloseIconClickListener(v -> {
             group.removeView(chip);
             updateSendEnabled();
-            scheduleAutoSave();
+//            scheduleAutoSave();
         });
         group.addView(chip);
         updateSendEnabled();
@@ -383,29 +341,8 @@ public class ComposeEmailActivity extends AppCompatActivity {
             sendEmailWithDraftId(draftId);
             return;
         }
-        EmailApiService api = ApiClient.getClient().create(EmailApiService.class);
-        Map<String, Object> reqBody = new HashMap<>();
-        reqBody.put("subject", editTextSubject.getText().toString());
-        reqBody.put("body", editTextBody.getText().toString());
-        reqBody.put("receiver", TextUtils.join(",", getChipsEmails(chipGroupTo)));
-
-        api.createDraft(reqBody).enqueue(new Callback<EmailData>() {
-            @Override
-            public void onResponse(Call<EmailData> call, Response<EmailData> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    draftId = response.body().getId();
-                    sendEmailWithDraftId(draftId);
-                } else {
-                    setSendEnabled(true);
-                    Snackbar.make(findViewById(android.R.id.content), "Failed to create draft", Snackbar.LENGTH_LONG).show();
-                }
-            }
-            @Override
-            public void onFailure(Call<EmailData> call, Throwable t) {
-                setSendEnabled(true);
-                Snackbar.make(findViewById(android.R.id.content), "Network error: " + t.getMessage(), Snackbar.LENGTH_LONG).show();
-            }
-        });
+        Mail draft = buildMailFromFields();
+        viewModel.createDraft(draft);
     }
 
     /**
@@ -421,42 +358,22 @@ public class ComposeEmailActivity extends AppCompatActivity {
             setSendEnabled(true);
             return;
         }
-        String receiver = toList.get(0);
-        String subject = editTextSubject.getText().toString();
-        String body = editTextBody.getText().toString();
-        Map<String, Object> reqBody = new HashMap<>();
-        reqBody.put("receiver", receiver);
-        reqBody.put("subject", editTextSubject.getText().toString());
-        reqBody.put("body", editTextBody.getText().toString());
-
-        EmailApiService api = ApiClient.getClient().create(EmailApiService.class);
-        api.sendMail(draftId, reqBody).enqueue(new Callback<EmailData>() {
-            @Override
-            public void onResponse(Call<EmailData> call, Response<EmailData> response) {
-                setSendEnabled(true);
-                if (response.isSuccessful()) {
-                    clearCompose();
-                    Snackbar.make(findViewById(android.R.id.content), "Email sent", Snackbar.LENGTH_LONG).show();
-                } else {
-                    Snackbar.make(findViewById(android.R.id.content), "Send failed: " + response.code(), Snackbar.LENGTH_LONG).show();
-                }
-            }
-            @Override
-            public void onFailure(Call<EmailData> call, Throwable t) {
-                setSendEnabled(true);
-                Snackbar.make(findViewById(android.R.id.content), "Network error: " + t.getMessage(), Snackbar.LENGTH_LONG).show();
-            }
-        });
+        Mail mail = buildMailFromFields();
+        mail.setId(draftId);
+        viewModel.sendMail(mail);
+        setSendEnabled(true);
+        clearCompose();
+        Toast.makeText(this, "Email sent", Toast.LENGTH_SHORT).show();
     }
 
     /**
      * Schedules an autosave of the draft after a delay.
      * Cancels any previously scheduled autosave to avoid excessive saves.
      */
-    private void scheduleAutoSave() {
-        autoSaveHandler.removeCallbacksAndMessages(null);
-        autoSaveHandler.postDelayed(this::saveDraftNow, AUTO_SAVE_MS);
-    }
+//    private void scheduleAutoSave() {
+//        autoSaveHandler.removeCallbacksAndMessages(null);
+//        autoSaveHandler.postDelayed(this::saveDraftNow, AUTO_SAVE_MS);
+//    }
 
     /**
      * Saves the current draft state.
@@ -466,21 +383,10 @@ public class ComposeEmailActivity extends AppCompatActivity {
     private void saveDraftNow() {
         if (draftId != null) {
             // Update draft on backend
-            Map<String, Object> reqBody = new HashMap<>();
-            reqBody.put("receiver", TextUtils.join(",", getChipsEmails(chipGroupTo)));
-            reqBody.put("subject", editTextSubject.getText().toString());
-            reqBody.put("body", editTextBody.getText().toString());
-            EmailApiService api = ApiClient.getClient().create(EmailApiService.class);
-            api.sendMail(draftId, reqBody).enqueue(new Callback<EmailData>() {
-                @Override
-                public void onResponse(Call<EmailData> call, Response<EmailData> response) {
-                    // handle response, show "Draft saved" if successful
-                }
-                @Override
-                public void onFailure(Call<EmailData> call, Throwable t) {
-                    // handle error
-                }
-            });
+            Mail mail = buildMailFromFields();
+            mail.setId(draftId);
+            viewModel.updateMail(mail);
+            Toast.makeText(this, "Draft updated", Toast.LENGTH_SHORT).show();
         } else {
             SharedPreferences sp = getSharedPreferences(PREFS, Context.MODE_PRIVATE);
             // Include chips + any pending text
@@ -491,6 +397,18 @@ public class ComposeEmailActivity extends AppCompatActivity {
                     .putString(DRAFT_BODY, safe(editTextBody.getText()))
                     .apply();
         }
+    }
+
+    /**
+     * Builds a Mail object from the current compose fields.
+     * @return The Mail object representing the current draft.
+     */
+    private Mail buildMailFromFields() {
+        Mail mail = new Mail();
+        mail.setReceiver(TextUtils.join(",", getChipsEmails(chipGroupTo)));
+        mail.setSubject(editTextSubject.getText().toString());
+        mail.setBody(editTextBody.getText().toString());
+        return mail;
     }
 
     /**
@@ -557,8 +475,8 @@ public class ComposeEmailActivity extends AppCompatActivity {
      */
     private ChipGroup.OnHierarchyChangeListener simpleChipHierarchyWatcher() {
         return new ChipGroup.OnHierarchyChangeListener() {
-            @Override public void onChildViewAdded(View parent, View child) { scheduleAutoSave(); updateSendEnabled(); }
-            @Override public void onChildViewRemoved(View parent, View child) { scheduleAutoSave(); updateSendEnabled(); }
+            @Override public void onChildViewAdded(View parent, View child) {  updateSendEnabled(); }
+            @Override public void onChildViewRemoved(View parent, View child) {  updateSendEnabled(); }
         };
     }
 

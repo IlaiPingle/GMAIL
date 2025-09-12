@@ -8,16 +8,16 @@
     android:paddingEnd="16dp"
     android:paddingTop="16dp"
     android:paddingBottom="16dp"
-    android:background="?attr/selectableItemBackground">
+    android:background="?attr/colorSurface">
 
     <TextView
         android:id="@+id/textSenderInitial"
         android:layout_width="42dp"
         android:layout_height="42dp"
-        android:background="@drawable/circle_background"
+        android:background="@color/chip_background"
         android:gravity="center"
         android:textSize="20sp"
-        android:textColor="@android:color/white"
+        android:textColor="@color/md_theme_light_onPrimary"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -26,7 +26,10 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_marginEnd="8dp"
-        android:src="@android:drawable/btn_star_big_off"
+        android:src="@drawable/ic_star"
+        app:tint="@color/icon_tint"
+        android:clickable="true"
+        android:focusable="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -39,6 +42,7 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:textStyle="bold"
+        android:textColor="?attr/colorOnSurface"
         app:layout_constraintEnd_toStartOf="@+id/textTime"
         app:layout_constraintStart_toEndOf="@+id/textSenderInitial"
         app:layout_constraintTop_toTopOf="parent" />
@@ -52,6 +56,7 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:textStyle="bold"
+        android:textColor="?attr/colorOnSurface"
         app:layout_constraintEnd_toStartOf="@+id/imgStar"
         app:layout_constraintStart_toEndOf="@+id/textSenderInitial"
         app:layout_constraintTop_toBottomOf="@+id/textSender" />
@@ -63,7 +68,7 @@
         android:layout_marginStart="16dp"
         android:ellipsize="end"
         android:maxLines="1"
-        android:textColor="@android:color/darker_gray"
+        android:textColor="@color/secondary_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textSenderInitial"
         app:layout_constraintTop_toBottomOf="@+id/textSubject" />
@@ -73,6 +78,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="12sp"
+        android:textColor="@color/secondary_text"
         app:layout_constraintEnd_toStartOf="@+id/imgStar"
         app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

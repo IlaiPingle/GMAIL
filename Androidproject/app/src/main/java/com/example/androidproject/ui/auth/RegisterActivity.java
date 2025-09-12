@@ -1,0 +1,352 @@
+package com.example.androidproject.ui.auth;
+
+import android.Manifest;
+import android.content.Intent;
+import android.content.ContentUris;
+import android.database.Cursor;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.provider.MediaStore;
+import android.provider.DocumentsContract;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.Toast;
+
+import java.io.File;
+
+import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.lifecycle.ViewModelProvider;
+
+import com.example.androidproject.R;
+import com.example.androidproject.ui.email.MailsActivity;
+import com.example.androidproject.util.ValidationUtils;
+import com.example.androidproject.viewModel.UserViewModel;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
+
+/**
+ * RegisterActivity handles user registration including:
+ * - Input fields for first name, last name, username, password, confirm password
+ * - Profile photo selection from gallery
+ * - Input validation with real-time feedback
+ * - API call to register user with multipart form data (including image upload)
+ * - Auto-login upon successful registration
+ * - Navigation to LoginActivity if user opts to sign in instead
+ */
+public class RegisterActivity extends AppCompatActivity {
+    private ImageView imgProfile;
+    private Uri selectedImageUri = null;
+
+    private TextInputLayout tilFirstName, tilLastName, tilUsername, tilPassword, tilConfirmPassword;
+    private TextInputEditText etFirstName, etLastName, etUsername, etPassword, etConfirmPassword;
+    private ProgressBar progressBar;
+    private UserViewModel userViewModel;
+
+    /**
+     * Activity Result launcher for ACTION_PICK (legacy gallery).
+     */
+    private final ActivityResultLauncher<Intent> imagePickerLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    selectedImageUri = result.getData().getData();
+                    imgProfile.setImageURI(selectedImageUri);
+                }
+            });
+
+    /**
+     * Activity Result launcher for runtime permission.
+     */
+    private final ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    openLegacyImagePicker(); // proceed to gallery
+                } else {
+                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_register);
+
+        tilFirstName = findViewById(R.id.til_first_name);
+        tilLastName = findViewById(R.id.til_last_name);
+        tilUsername = findViewById(R.id.til_username);
+        tilPassword = findViewById(R.id.til_password);
+        tilConfirmPassword = findViewById(R.id.til_confirm_password);
+
+        etFirstName = findViewById(R.id.et_first_name);
+        etLastName = findViewById(R.id.et_last_name);
+        etUsername = findViewById(R.id.et_username);
+        etPassword = findViewById(R.id.et_password);
+        etConfirmPassword = findViewById(R.id.et_confirm_password);
+
+        imgProfile = findViewById(R.id.img_profile);
+        progressBar = findViewById(R.id.progress_bar);
+
+        MaterialButton btnNext = findViewById(R.id.btn_next);
+        MaterialButton btnSelectPhoto = findViewById(R.id.btn_select_photo);
+        MaterialButton btnSignInInstead = findViewById(R.id.btn_sign_in_top);
+
+        btnNext.setOnClickListener(v -> validateAndSubmit());
+        btnSelectPhoto.setOnClickListener(v -> checkPermissionAndPickImage());
+        btnSignInInstead.setOnClickListener(v -> {
+            // Navigate to login activity
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            finish(); // Assuming this activity was started from LoginActivity
+        });
+
+        // Initialize ViewModel
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+        // Success flow: when user is saved locally (Room), we navigate forward.
+        userViewModel.getUser().observe(this, user -> {
+            if (user != null) {
+                Toast.makeText(this, "Registration successful", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(this, MailsActivity.class));
+                finish();
+            }
+        });
+        // Error flow: show toast and hide loading.
+        userViewModel.getErrorMessage().observe(this, errorMsg -> {
+            showLoading(false);
+            if (errorMsg != null && !errorMsg.isEmpty()) {
+                Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show();
+            }
+        });
+        etUsername.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int st, int c, int a) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int st, int b, int c) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() > 0 && !ValidationUtils.isValidUsername(s.toString())) {
+                    tilUsername.setError("Use only letters, numbers and periods");
+                } else {
+                    tilUsername.setError(null);
+                    tilUsername.setHelperText(getString(R.string.helper_username));
+                }
+            }
+        });
+        etPassword.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() > 0) {
+                    if (s.length() < 8) {
+                        tilPassword.setError("Password is too short");
+                        tilPassword.setError(null);
+                    } else if (!ValidationUtils.isStrongPassword(s.toString())) {
+                        tilPassword.setError(null);
+                        tilPassword.setHelperText("Make password stronger");
+                    } else {
+                        tilPassword.setError(null);
+                        tilPassword.setHelperText(getString(R.string.helper_password));
+                    }
+                } else {
+                    tilPassword.setError(null);
+                    tilPassword.setHelperText(null);
+                }
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+        });
+    }
+
+    /**
+     * Validates user input fields and submits registration data if valid
+     * Checks for empty fields, username format, password strength, and matching passwords
+     * Displays error messages on invalid fields
+     * Ensures a profile photo is selected before submission
+     * Calls uploadData() to perform the API call if all validations pass
+     */
+    private void validateAndSubmit() {
+        clearErrors();
+
+        String first = getText(etFirstName);
+        String last = getText(etLastName);
+        String user = getText(etUsername);
+        String pass = getText(etPassword);
+        String pass2 = getText(etConfirmPassword);
+
+        boolean ok = true;
+
+        if (first.isEmpty()) {
+            tilFirstName.setError("Required");
+            ok = false;
+        }
+        if (last.isEmpty()) {
+            tilLastName.setError("Required");
+            ok = false;
+        }
+        if (user.isEmpty()) {
+            tilUsername.setError("Required");
+            ok = false;
+        } else if (!ValidationUtils.isValidUsername(user)) {
+            tilUsername.setError("Use only letters, numbers and periods");
+            ok = false;
+        }
+        if (pass.isEmpty()) {
+            tilPassword.setError("Required");
+            ok = false;
+        } else if (pass.length() < 8) {
+            tilPassword.setError("At least 8 characters required");
+            ok = false;
+        } else if (!ValidationUtils.isStrongPassword(pass)) {
+            tilPassword.setError("Include at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character");
+            ok = false;
+        }
+        if (pass2.isEmpty()) {
+            tilConfirmPassword.setError("Required");
+            ok = false;
+        } else if (!pass.equals(pass2)) {
+            tilConfirmPassword.setError("Passwords do not match");
+            ok = false;
+        }
+
+        if (!ok) return;
+        File imageFile = null;
+        if (selectedImageUri != null) {
+            String imagePath = getFilePathFromUri(selectedImageUri);
+            if (imagePath != null) {
+                imageFile = new File(imagePath);
+            }
+        }
+        userViewModel.register(first, last, user, pass, imageFile);
+    }
+
+    /**
+     * Clears all error messages from input fields
+     * Resets the error state of TextInputLayouts
+     */
+    private void clearErrors() {
+        tilFirstName.setError(null);
+        tilLastName.setError(null);
+        tilUsername.setError(null);
+        tilPassword.setError(null);
+        tilConfirmPassword.setError(null);
+    }
+
+    // Helper to get trimmed text from TextInputEditText
+    private String getText(TextInputEditText et) {
+        return et.getText() == null ? "" : et.getText().toString().trim();
+    }
+
+    /**
+     * Converts a content URI to an absolute file path
+     * Handles different URI schemes and document providers
+     *
+     * @param uri The content URI to convert
+     * @return The absolute file path, or null if not found
+     */
+    public String getFilePathFromUri(Uri uri) {
+        String filePath;
+        if (DocumentsContract.isDocumentUri(this, uri)) {
+            // For newer Android versions
+            String documentId = DocumentsContract.getDocumentId(uri);
+            if ("com.android.providers.media.documents".equals(uri.getAuthority())) {
+                String id = documentId.split(":")[1];
+                String selection = MediaStore.Images.Media._ID + "=" + id;
+                filePath = getPathFromMediaStore(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, selection);
+            } else if ("com.android.providers.downloads.documents".equals(uri.getAuthority())) {
+                Uri contentUri = ContentUris.withAppendedId(
+                        Uri.parse("content://downloads/public_downloads"), Long.parseLong(documentId));
+                filePath = getPathFromMediaStore(contentUri, null);
+            } else {
+                filePath = null;
+            }
+        } else if ("content".equalsIgnoreCase(uri.getScheme())) {
+            filePath = getPathFromMediaStore(uri, null);
+        } else if ("file".equalsIgnoreCase(uri.getScheme())) {
+            filePath = uri.getPath();
+        } else {
+            filePath = null;
+        }
+        return filePath;
+    }
+
+    /**
+     * Queries the MediaStore to get the file path from a content URI
+     *
+     * @param uri       The content URI to query
+     * @param selection Optional selection criteria
+     * @return The file path as a string, or null if not found
+     */
+    private String getPathFromMediaStore(Uri uri, String selection) {
+        String path = null;
+        String[] projection = {MediaStore.Images.Media.DATA};
+        try (Cursor cursor = getContentResolver().query(uri, projection, selection, null, null)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                path = cursor.getString(columnIndex);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return path;
+    }
+
+    /**
+     * Decide which permission is required (depends on Android version).
+     */
+    private String storagePermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            return Manifest.permission.READ_MEDIA_IMAGES;
+        } else {
+            return Manifest.permission.READ_EXTERNAL_STORAGE;
+        }
+    }
+
+    /**
+     * Check permission and open gallery (legacy ACTION_PICK).
+     */
+    private void checkPermissionAndPickImage() {
+        String perm = storagePermission();
+        if (ContextCompat.checkSelfPermission(this, perm) == PackageManager.PERMISSION_GRANTED) {
+            openLegacyImagePicker();
+        } else {
+            requestPermissionLauncher.launch(perm);
+        }
+    }
+
+    /**
+     * Open legacy gallery intent (requires permission).
+     */
+    private void openLegacyImagePicker() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        imagePickerLauncher.launch(intent); // open gallery
+    }
+
+    /**
+     * Shows or hides the loading indicator (ProgressBar)
+     *
+     * @param isLoading true to show loading, false to hide
+     */
+    private void showLoading(boolean isLoading) {
+        if (progressBar != null) {
+            progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        }
+    }
+}
