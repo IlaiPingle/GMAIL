@@ -33,6 +33,7 @@ import retrofit2.Response;
  */
 public class EditLabelBottomSheet extends BottomSheetDialogFragment {
     private static final String ARG_OLD_NAME = "oldName"; // Argument key for the old label name
+    private String originalLabelName;
 
     // Factory method to create a new instance of the fragment with the old label name as an argument
     public static EditLabelBottomSheet newInstance(String oldName) {
@@ -45,6 +46,15 @@ public class EditLabelBottomSheet extends BottomSheetDialogFragment {
 
     private LabelsViewModel labelsViewModel;
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            originalLabelName = getArguments().getString(ARG_OLD_NAME);
+            android.util.Log.d("EditLabelBottomSheet", "Editing label: " + originalLabelName);
+        }
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -54,9 +64,7 @@ public class EditLabelBottomSheet extends BottomSheetDialogFragment {
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
-        String oldName = getArguments() == null ? "" : getArguments().getString(ARG_OLD_NAME, "");
-
-        labelsViewModel = new ViewModelProvider(requireActivity()).get(LabelsViewModel.class);
+        labelsViewModel= new ViewModelProvider(requireActivity()).get(LabelsViewModel.class);
 
         TextInputLayout til = v.findViewById(R.id.tilLabelName);
         TextInputEditText et = v.findViewById(R.id.etLabelName);
@@ -64,21 +72,27 @@ public class EditLabelBottomSheet extends BottomSheetDialogFragment {
         MaterialButton btnDelete = v.findViewById(R.id.btnDelete);
         MaterialButton btnCancel = v.findViewById(R.id.btnCancel);
 
-        et.setText(oldName);
+        et.setText(originalLabelName == null ? "" : originalLabelName);
 
         final Set<String> existing = new HashSet<>();
         labelsViewModel.getLabels().observe(getViewLifecycleOwner(), list -> {
             existing.clear();
-            if (list != null) for (Label l : list) existing.add(l.getLabelName().toLowerCase());
+            if (list != null) for (Label l : list) existing.add(l.getName().toLowerCase());
         });
 
         final Set<String> system = new HashSet<>(Arrays.asList(
-                "inbox", "sent", "starred", "snoozed", "spam", "bin", "trash", "drafts", "social", "promotions", "primary"
+                "inbox", "starred", "snoozed", "important", "chats", "sent", "drafts", "bin", "spam", "all", "scheduled", "unread"
         ));
 
         btnSave.setOnClickListener(v1 -> {
+            String oldName = originalLabelName;
             String newName = et.getText() == null ? "" : et.getText().toString().trim();
             til.setError(null);
+
+            if (TextUtils.isEmpty(oldName)) {
+                til.setError("Invalid original label name");
+                return;
+            }
 
             if (TextUtils.isEmpty(newName)) {
                 til.setError(getString(R.string.error_required));
@@ -88,25 +102,67 @@ public class EditLabelBottomSheet extends BottomSheetDialogFragment {
                 til.setError(getString(R.string.error_too_long));
                 return;
             }
-            String key = newName.toLowerCase();
-            if (system.contains(key)) {
-                til.setError(getString(R.string.error_system_label));
+            if (newName.equalsIgnoreCase(oldName)) {
+                dismiss();
                 return;
             }
-            if (!newName.equalsIgnoreCase(oldName) && existing.contains(key)) {
-                til.setError(getString(R.string.error_label_exists));
+            if (system.contains(newName.toLowerCase())) {
+                til.setError(getString(R.string.error_system_label));
                 return;
             }
 
             btnSave.setEnabled(false);
-            labelsViewModel.updateLabel(oldName, newName);
+            labelsViewModel.updateLabel(oldName, newName, new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    btnSave.setEnabled(true);
+                    if (response.isSuccessful()) {
+                        dismiss();
+                    } else {
+                        til.setError(response.code() == 409 ? getString(R.string.error_label_exists)
+                                : response.code() == 404 ? "Label not found"
+                                : response.code() == 400 ? getString(R.string.error_system_label)
+                                : "Update failed: (" + response.code() + ")");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    btnSave.setEnabled(true);
+                    til.setError(t.getMessage() == null ? "Network error" : t.getMessage());
+                }
+            });
         });
 
         btnDelete.setOnClickListener(v12 -> {
+            String name = originalLabelName;
+            til.setError(null);
+            if (TextUtils.isEmpty(name)) {
+                til.setError("Invalid label name");
+                return;
+            }
             btnDelete.setEnabled(false);
-            labelsViewModel.deleteLabel(oldName);
+            labelsViewModel.deleteLabel(originalLabelName, new Callback<Void>() {
+                        @Override
+                        public void onResponse(Call<Void> call, Response<Void> response) {
+                            btnDelete.setEnabled(true);
+                            if (response.isSuccessful()) {
+                                dismiss();
+                            } else {
+                                til.setError(response.code() == 404 ? "Label not found"
+                                        : response.code() == 400 ? "Cannot delete system label"
+                                        : "Failed to delete label: (" + response.code() + ")");
+                            }
+                        }
 
-            btnCancel.setOnClickListener(v13 -> dismiss());
+                        @Override
+                        public void onFailure(Call<Void> call, Throwable t) {
+                            btnDelete.setEnabled(true);
+                            til.setError(t.getMessage() == null ? "Network error" : t.getMessage());
+                        }
+                    });
         });
+
+        btnCancel.setOnClickListener(v13 -> dismiss());
     }
 }

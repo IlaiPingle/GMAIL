@@ -11,6 +11,7 @@ import com.example.androidproject.data.local.db.AppDB;
 import com.example.androidproject.data.models.Mail;
 
 import com.example.androidproject.data.remote.net.MailAPIClient;
+import com.example.androidproject.util.UrlUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -81,17 +82,23 @@ public class MailsRepository {
         return local;
     }
 
-    public void createDraft(Mail mail) {
+    public void createDraft(Mail mail, Callback<Mail> callback) {
         mailApi.createDraft(mail, new Callback<Mail>() {
             @Override
             public void onResponse(@NonNull Call<Mail> call, @NonNull Response<Mail> response) {
-                if (response.isSuccessful() && response.body() != null)
+                if (response.isSuccessful() && response.body() != null) {
                     executor.execute(() -> mailDao.insert(response.body()));
+                }
+                if (callback != null) {
+                    callback.onResponse(call, response);
+                }
             }
 
             @Override
             public void onFailure(@NonNull Call<Mail> call, @NonNull Throwable t) {
-                t.printStackTrace();
+                if (callback != null) {
+                    callback.onFailure(call, t);
+                }
             }
         });
     }
@@ -286,6 +293,36 @@ public class MailsRepository {
                 t.printStackTrace();
             }
         });
+    }
+
+    public void addToBlacklist(String url, Callback<Void> callback) {
+        mailApi.addToBlacklist(url, new Callback<Void>() {
+            @Override
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                if (callback != null) {
+                    callback.onResponse(call, response);
+                }
+            }
+            @Override
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                if (callback != null) {
+                    callback.onFailure(call, t);
+                }
+            }
+        });
+    }
+
+    public void addToBlacklistFromMail(Mail mail) {
+        if (mail == null) return;
+        List<String> urls = UrlUtils.extractUrlsLikeFrontend(mail.getSubject(), mail.getBody(), mail.getSender());
+        for (String url : urls) {
+            mailApi.addToBlacklist(url, new Callback<Void>() {
+                @Override
+                public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {}
+                @Override
+                public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {}
+            });
+        }
     }
 
     // Helper methods for filtering and searching mails locally

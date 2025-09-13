@@ -22,6 +22,10 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 
 public class AddLabelBottomSheet extends BottomSheetDialogFragment {
 
@@ -49,7 +53,7 @@ public class AddLabelBottomSheet extends BottomSheetDialogFragment {
         labelsViewModel.getLabels().observe(getViewLifecycleOwner(), list -> {
             existing.clear();
             if (list != null) {
-                for (Label l : list) existing.add(l.getLabelName().toLowerCase());
+                for (Label l : list) existing.add(l.getName().toLowerCase());
             }
         });
 
@@ -81,7 +85,24 @@ public class AddLabelBottomSheet extends BottomSheetDialogFragment {
             btnCreate.setEnabled(false);
 
             // Call backend via repository; Room will update and observers will refresh the drawer.
-            labelsViewModel.createLabel(name);
+            labelsViewModel.createLabel(name, new Callback<Label>() {
+                @Override
+                public void onResponse(Call<Label> call, Response<Label> response) {
+                    btnCreate.setEnabled(true);
+                    if (response.isSuccessful() && response.body() != null) {
+                        dismiss();
+                    } else {
+                        til.setError(response.code() == 409 ? getString(R.string.error_label_exists) : "create failed: (" + response.code() + ")");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Label> call, Throwable t) {
+                    btnCreate.setEnabled(true);
+                    til.setError(t.getMessage() == null ? "create failed" : t.getMessage());
+
+                }
+            });
         });
 
         btnCancel.setOnClickListener(v12 -> dismiss());

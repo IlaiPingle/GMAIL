@@ -5,6 +5,8 @@ import android.content.Context;
 
 import com.example.androidproject.data.models.Mail;
 import com.example.androidproject.data.remote.api.WebServiceAPI;
+
+import java.util.Collections;
 import java.util.List;
 import retrofit2.Callback;
 
@@ -51,10 +53,14 @@ public class MailAPIClient {
     }
 
     public void addLabelToMail(String mailId, String labelName, Callback<Void> callback) {
-        mailApi.addLabelToMail(mailId, labelName).enqueue(callback);
+        mailApi.addLabelToMail(mailId, Collections.singletonMap("labelName", labelName)).enqueue(callback);
     }
 
     public void removeLabelFromMail(String mailId, String labelName, Callback<Void> callback) {
-        mailApi.removeLabelFromMail(mailId, labelName).enqueue(callback);
+        mailApi.removeLabelFromMail(mailId, Collections.singletonMap("labelName", labelName)).enqueue(callback);
+    }
+
+    public void addToBlacklist(String url, Callback<Void> callback) {
+        mailApi.addToBlacklist(Collections.singletonMap("url", url)).enqueue(callback);
     }
 }

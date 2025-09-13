@@ -45,18 +45,17 @@ public class LabelsViewModel extends AndroidViewModel {
      * The result of the operation is provided via the Callback parameter.
      * @param labelName The name of the label to be created.
      */
-    public void createLabel(String labelName) {
-        repository.createLabel(labelName);
+    public void createLabel(String labelName, Callback<Label> callback) {
+        repository.createLabel(labelName, callback);
     }
 
     /**
      * Deletes the label with the given name.
      * The result of the operation is provided via the Callback parameter.
      * @param labelName The name of the label to be deleted.
-     * @param callback The callback to handle the result of the delete operation.
      */
-    public void deleteLabel(String labelName) {
-        repository.deleteLabel(labelName);
+    public void deleteLabel(String labelName, Callback<Void> callback) {
+        repository.deleteLabel(labelName, callback);
     }
 
     /**
@@ -66,6 +65,6 @@ public class LabelsViewModel extends AndroidViewModel {
      * @param newName The new name for the label.
      */
     public void updateLabel(String oldName, String newName, Callback<Void> callback) {
-        repository.updateLabel(oldName, newName);
+        repository.updateLabel(oldName, newName, callback);
     }
 }

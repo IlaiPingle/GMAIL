@@ -14,6 +14,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -54,6 +55,7 @@ public class MailsActivity extends AppCompatActivity {
 
     private EditText searchInputText;
     private TextView tvCurrentLabel;
+    private String currentLabel;
 
     private static final String DEFAULT_LABEL = "inbox";
 
@@ -79,11 +81,9 @@ public class MailsActivity extends AppCompatActivity {
         mailsListAdapter = new MailsListAdapter(new ArrayList<>(), new MailsListAdapter.OnMailsListAdapterListener() {
             @Override
             public void onMailClick(Mail mail) {
-                if (mail.getLabels() != null && mail.getLabels().contains("starred")) {
-                    mailsViewModel.removeLabelFromMail(mail, "starred");
-                } else {
-                    mailsViewModel.addLabelToMail(mail, "starred");
-                }
+                Intent intent = new Intent(MailsActivity.this, EmailDetailActivity.class);
+                intent.putExtra(EmailDetailActivity.EXTRA_MAIL_ID, mail.getId());
+                startActivity(intent);
             }
 
             @Override
@@ -144,16 +144,21 @@ public class MailsActivity extends AppCompatActivity {
 
                 drawerAdapter.setSelectedLabel(name);
                 drawerLayout.closeDrawer(GravityCompat.START);
+                currentLabel = name;
             }
 
             @Override
             public void onCreateLabelClick() {
-                startActivity(new Intent(MailsActivity.this, AddLabelBottomSheet.class));
+                new AddLabelBottomSheet().show(getSupportFragmentManager(), "add_label");
             }
 
             @Override
             public void onManageLabelsClick() {
-                startActivity(new Intent(MailsActivity.this, EditLabelBottomSheet.class));
+                if (isUserLabel(currentLabel)) {
+                    EditLabelBottomSheet.newInstance(currentLabel).show(getSupportFragmentManager(), "edit_label");
+                } else {
+                    Toast.makeText(MailsActivity.this, R.string.error_system_label, Toast.LENGTH_SHORT).show();
+                    }
             }
         });
         drawerRecycler.setAdapter(drawerAdapter);
@@ -263,5 +268,14 @@ public class MailsActivity extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
+    }
+
+    private boolean isUserLabel(String labelName) {
+        if (labelName == null) return false;
+        String lower = labelName.toLowerCase();
+        List<String> systemLabels = Arrays.asList(
+                "inbox", "sent", "starred", "spam", "bin", "drafts", "all"
+        );
+        return !systemLabels.contains(lower);
     }
 }

@@ -16,6 +16,9 @@ import com.example.androidproject.viewModel.MailsViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class EmailDetailActivity extends AppCompatActivity {
     public static final String EXTRA_MAIL_ID = "extra_mail_id";
 
@@ -48,7 +51,7 @@ public class EmailDetailActivity extends AppCompatActivity {
         TextView tvSpamWarning = findViewById(R.id.tvSpamWarning);
 
         viewModel = new ViewModelProvider(this).get(MailsViewModel.class);
-        viewModel.getMailById(mailId).observe(this, mail -> {
+        viewModel.getMail(mailId).observe(this, mail -> {
             currentMail = mail;
             if (mail == null) return;
             tvFrom.setText(mail.getSender() == null ? "" : mail.getSender());
@@ -77,28 +80,79 @@ public class EmailDetailActivity extends AppCompatActivity {
 
         findViewById(R.id.btnDelete).setOnClickListener(v -> {
             if (currentMail == null) return;
-            viewModel.deleteMail(currentMail);
-            Toast.makeText(this, "Deleted", Toast.LENGTH_SHORT).show();
-            finish();
+            List<String> labels = currentMail.getLabels();
+            if (labels != null && (labels.contains("bin") || labels.contains("spam"))) {
+                // Permanently delete
+                viewModel.deleteMail(currentMail);
+                Toast.makeText(this, "Mail deleted permanently", Toast.LENGTH_SHORT).show();
+                finish();
+                return;
+            } else {
+                List<String> newLabels = new ArrayList<>();
+                if (labels != null) {
+                    for (String label : labels) {
+                        if ("all".equals(label) || "unread".equals(label)) {
+                            newLabels.add(label);
+                        }
+                    }
+                }
+                if (!newLabels.contains("bin")) {
+                    newLabels.add("bin");
+                }
+                currentMail.setLabels(newLabels);
+                viewModel.updateMail(currentMail);
+                Toast.makeText(this, "Moved to Bin", Toast.LENGTH_SHORT).show();
+                finish();
+            }
         });
 
         findViewById(R.id.btnStar).setOnClickListener(v -> {
             if (currentMail == null) return;
             boolean isStarred = currentMail.getLabels() != null && currentMail.getLabels().contains("starred");
             viewModel.toggleStar(currentMail.getId(), !isStarred);
+            if (isStarred) {
+                currentMail.getLabels().remove("starred");
+            } else {
+                if (!currentMail.getLabels().contains("starred")) {
+                    currentMail.getLabels().add("starred");
+                }
+            }
+            viewModel.refreshMail(currentMail.getId());
             Toast.makeText(this, isStarred ? "Unstarred" : "Starred", Toast.LENGTH_SHORT).show();
         });
 
         findViewById(R.id.btnMarkUnread).setOnClickListener(v -> {
             if (currentMail == null) return;
             viewModel.addLabelToMail(currentMail, "unread");
+            viewModel.refreshMail(currentMail.getId());
             Toast.makeText(this, "Marked as unread", Toast.LENGTH_SHORT).show();
         });
 
         findViewById(R.id.btnSpam).setOnClickListener(v -> {
             if (currentMail == null) return;
-            viewModel.addLabelToMail(currentMail, "spam");
-            Toast.makeText(this, "Reported as spam", Toast.LENGTH_SHORT).show();
+            List<String> labels = currentMail.getLabels();
+            if (labels != null && labels.contains("spam")) {
+                viewModel.deleteMail(currentMail);
+                Toast.makeText(this, "Mail deleted permanently", Toast.LENGTH_SHORT).show();
+                finish();
+            } else {
+                List<String> newLabels = new ArrayList<>();
+                if (labels != null) {
+                    for (String label : labels) {
+                        if ("all".equals(label) || "unread".equals(label)) {
+                            newLabels.add(label);
+                        }
+                    }
+                }
+                if (!newLabels.contains("spam")) {
+                    newLabels.add("spam");
+                }
+                currentMail.setLabels(newLabels);
+                viewModel.updateMail(currentMail);
+                viewModel.addToBlacklistFromMail(currentMail);
+                Toast.makeText(this, "Marked as spam", Toast.LENGTH_SHORT).show();
+                finish();
+            }
         });
     }
 

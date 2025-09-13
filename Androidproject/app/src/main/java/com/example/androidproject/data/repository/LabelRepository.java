@@ -74,52 +74,78 @@ public class LabelRepository {
     }
 
     public void createLabel(String labelName) {
+        createLabel(labelName, null);
+    }
+
+    public void createLabel(String labelName, Callback<Label> callback) {
         labelApi.createLabel(labelName, new Callback<Label>() {
             @Override
             public void onResponse(Call<Label> call, Response<Label> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     new Thread(() -> labelDao.insert(response.body())).start();
                 }
+                if (callback != null) {
+                    callback.onResponse(call, response);
+                }
             }
 
             @Override
             public void onFailure(Call<Label> call, Throwable t) {
-                t.printStackTrace();
+                if (callback != null) {
+                    callback.onFailure(call, t);
+                }
             }
         });
     }
 
-    public void deleteLabel(String labelName) {
+    public void deleteLabel(String labelName, Callback<Void> callback) {
         labelApi.deleteLabel(labelName, new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
                     new Thread(() -> labelDao.deleteByName(labelName)).start();
                 }
-            }
-
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                t.printStackTrace();
-            }
-        });
-    }
-
-    public void updateLabel(String oldName, String newName) {
-        labelApi.updateLabel(oldName, newName, new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                if (response.isSuccessful()) {
-                    new Thread(() -> {
-                        labelDao.deleteByName(oldName);
-                        labelDao.insert(new Label(newName));
-                    }).start();
+                if (callback != null) {
+                    callback.onResponse(call, response);
                 }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                t.printStackTrace();
+                if (callback != null) {
+                    callback.onFailure(call, t);
+                }
+            }
+        });
+    }
+
+    public void updateLabel(String oldName, String newName, Callback<Void> callback) {
+        labelApi.updateLabel(oldName, newName, new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (!response.isSuccessful()) {
+                    try {
+                        Log.e("LabelRepo", "update failed code=" + response.code()
+                                + " Body=" + (response.errorBody() == null ? "" : response.errorBody().string()));
+                    } catch (Exception ignored) {}
+                }
+                if (response.isSuccessful()) {
+                    new Thread(() -> {
+                        labelDao.deleteByName(oldName);
+                        labelDao.insert(new Label(newName));
+                    }).start();
+                    fetchLabelsFromServer();
+                }
+                if (callback != null) {
+                    callback.onResponse(call, response);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                if (callback != null) {
+                    callback.onFailure(call, t);
+                }
             }
         });
     }

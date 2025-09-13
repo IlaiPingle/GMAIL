@@ -33,8 +33,7 @@ public class ApiClient {
         if (retrofit != null) return retrofit;
 
         // Add logging for debugging
-        HttpLoggingInterceptor logging = new HttpLoggingInterceptor().setLevel(BuildConfig.DEBUG ?
-                HttpLoggingInterceptor.Level.BASIC : HttpLoggingInterceptor.Level.NONE);
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY);
 
         client = new OkHttpClient.Builder()
                 .cookieJar(new SessionCookieJar(context))

@@ -32,6 +32,10 @@ import com.google.android.material.chip.ChipGroup;
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 /**
  * Activity for composing a new email.
  * Features:
@@ -179,8 +183,31 @@ public class ComposeEmailActivity extends AppCompatActivity {
             Toast.makeText(this, "Add at least one recipient", Toast.LENGTH_SHORT).show();
             return;
         }
-        String receiver = toList.get(0);
-        createDraftIfNeededAndSend();
+        setSendEnabled(false);
+        if (draftId == null) {
+            Mail draft = buildMailFromFields();
+            viewModel.createDraft(draft, new Callback<Mail>() {
+                @Override
+                public void onResponse(Call<Mail> call, Response<Mail> response) {
+                    if (response.isSuccessful() && response.body() != null && response.body().getId() != null) {
+                        draftId = response.body().getId();
+                        sendEmailWithDraftId(draftId);
+                    } else {
+                        setSendEnabled(true);
+                        Toast.makeText(ComposeEmailActivity.this, "Failed to create draft", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Mail> call, Throwable t) {
+                    setSendEnabled(true);
+                    Toast.makeText(ComposeEmailActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+
+                }
+            });
+        } else {
+            sendEmailWithDraftId(draftId);
+        }
     }
 
     /**
@@ -336,14 +363,14 @@ public class ComposeEmailActivity extends AppCompatActivity {
      * Handles API responses and errors, updating UI accordingly.
      * Disables Send button during operation to prevent duplicates.
      */
-    private void createDraftIfNeededAndSend() {
-        if (draftId != null) {
-            sendEmailWithDraftId(draftId);
-            return;
-        }
-        Mail draft = buildMailFromFields();
-        viewModel.createDraft(draft);
-    }
+//    private void createDraftIfNeededAndSend() {
+//        if (draftId != null) {
+//            sendEmailWithDraftId(draftId);
+//            return;
+//        }
+//        Mail draft = buildMailFromFields();
+//        viewModel.createDraft(draft);
+//    }
 
     /**
      * Sends the email using the existing draft ID.
@@ -352,10 +379,9 @@ public class ComposeEmailActivity extends AppCompatActivity {
      * @param draftId The ID of the draft to send.
      */
     private void sendEmailWithDraftId(String draftId) {
-        List<String> toList = getChipsEmails(chipGroupTo);
-        if (toList.isEmpty()) {
-            Toast.makeText(this, "Add at least one recipient", Toast.LENGTH_SHORT).show();
+        if (draftId == null) {
             setSendEnabled(true);
+            Toast.makeText(this, "Draft ID is null", Toast.LENGTH_SHORT).show();
             return;
         }
         Mail mail = buildMailFromFields();
@@ -364,6 +390,7 @@ public class ComposeEmailActivity extends AppCompatActivity {
         setSendEnabled(true);
         clearCompose();
         Toast.makeText(this, "Email sent", Toast.LENGTH_SHORT).show();
+        finish();
     }
 
     /**

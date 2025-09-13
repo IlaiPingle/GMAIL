@@ -12,6 +12,8 @@ import com.example.androidproject.data.repository.MailsRepository;
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Callback;
+
 /**
  * ViewModel class for managing Mail data and operations.
  * This class interacts with the MailsRepository to supply data to the UI and handle user actions.
@@ -57,8 +59,8 @@ public class MailsViewModel extends AndroidViewModel {
     public void toggleStar(String mailId, boolean isStarred) {
         repository.toggleStar(mailId, isStarred);
     }
-    public void createDraft(Mail mail) {
-        repository.createDraft(mail);
+    public void createDraft(Mail mail, Callback<Mail> callback) {
+        repository.createDraft(mail, callback);
     }
 
     public void deleteMail(Mail mail) {
@@ -107,5 +109,13 @@ public class MailsViewModel extends AndroidViewModel {
             }
         }
         repository.addLabelToMail(mail.getId(), label);
+    }
+
+    public void addToBlacklist(String url, Callback<Void> callback) {
+        repository.addToBlacklist(url, callback);
+    }
+
+    public void addToBlacklistFromMail(Mail mail) {
+        repository.addToBlacklistFromMail(mail);
     }
 }

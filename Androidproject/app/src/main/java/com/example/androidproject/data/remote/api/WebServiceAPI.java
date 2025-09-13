@@ -68,21 +68,28 @@ public interface WebServiceAPI {
     @GET("labels")
     Call<List<String>> getLabels();
 
+    @GET("labels/{id}")
+    Call<Label> getLabelByName(@Path("id") String labelName);
+
     @POST("labels")
-    Call<Label> createLabel(@Body String labelName);
+    Call<Label> createLabel(@Body Map<String, String> labelName);
 
-    @PATCH("labels/{labelName}")
-    Call<Void> updateLabel(@Path("labelName") String labelName, @Body String newName);
+    @PATCH("labels/{id}")
+    Call<Void> updateLabel(@Path("id") String labelName, @Body Map<String, String> newLabelName);
 
-    @DELETE("labels/{labelName}")
-    Call<Void> deleteLabel(@Path("labelName") String labelName);
+    @DELETE("labels/{id}")
+    Call<Void> deleteLabel(@Path("id") String labelName);
 
     @GET("labels/mails")
     Call<List<Mail>> getMailsByLabel(@Query("label") String label);
 
     @POST("labels/mails/{mailId}")
-    Call<Void> addLabelToMail(@Path("mailId") String mailId, @Body String labelName);
+    Call<Void> addLabelToMail(@Path("mailId") String mailId, @Body Map<String, String> body);
 
     @HTTP(method = "DELETE", path = "labels/mails/{mailId}", hasBody = true)
-    Call<Void> removeLabelFromMail(@Path("mailId") String mailId, @Body String labelName);
+    Call<Void> removeLabelFromMail(@Path("mailId") String mailId, @Body Map<String, String> body);
+
+    /* blacklist endpoints */
+    @POST("blacklist")
+    Call<Void> addToBlacklist(@Body Map<String, String> body);
 }
