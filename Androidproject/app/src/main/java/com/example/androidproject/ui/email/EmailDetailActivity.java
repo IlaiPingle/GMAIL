@@ -71,14 +71,8 @@ public class EmailDetailActivity extends AppCompatActivity {
         });
         viewModel.refreshMail(mailId);
 
-        FloatingActionButton fabReply = findViewById(R.id.fabReply);
+        FloatingActionButton fabReply = findViewById(R.id.fabDelete);
         fabReply.setOnClickListener(v -> {
-            if (currentMail == null) return;
-            // Open compose prefilled as reply (optional)
-            ComposeEmailActivityStarter.startReply(this, currentMail);
-        });
-
-        findViewById(R.id.btnDelete).setOnClickListener(v -> {
             if (currentMail == null) return;
             List<String> labels = currentMail.getLabels();
             if (labels != null && (labels.contains("bin") || labels.contains("spam"))) {

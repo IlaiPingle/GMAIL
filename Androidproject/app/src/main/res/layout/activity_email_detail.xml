@@ -75,14 +75,15 @@
     </ScrollView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabReply"
+        android:id="@+id/fabDelete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:contentDescription="Reply"
-        app:layout_anchor="@id/detailToolbar"
-        app:layout_anchorGravity="bottom|end"
-        app:srcCompat="@drawable/ic_reply" />
+        android:contentDescription="Delete"
+        app:srcCompat="@drawable/ic_delete"
+        android:tint="@android:color/white"
+        android:backgroundTint="@color/design_default_color_error"
+        android:layout_gravity="top|end" />
 
     <HorizontalScrollView
         android:layout_width="match_parent"
@@ -118,13 +119,6 @@
                 android:layout_marginStart="8dp"
                 android:text="Star" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnDelete"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="Delete" />
         </LinearLayout>
     </HorizontalScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
