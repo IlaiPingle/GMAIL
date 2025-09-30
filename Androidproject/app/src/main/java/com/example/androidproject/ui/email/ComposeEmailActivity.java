@@ -2,23 +2,22 @@
 package com.example.androidproject.ui.email;
 
 import android.content.Intent;
-
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-
 import android.view.Menu;
 import android.view.MenuItem;
-
 import android.view.inputmethod.EditorInfo;
-import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.androidproject.R;
@@ -28,30 +27,25 @@ import com.example.androidproject.ui.BaseActivity;
 import com.example.androidproject.viewModel.MailsViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
 
-/**
- * Activity for composing a new email.
- * Features:
- * - Recipient input with chips (To field)
- * - Subject and body input
- * - Save draft to backend when "Save" is clicked
- * - Send email, creating draft on backend if needed
- * - Discard draft with confirmation
- * - Exit with confirmation if draft has content
- */
 public class ComposeEmailActivity extends BaseActivity {
-    // UI elements
-    private MaterialToolbar toolbar;
-    private AutoCompleteTextView editTextTo;
 
-    private EditText toField, subjectField, bodyField;
-    @Nullable
-    private MenuItem sendMenuItem;
+    // ===== Keys =====
     static final String EXTRA_DRAFT_ID = "draft_id";
-    private MailsViewModel viewModel;
-    @Nullable
-    private String draftId = null; // Set when draft is created on server
+    private static final String K_TO   = "state_to";
+    private static final String K_SUB  = "state_sub";
+    private static final String K_BODY = "state_body";
+    private static final String K_DRAFT= "state_draft";
 
-    // ViewModel for email operations
+    // ===== UI =====
+    private MaterialToolbar toolbar;
+    private EditText toField, subjectField, bodyField;
+    @Nullable private MenuItem sendMenuItem;
+
+    // ===== State =====
+    private MailsViewModel viewModel;
+    @Nullable private String draftId = null;
+    private boolean isCreatingDraft = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,31 +54,29 @@ public class ComposeEmailActivity extends BaseActivity {
         toolbar = findViewById(R.id.composeToolbar);
         setSupportActionBar(toolbar);
 
-        // Toolbar navigation (X) -> Gmail-like exit
         toolbar.setNavigationOnClickListener(v -> handleExit());
-        // Menu is defined in XML (app:menu). Handle clicks here.
         toolbar.setOnMenuItemClickListener(this::onToolbarMenuItemClick);
-        // Menu may not be ready immediately; post to read it safely.
         toolbar.post(() -> {
             sendMenuItem = toolbar.getMenu().findItem(R.id.menu_send);
             updateSendEnabled();
         });
 
-        // Back gesture -> Gmail-like exit
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                handleExit();
-            }
+            @Override public void handleOnBackPressed() { handleExit(); }
         });
 
-        // Bind views
-        toField = findViewById(R.id.editTextTo);
+        toField      = findViewById(R.id.editTextTo);
         subjectField = findViewById(R.id.editTextSubject);
-        bodyField = findViewById(R.id.editTextBody);
+        bodyField    = findViewById(R.id.editTextBody);
 
-        // ViewModel
         viewModel = new ViewModelProvider(this).get(MailsViewModel.class);
+
+        if (savedInstanceState != null) {
+            toField.setText(savedInstanceState.getString(K_TO, ""));
+            subjectField.setText(savedInstanceState.getString(K_SUB, ""));
+            bodyField.setText(savedInstanceState.getString(K_BODY, ""));
+            draftId = savedInstanceState.getString(K_DRAFT, null);
+        }
 
         SimpleWatcher firstEditWatcher = new SimpleWatcher(() -> {
             ensureDraftCreated();
@@ -95,36 +87,33 @@ public class ComposeEmailActivity extends BaseActivity {
         bodyField.addTextChangedListener(firstEditWatcher);
 
         toField.setOnEditorActionListener((v, actionId, e) -> {
-            if (actionId == EditorInfo.IME_ACTION_SEND) {
-                attemptSend();
-                return true;
-            }
+            if (actionId == EditorInfo.IME_ACTION_SEND) { attemptSend(); return true; }
             return false;
         });
 
         Intent in = getIntent();
         if (in != null && in.hasExtra(EXTRA_DRAFT_ID)) {
             draftId = in.getStringExtra(EXTRA_DRAFT_ID);
-            viewModel.getMail(draftId).observe(this, resource -> {
-                Mail mail = getMailResult(resource);
-                if (mail != null) {
-                    toField.setText(mail.getReceiver());
-                    subjectField.setText(mail.getSubject());
-                    bodyField.setText(mail.getBody());
+            viewModel.getMail(draftId).observe(this, res -> {
+                if (res == null) return;
+                switch (res.getStatus()) {
+                    case SUCCESS:
+                        if (res.getData() != null) bindMail(res.getData());
+                        break;
+                    case ERROR:
+                        toast(res.getMessage());
+                        if (res.getData() != null) bindMail(res.getData());
+                        break;
+                    case LOADING:
+                        break;
                 }
-                viewModel.refreshMail(draftId);
             });
-        } else {
-            updateSendEnabled();
+            viewModel.refreshMail(draftId);
         }
+
+        updateSendEnabled();
     }
 
-    /**
-     * Inflates the menu; this adds items to the action bar if it is present.
-     *
-     * @param menu The options menu in which you place your items.
-     * @return true for the menu to be displayed; false otherwise.
-     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.compose_menu, menu);
@@ -133,12 +122,6 @@ public class ComposeEmailActivity extends BaseActivity {
         return true;
     }
 
-    /**
-     * Handles toolbar menu item clicks.
-     *
-     * @param item The menu item that was clicked.
-     * @return true if the click was handled; false otherwise.
-     */
     private boolean onToolbarMenuItemClick(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.menu_send) {
@@ -146,7 +129,6 @@ public class ComposeEmailActivity extends BaseActivity {
             return true;
         } else if (id == R.id.menu_save_draft) {
             saveAndFinish();
-            Toast.makeText(this, "Draft saved", Toast.LENGTH_SHORT).show();
             return true;
         } else if (id == R.id.menu_discard) {
             handleExit();
@@ -154,64 +136,41 @@ public class ComposeEmailActivity extends BaseActivity {
         }
         return false;
     }
-    private Mail getMailResult(Resource<Mail> res) {
-        if (res == null) return null;
-        switch (res.getStatus()) {
-            case SUCCESS:
-                return res.getData();
-            case ERROR:
-                toast(res.getMessage());
-                return res.getData(); // May be null
-            case LOADING:
-                return res.getData(); // May be null
-            default:
-                return null;
-        }
-    }
 
-// =================EXIT HANDLING================
-
-    /**
-     * Handles exit action (toolbar X or back gesture).
-     * If draft is empty, exits immediately.
-     * If draft has content, shows dialog to Save/Discard/Cancel.
-     * Saves draft if "Save" is chosen, clears if "Discard", does nothing if "Cancel".
-     */
+    // ===== Exit =====
     private void handleExit() {
-        if (!hasAnyContent()) {
-            finish();
-            return;
-        }
+        if (!hasAnyContent()) { finish(); return; }
         new AlertDialog.Builder(this)
                 .setMessage("Save draft?")
-                .setPositiveButton("Save", (d, w) -> {
-                    saveAndFinish();
-                    finish();
-                })
-                .setNegativeButton("Discard", (d, w) -> {
-                    clearCompose();
-                    finish();
-                })
+                .setPositiveButton("Save", (d, w) -> saveAndFinish()) // לא קוראים finish פה; saveAndFinish ידאג לכך
+                .setNegativeButton("Discard", (d, w) -> { clearCompose(); finish(); })
                 .setNeutralButton("Cancel", null)
                 .show();
     }
 
     private void saveAndFinish() {
         if (draftId == null) {
-            createDraft(this::finish);
+            createDraft(() -> { toast("Draft saved"); finish(); });
         } else {
             Mail mail = buildMailFromFields();
             mail.setId(draftId);
-            viewModel.updateMail(mail);
-            finish();
+            observeOnce(viewModel.updateMail(mail), res -> {
+                if (res == null) { toast("Draft save error"); return; }
+                switch (res.getStatus()) {
+                    case SUCCESS:
+                        toast("Draft saved");
+                        clearCompose();
+                        finish();
+                        break;
+                    case ERROR:
+                        toast("Draft save failed: " + res.getMessage());
+                        break;
+                }
+            });
         }
     }
 
-//    ================= SENDING =================
-
-    /**
-     * Checks if the draft is empty (no recipients, subject, body, or attachments).
-     */
+    // ===== Send =====
     private void attemptSend() {
         String to = safe(toField.getText()).trim();
         if (to.isEmpty()) {
@@ -229,12 +188,8 @@ public class ComposeEmailActivity extends BaseActivity {
     private void sendNow() {
         Mail mail = buildMailFromFields();
         mail.setId(draftId);
-        viewModel.sendMail(mail).observe(this, res -> {
-            if (res == null) {
-                toast("Send error");
-                setSendEnabled(true);
-                return;
-            }
+        observeOnce(viewModel.sendMail(mail), res -> {
+            if (res == null) { toast("Send error"); setSendEnabled(true); return; }
             switch (res.getStatus()) {
                 case SUCCESS:
                     toast("Email sent");
@@ -245,65 +200,71 @@ public class ComposeEmailActivity extends BaseActivity {
                     toast("Send failed: " + res.getMessage());
                     setSendEnabled(true);
                     break;
-                case LOADING:
-                    // Ignore loading state
+            }
+        });
+    }
+
+    // ===== Draft creation =====
+    private void ensureDraftCreated() {
+        if (draftId != null) return;
+        if (!hasAnyContent()) return;
+        if (isCreatingDraft) return;
+        createDraft(null);
+    }
+
+    private void createDraft(@Nullable Runnable onSuccessThen) {
+        isCreatingDraft = true;
+        Mail draft = buildMailFromFields();
+        observeOnce(viewModel.createDraft(draft), res -> {
+            isCreatingDraft = false;
+            if (res == null) { toast("Draft creation error"); return; }
+            switch (res.getStatus()) {
+                case SUCCESS:
+                    if (res.getData() != null) {
+                        draftId = res.getData().getId();
+                        if (onSuccessThen != null) onSuccessThen.run();
+                    } else {
+                        toast("Draft save failed: empty response");
+                    }
+                    break;
+                case ERROR:
+                    toast("Draft save failed: " + res.getMessage());
                     break;
             }
         });
     }
 
-    //   =============== DRAFT CREATION =================
-    private void ensureDraftCreated() {
-        if (draftId != null) return;
-        createDraft(null);
+    // ===== Helpers =====
+    private void bindMail(Mail mail) {
+        if (mail == null) return;
+        if (TextUtils.isEmpty(safe(toField.getText())))      toField.setText(safe(mail.getReceiver()));
+        if (TextUtils.isEmpty(safe(subjectField.getText()))) subjectField.setText(safe(mail.getSubject()));
+        if (TextUtils.isEmpty(safe(bodyField.getText())))    bodyField.setText(safe(mail.getBody()));
+        updateSendEnabled();
     }
 
-    private void createDraft(@Nullable Runnable onSuccessThen) {
-        Mail draft = buildMailFromFields();
-        viewModel.createDraft(draft).observe(this, res -> {
-            Mail mail = getMailResult(res);
-            if (mail != null) {
-                draftId = mail.getId();
-                if (onSuccessThen != null) onSuccessThen.run();
-            } else {
-                toast("Draft save failed: " + (res != null ? res.getMessage() : "unknown error"));
-            }
-        });
-    }
-
-//  ================= HELPERS =================
-
-    /**
-     * Builds a Mail object from the current compose fields.
-     *
-     * @return The Mail object representing the current draft.
-     */
     private Mail buildMailFromFields() {
-        Mail mail = new Mail();
-        mail.setReceiver(safe(toField.getText()).trim());
-        mail.setSubject(safe(subjectField.getText()));
-        mail.setBody(safe(bodyField.getText()));
-        return mail;
+        Mail m = new Mail();
+        m.setReceiver(safe(toField.getText()).trim());
+        m.setSubject(safe(subjectField.getText()));
+        m.setBody(safe(bodyField.getText()));
+        return m;
     }
 
-    /**
-     * Enables or disables the Send menu item.
-     *
-     * @param enabled true to enable, false to disable.
-     */
     private void setSendEnabled(boolean enabled) {
         if (sendMenuItem != null) {
             sendMenuItem.setEnabled(enabled);
-            if (sendMenuItem.getIcon() != null) {
+            if (sendMenuItem.getIcon() != null)
                 sendMenuItem.getIcon().setAlpha(enabled ? 255 : 100);
-            }
         }
     }
+
     private void updateSendEnabled() {
-        boolean canSend = TextUtils.isEmpty(safe(toField.getText()).trim());
+        boolean hasRecipient = !TextUtils.isEmpty(safe(toField.getText()).trim());
         if (sendMenuItem != null) {
-            sendMenuItem.setEnabled(canSend);
-            if (sendMenuItem.getIcon() != null) sendMenuItem.getIcon().setAlpha(canSend ? 255 : 100);
+            sendMenuItem.setEnabled(hasRecipient);
+            if (sendMenuItem.getIcon() != null)
+                sendMenuItem.getIcon().setAlpha(hasRecipient ? 255 : 100);
         }
     }
 
@@ -312,50 +273,55 @@ public class ComposeEmailActivity extends BaseActivity {
                 || !TextUtils.isEmpty(safe(subjectField.getText()))
                 || !TextUtils.isEmpty(safe(bodyField.getText()));
     }
+
     private void clearCompose() {
         toField.setText("");
         subjectField.setText("");
         bodyField.setText("");
         draftId = null;
+        isCreatingDraft = false;
+        updateSendEnabled();
     }
 
-    /**
-     * Simple TextWatcher implementation that runs a Runnable on text change.
-     * Used for scheduling autosave and updating Send button state.
-     */
     private static class SimpleWatcher implements TextWatcher {
         private final Runnable onChange;
-
-        SimpleWatcher(Runnable onChange) {
-            this.onChange = onChange;
-        }
-
-        @Override
-        public void beforeTextChanged(CharSequence s, int st, int c, int a) {
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int st, int b, int c) {
-            onChange.run();
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-        }
+        SimpleWatcher(Runnable onChange) { this.onChange = onChange; }
+        @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
+        @Override public void onTextChanged(CharSequence s, int st, int b, int c) { onChange.run(); }
+        @Override public void afterTextChanged(Editable s) {}
     }
 
     private void toast(String m) {
         Toast.makeText(this, m, Toast.LENGTH_SHORT).show();
     }
 
+    private <T> void observeOnce(LiveData<Resource<T>> liveData, Observer<Resource<T>> observer) {
+        liveData.observe(this, new Observer<>() {
+            @Override public void onChanged(Resource<T> resource) {
+                if (resource == null) return;
+                switch (resource.getStatus()) {
+                    case LOADING: break;
+                    case ERROR:
+                    case SUCCESS:
+                        liveData.removeObserver(this);
+                        observer.onChanged(resource);
+                        break;
+                }
+            }
+        });
+    }
 
-    /**
-     * Safely converts a CharSequence to String, returning empty string if null.
-     *
-     * @param cs The CharSequence to convert.
-     * @return The resulting String, or "" if input is null.
-     */
     private static String safe(@Nullable CharSequence cs) {
         return cs == null ? "" : cs.toString();
+    }
+
+    // ===== Save/Restore =====
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle out) {
+        super.onSaveInstanceState(out);
+        out.putString(K_TO,   safe(toField.getText()));
+        out.putString(K_SUB,  safe(subjectField.getText()));
+        out.putString(K_BODY, safe(bodyField.getText()));
+        out.putString(K_DRAFT, draftId);
     }
 }

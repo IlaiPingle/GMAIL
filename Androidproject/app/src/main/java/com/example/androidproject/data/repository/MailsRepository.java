@@ -68,9 +68,7 @@ public class MailsRepository {
         MediatorLiveData<Resource<List<Mail>>> result = new MediatorLiveData<>();
         result.setValue(Resource.loading(null));
         LiveData<List<Mail>> allLocalMails = mailDao.getMails();
-        result.addSource(allLocalMails, all -> {
-            executor.execute(() -> result.postValue(Resource.success(filterByLabel(all, label))));
-        });
+        result.addSource(allLocalMails, all -> executor.execute(() -> result.postValue(Resource.success(filterByLabel(all, label)))));
         mailApi.getMailsByLabel(label, new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<List<Mail>> call, @NonNull Response<List<Mail>> response) {

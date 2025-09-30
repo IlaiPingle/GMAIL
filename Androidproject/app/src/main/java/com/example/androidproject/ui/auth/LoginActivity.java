@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.androidproject.R;
 import com.example.androidproject.data.models.User;
+import com.example.androidproject.data.remote.net.ApiClient;
 import com.example.androidproject.ui.email.MailsActivity;
 import com.example.androidproject.util.ValidationUtils;
 import com.example.androidproject.viewModel.UserViewModel;
@@ -28,6 +29,8 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputEditText etUsername, etPassword;
     private ProgressBar progressBar;
     private UserViewModel userViewModel;
+    MaterialButton btnSignIn;
+    private boolean didNavigate = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +46,7 @@ public class LoginActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progress_bar);
 
         // Set up button clicks
-        MaterialButton btnSignIn = findViewById(R.id.btn_sign_in);
+        btnSignIn = findViewById(R.id.btn_sign_in);
         MaterialButton btnCreateAccount = findViewById(R.id.btn_create_account);
         MaterialButton btnForgotPassword = findViewById(R.id.btn_forgot_password);
 
@@ -56,18 +59,22 @@ public class LoginActivity extends AppCompatActivity {
 
         // If a user exists in Room (auto sign-in via cookie already happened), go to inbox
         userViewModel.getUser().observe(this, (User user) -> {
-            if (user != null && user.username != null && !user.username.isEmpty()) {
-                // User is already logged in, navigate to InboxActivity
+            if (didNavigate) return;
+            boolean hasSession = ApiClient.hasSession(this);
+            if (hasSession && user != null && user.username != null && !user.username.isEmpty()) {
+                didNavigate = true;
                 showLoading(false);
-				Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
+                btnSignIn.setEnabled(true);
+                Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(this, MailsActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // ⭐ נקה סטאק
                 startActivity(intent);
-                finish();
             }
         });
         // Observe ViewModel LiveData errors
         userViewModel.getErrorMessage().observe(this, msg -> {
             showLoading(false);
+            btnSignIn.setEnabled(true);
             if (msg != null && !msg.isEmpty()) {
                 Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
             }
@@ -101,6 +108,7 @@ public class LoginActivity extends AppCompatActivity {
         }
         if (!isValid) return;
         showLoading(true);
+        btnSignIn.setEnabled(false);
         userViewModel.login(username, password);
     }
 
@@ -117,7 +125,6 @@ public class LoginActivity extends AppCompatActivity {
      * Currently, it shows a placeholder message.
      */
     private void handleForgotPassword() {
-        // TODO: Implement forgot password flow
         Toast.makeText(this, "Forgot password clicked", Toast.LENGTH_SHORT).show();
     }
 

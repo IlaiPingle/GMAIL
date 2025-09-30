@@ -81,7 +81,7 @@ public class MailsActivity extends BaseActivity {
             @Override
             public void onMailClick(Mail mail) {
                 Intent intent;
-                if (mail.getLabels() != null && mail.getLabels().contains("drafts")) {
+                if (mail.getLabels() != null && !mail.getLabels().contains("drafts")) {
                     intent = new Intent(MailsActivity.this, EmailDetailActivity.class);
                     intent.putExtra(EmailDetailActivity.EXTRA_MAIL_ID, mail.getId());
                 } else {
@@ -156,7 +156,6 @@ public class MailsActivity extends BaseActivity {
                     break;
                 case ERROR:
                     swipeRefreshLayout.setRefreshing(false);
-                    int code = state.getErrorCode();
                     Toast.makeText(this,
                             state.getMessage() != null ? state.getMessage() : "Error",
                             Toast.LENGTH_SHORT).show();
