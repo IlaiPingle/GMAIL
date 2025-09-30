@@ -12,7 +12,7 @@ import com.example.androidproject.data.models.RegisterRequest;
 import com.example.androidproject.data.models.User;
 import com.example.androidproject.data.remote.api.WebServiceAPI;
 import com.example.androidproject.data.remote.net.ApiClient;
-import com.example.androidproject.util.ApiErrorUtils;
+import com.example.androidproject.util.ApiErrorParser;
 
 import java.io.File;
 import java.util.Map;
@@ -49,11 +49,11 @@ public class UserRepository {
 
     // LOGIN
     public void login(String username, String password, @Nullable ErrorSink onError) {
-        api.login(username, password).enqueue(new Callback<Void>() {
+        api.login(username, password).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<Void> loginCall, @NonNull Response<Void> loginResp) {
                 if (!loginResp.isSuccessful()) {
-                    String r = ApiErrorUtils.parseMessage(loginResp);
+                    String r = ApiErrorParser.parseMessage(loginResp);
                     if (onError != null)
                         onError.onError("Login failed: (" + loginResp.code() + ") " + r);
                     return;
@@ -72,13 +72,13 @@ public class UserRepository {
         Map<String, RequestBody> parts = toPartMap(request);
         MultipartBody.Part imagePart = toImagePart(imageFile);
         api.register(parts, imagePart)
-                .enqueue(new Callback<User>() {
+                .enqueue(new Callback<>() {
                     @Override
                     public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
                         if (response.isSuccessful() && response.body() != null) {
                             executor.submit(() -> userDao.upsert(response.body()));
                         } else {
-                            String message = ApiErrorUtils.parseMessage(response);
+                            String message = ApiErrorParser.parseMessage(response);
                             if (onError != null)
                                 onError.onError("Registration failed: (" + response.code() + ") " + message);
                         }
@@ -94,15 +94,16 @@ public class UserRepository {
 
     // LOGOUT
     public void logout(@Nullable ErrorSink onError) {
-        api.logout().enqueue(new Callback<Void>() {
+        api.logout().enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> resp) {
                 clearLocal();
                 if (!resp.isSuccessful() && onError != null) {
-                    String r = ApiErrorUtils.parseMessage(resp);
+                    String r = ApiErrorParser.parseMessage(resp);
                     onError.onError("Logout failed: (" + resp.code() + ") " + r);
                 }
             }
+
             @Override
             public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                 clearLocal();
@@ -113,7 +114,7 @@ public class UserRepository {
 
     // AUTO SIGN-IN / CHECK
     public void refreshMe(@Nullable ErrorSink onError) {
-        api.getMe().enqueue(new Callback<User>() {
+        api.getMe().enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -121,7 +122,7 @@ public class UserRepository {
                 } else if (response.code() == 401) {
                     clearLocal(); // unauthorized, clear local user
                 } else if (onError != null) {
-                    String message = ApiErrorUtils.parseMessage(response);
+                    String message = ApiErrorParser.parseMessage(response);
                     onError.onError("Failed to refresh user: (" + response.code() + ") " + message);
                 }
             }

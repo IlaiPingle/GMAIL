@@ -38,4 +38,9 @@
     <string name="manage_labels">Manage labels</string>
     <string name="user_settings">user settings</string>
     <string name="logout">Logout</string>
+    <string name="this_email_is_marked_as_spam">This email is marked as spam</string>
+    <string name="delete_description">Delete</string>
+    <string name="save_draft">Save draft</string>
+    <string name="discard">Discard</string>
+    <string name="send">Send</string>
 </resources>

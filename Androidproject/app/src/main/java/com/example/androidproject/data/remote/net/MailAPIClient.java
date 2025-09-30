@@ -63,4 +63,7 @@ public class MailAPIClient {
     public void addToBlacklist(String url, Callback<Void> callback) {
         mailApi.addToBlacklist(Collections.singletonMap("url", url)).enqueue(callback);
     }
+    public void removeFromBlacklist(String url, Callback<Void> callback) {
+        mailApi.removeFromBlacklist(url).enqueue(callback);
+    }
 }

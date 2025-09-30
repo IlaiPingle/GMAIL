@@ -9,7 +9,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:background="@color/main_background">
 
         <LinearLayout
             android:id="@+id/searchBarLayout"
@@ -37,7 +38,10 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:autofillHints=""
+                android:textColor="@color/normal_text_color"
                 android:hint="@string/search_in_mail"
+                android:background="@null"
+                android:backgroundTint="@android:color/transparent"
                 android:imeOptions="actionSearch"
                 android:inputType="text"
                 android:paddingStart="8dp"
@@ -88,7 +92,7 @@
                 android:layout_margin="16dp"
                 android:background="@drawable/bg_compose_btn"
                 android:src="@drawable/ic_edit"
-                app:tint="@color/white"
+                app:tint="@color/compose_btn_icon"
                 android:contentDescription="@string/compose_btn"
                 android:padding="12dp" />
         </FrameLayout>

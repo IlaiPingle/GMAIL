@@ -5,14 +5,14 @@ import android.app.Application;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import com.example.androidproject.data.models.Mail;
+import com.example.androidproject.data.remote.net.Resource;
 import com.example.androidproject.data.repository.MailsRepository;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import retrofit2.Callback;
 
 /**
  * ViewModel class for managing Mail data and operations.
@@ -22,84 +22,118 @@ import retrofit2.Callback;
 public class MailsViewModel extends AndroidViewModel {
     private final MailsRepository repository;
     private final MediatorLiveData<List<Mail>> mailsData = new MediatorLiveData<>();
-    private final LiveData<List<Mail>> mails = mailsData;
+    private final MediatorLiveData<Resource<List<Mail>>> mailsState = new MediatorLiveData<>();
 
     private String selectedLabel = "all";
-    private LiveData<List<Mail>> currentMailsSource = null;
+    private String currentQuery = null;
+    private LiveData<Resource<List<Mail>>> currentMailsSource = null;
 
     public MailsViewModel(Application application) {
         super(application);
         repository = new MailsRepository(application);
-        loadMails();
+        attachListSource(repository.getMailsByLabel(selectedLabel));
     }
 
     public LiveData<List<Mail>> observeMailList() {
-        return mails;
+        return mailsData;
     }
 
-    public void loadMails() {
-        LiveData<List<Mail>> mailsSource =
-                (selectedLabel == null || "all".equals(selectedLabel))
-                        ? repository.getMails()
-                        : repository.getMailsByLabel(selectedLabel);
-        if (currentMailsSource != null) {
-            mailsData.removeSource(currentMailsSource);
-        }
-        currentMailsSource = mailsSource;
-        mailsData.addSource(currentMailsSource, mailsData::setValue);
+    public LiveData<Resource<List<Mail>>> observeMailsState() {
+        return mailsState;
     }
 
-
-    public LiveData<Mail> getMail(String mailId) {
-        return repository.getMailById(mailId);
-    }
-    public void refreshMail(String mailId) {
-        repository.refreshMail(mailId);
-    }
-    public void toggleStar(String mailId, boolean isStarred) {
-        repository.toggleStar(mailId, isStarred);
-    }
-    public void createDraft(Mail mail, Callback<Mail> callback) {
-        repository.createDraft(mail, callback);
-    }
-
-    public void deleteMail(Mail mail) {
-        repository.deleteMail(mail);
-    }
-
-    public void updateMail(Mail mail) {
-        repository.updateMail(mail);
-    }
-
-    public void sendMail(Mail mail) {
-        repository.sendMail(mail);
+    public void setSelectedLabel(String label) {
+        if (label == null || label.trim().isEmpty()) label = "all";
+        selectedLabel = label;
+        currentQuery = null;
+        attachListSource(repository.getMailsByLabel(label));
     }
 
     public void searchMails(String query) {
-        if (query == null || query.trim().isEmpty()) {
-            loadMails();
-            return;
+        currentQuery = (query != null && !query.trim().isEmpty()) ? query : null;
+        if (currentQuery == null) {
+            attachListSource(repository.getMailsByLabel(selectedLabel));
+        } else {
+            attachListSource(repository.searchMails(currentQuery));
         }
-        LiveData<List<Mail>> searchResults = repository.searchMails(query);
+    }
+
+    public LiveData<Resource<Void>> fetchAllMails() {
+        return repository.fetchMailsFromServer();
+    }
+
+    private void attachListSource(LiveData<Resource<List<Mail>>> source) {
         if (currentMailsSource != null) {
             mailsData.removeSource(currentMailsSource);
+            mailsState.removeSource(currentMailsSource);
         }
-        currentMailsSource = searchResults;
-        mailsData.addSource(currentMailsSource, mailsData::setValue);
+        currentMailsSource = source;
+        mailsState.addSource(source, resource -> {
+            if (resource == null) return;
+            switch (resource.getStatus()) {
+                case LOADING:
+                    mailsState.setValue(Resource.loading(null));
+                    break;
+                case SUCCESS:
+                    mailsState.setValue(Resource.success(resource.getData()));
+                    break;
+                case ERROR:
+                    mailsState.setValue(Resource.error(resource.getMessage(), resource.getErrorCode(), resource.getData(), resource.getCause()));
+                    break;
+            }
+        });
+        mailsData.addSource(source, resource -> {
+            if (resource == null) return;
+            if (resource.getData() != null) {
+                mailsData.setValue(resource.getData());
+            }
+        });
     }
 
-    public void getMailsByLabel(String label) {
-        selectedLabel = label;
-        loadMails();
+    public void refreshCurrentList() {
+        if (currentQuery != null) {
+            attachListSource(repository.searchMails(currentQuery));
+        } else {
+            attachListSource(repository.getMailsByLabel(selectedLabel));
+        }
     }
 
-    public void removeLabelFromMail(Mail mail, String label) {
+    //  single mail operations
+    public LiveData<Resource<Mail>> getMail(String mailId) {
+        return repository.getMailById(mailId);
+    }
+
+    public void refreshMail(String mailId) {
+        repository.refreshMail(mailId);
+    }
+
+    public LiveData<Resource<Mail>> createDraft(Mail mail) {
+        return repository.createDraft(mail);
+    }
+
+    public LiveData<Resource<Void>> sendMail(Mail mail) {
+        return repository.sendMail(mail);
+    }
+
+    public LiveData<Resource<Void>> deleteMail(Mail mail) {
+        return repository.deleteMail(mail);
+    }
+
+    public LiveData<Resource<Void>> updateMail(Mail mail) {
+        return repository.updateMail(mail);
+    }
+
+    public LiveData<Resource<Void>> removeLabelFromMail(Mail mail, String label) {
+        if (mail == null) {
+            MutableLiveData<Resource<Void>> bad = new MutableLiveData<>();
+            bad.setValue(Resource.error("Invalid mail", -1));
+            return bad;
+        }
         mail.getLabels().remove(label);
-        repository.removeLabelFromMail(mail.getId(), label);
-        loadMails();
+        return repository.removeLabelFromMail(mail.getId(), label);
     }
 
-    public void addLabelToMail(Mail mail, String label) {
+    public LiveData<Resource<Void>> addLabelToMail(Mail mail, String label) {
         if (mail != null) {
             if (mail.getLabels() == null) mail.setLabels(new ArrayList<>());
             if (!mail.getLabels().contains(label)) {
@@ -108,14 +142,47 @@ public class MailsViewModel extends AndroidViewModel {
                 if (curr != null) mailsData.setValue(new ArrayList<>(curr));
             }
         }
-        repository.addLabelToMail(mail.getId(), label);
+        return repository.addLabelToMail(mail.getId(), label);
     }
 
-    public void addToBlacklist(String url, Callback<Void> callback) {
-        repository.addToBlacklist(url, callback);
+
+    public LiveData<Resource<Void>> markMailAsSpam(Mail mail) {
+        if (mail == null) {
+            MutableLiveData<Resource<Void>> bad = new MutableLiveData<>();
+            bad.setValue(Resource.error("Invalid mail", -1));
+            return bad;
+        }
+        repository.reportUrlsAsync(mail);
+
+        LiveData<Resource<Void>> res = repository.addLabelToMail(mail.getId(), "spam");
+
+        refreshMail(mail.getId());
+
+        return res;
     }
 
-    public void addToBlacklistFromMail(Mail mail) {
-        repository.addToBlacklistFromMail(mail);
+
+    public LiveData<Resource<Void>> removeMailFromSpam(Mail mail) {
+        if (mail == null) {
+            MutableLiveData<Resource<Void>> bad = new MutableLiveData<>();
+            bad.setValue(Resource.error("Invalid mail", -1));
+            return bad;
+        }
+        repository.removeUrlsFromBlacklistAsync(mail);
+
+        LiveData<Resource<Void>> res = repository.removeLabelFromMail(mail.getId(), "spam");
+        refreshMail(mail.getId());
+        return res;
+    }
+
+    public LiveData<Resource<Void>> toggleStar(String mailId, boolean isStarred) {
+        LiveData<Resource<Void>> result;
+        if (isStarred) {
+            result = repository.removeLabelFromMail(mailId, "starred");
+        } else {
+            result = repository.addLabelToMail(mailId, "starred");
+        }
+        refreshMail(mailId);
+        return result;
     }
 }

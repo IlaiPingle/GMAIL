@@ -44,14 +44,14 @@ public class LabelRepository {
     }
 
     public void fetchLabelsFromServer() {
-        labelApi.getLabels(new retrofit2.Callback<List<String>>() {
+        labelApi.getLabels(new Callback<List<String>>() {
             @Override
             public void onResponse(Call<List<String>> call, Response<List<String>> resp) {
                 int code = resp.code();
-                android.util.Log.d("LabelRepo", "code=" + code);
+                Log.d("LabelRepo", "code=" + code);
                 if (!resp.isSuccessful() || resp.body() == null) {
                     try {
-                        android.util.Log.e("LabelRepo", "errorBody=" + (resp.errorBody() == null ? "null" : resp.errorBody().string()));
+                        Log.e("LabelRepo", "errorBody=" + (resp.errorBody() == null ? "null" : resp.errorBody().string()));
                     } catch (Exception ignored) {
                     }
                     return; // early return on error

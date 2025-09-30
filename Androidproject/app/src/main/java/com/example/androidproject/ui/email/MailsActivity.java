@@ -1,5 +1,6 @@
 package com.example.androidproject.ui.email;
 
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -11,13 +12,11 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.ViewModelProvider;
@@ -28,6 +27,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.example.androidproject.R;
 import com.example.androidproject.data.models.Label;
 import com.example.androidproject.data.models.Mail;
+import com.example.androidproject.ui.BaseActivity;
 import com.example.androidproject.ui.adapters.DrawerAdapter;
 import com.example.androidproject.ui.adapters.DrawerItem;
 import com.example.androidproject.ui.adapters.MailsListAdapter;
@@ -42,7 +42,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class MailsActivity extends AppCompatActivity {
+public class MailsActivity extends BaseActivity {
     private MailsViewModel mailsViewModel;
     private LabelsViewModel labelsViewModel;
     private UserViewModel userViewModel;
@@ -55,9 +55,8 @@ public class MailsActivity extends AppCompatActivity {
 
     private EditText searchInputText;
     private TextView tvCurrentLabel;
-    private String currentLabel;
-
     private static final String DEFAULT_LABEL = "inbox";
+    private String currentLabel = DEFAULT_LABEL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +67,7 @@ public class MailsActivity extends AppCompatActivity {
         drawerLayout = findViewById(R.id.drawerLayout);
         ImageButton avatarButton = findViewById(R.id.toolbarAvatar);
         ImageButton btnMenu = findViewById(R.id.btnMenu);
-        avatarButton.setOnClickListener(v -> showAvatarMenu(v));
+        avatarButton.setOnClickListener(this::showAvatarMenu);
         btnMenu.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
         ImageButton btnCompose = findViewById(R.id.btnCompose);
 
@@ -81,16 +80,27 @@ public class MailsActivity extends AppCompatActivity {
         mailsListAdapter = new MailsListAdapter(new ArrayList<>(), new MailsListAdapter.OnMailsListAdapterListener() {
             @Override
             public void onMailClick(Mail mail) {
-                Intent intent = new Intent(MailsActivity.this, EmailDetailActivity.class);
-                intent.putExtra(EmailDetailActivity.EXTRA_MAIL_ID, mail.getId());
+                Intent intent;
+                if (mail.getLabels() != null && mail.getLabels().contains("drafts")) {
+                    intent = new Intent(MailsActivity.this, EmailDetailActivity.class);
+                    intent.putExtra(EmailDetailActivity.EXTRA_MAIL_ID, mail.getId());
+                } else {
+                    intent = new Intent(MailsActivity.this, ComposeEmailActivity.class);
+                    intent.putExtra(ComposeEmailActivity.EXTRA_DRAFT_ID, mail.getId());
+                }
                 startActivity(intent);
             }
 
             @Override
             public void onStarClick(Mail mail) {
-                if (mail.getLabels() != null && mail.getLabels().contains("starred")) {
-                    mailsViewModel.removeLabelFromMail(mail, "starred");
-                } else mailsViewModel.addLabelToMail(mail, "starred");
+                mailsViewModel.toggleStar(mail.getId(), mail.getLabels() != null && mail.getLabels().contains("starred")).observe(
+                        MailsActivity.this, resource -> {
+                            if (resource != null && resource.isError()) {
+                                String msg = resource.getMessage() != null ? resource.getMessage() : "Error";
+                                Toast.makeText(MailsActivity.this, msg, Toast.LENGTH_SHORT).show();
+                                mailsViewModel.refreshCurrentList();
+                            }
+                        });
             }
         });
         mailsListAdapter.setHasStableIds(true);
@@ -105,6 +115,23 @@ public class MailsActivity extends AppCompatActivity {
         labelsViewModel = new ViewModelProvider(this).get(LabelsViewModel.class);
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
 
+        mailsViewModel.fetchAllMails().observe(this, st -> {
+            if (st == null) return;
+            switch (st.getStatus()) {
+                case LOADING:
+                    swipeRefreshLayout.setRefreshing(true);
+                    break;
+                case SUCCESS:
+                    swipeRefreshLayout.setRefreshing(false);
+                    break;
+                case ERROR:
+                    swipeRefreshLayout.setRefreshing(false);
+                    Toast.makeText(this,
+                            st.getMessage() != null ? st.getMessage() : "Error",
+                            Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        });
         mailsViewModel.observeMailList().observe(this, mailsList -> {
             mailsListAdapter.setMails(mailsList);
             // stop refreshing animation when data is loaded
@@ -118,9 +145,28 @@ public class MailsActivity extends AppCompatActivity {
                 avatarButton.setImageResource(R.drawable.search_bar_bg);
             }
         });
+        mailsViewModel.observeMailsState().observe(this, state -> {
+            if (state == null) return;
+            switch (state.getStatus()) {
+                case LOADING:
+                    swipeRefreshLayout.setRefreshing(true);
+                    break;
+                case SUCCESS:
+                    swipeRefreshLayout.setRefreshing(false);
+                    break;
+                case ERROR:
+                    swipeRefreshLayout.setRefreshing(false);
+                    int code = state.getErrorCode();
+                    Toast.makeText(this,
+                            state.getMessage() != null ? state.getMessage() : "Error",
+                            Toast.LENGTH_SHORT).show();
+
+                    break;
+            }
+        });
 
 //      set up swipe to refresh
-        swipeRefreshLayout.setOnRefreshListener(() -> mailsViewModel.loadMails());
+        swipeRefreshLayout.setOnRefreshListener(() -> mailsViewModel.refreshCurrentList());
 
 
 //      set up compose email button
@@ -140,7 +186,7 @@ public class MailsActivity extends AppCompatActivity {
                 String name = labelItem.label != null ? labelItem.label.getName() : DEFAULT_LABEL;
                 tvCurrentLabel.setText(name);
 
-                mailsViewModel.getMailsByLabel(name);
+                mailsViewModel.setSelectedLabel(name);
 
                 drawerAdapter.setSelectedLabel(name);
                 drawerLayout.closeDrawer(GravityCompat.START);
@@ -158,7 +204,7 @@ public class MailsActivity extends AppCompatActivity {
                     EditLabelBottomSheet.newInstance(currentLabel).show(getSupportFragmentManager(), "edit_label");
                 } else {
                     Toast.makeText(MailsActivity.this, R.string.error_system_label, Toast.LENGTH_SHORT).show();
-                    }
+                }
             }
         });
         drawerRecycler.setAdapter(drawerAdapter);
@@ -174,7 +220,7 @@ public class MailsActivity extends AppCompatActivity {
         drawerAdapter.submitList(
                 DrawerItem.buildDrawerItems(headerItem, systemLabels, sectionItem, new ArrayList<>())
         );
-        mailsViewModel.getMailsByLabel(DEFAULT_LABEL);
+        mailsViewModel.setSelectedLabel(DEFAULT_LABEL);
         drawerAdapter.setSelectedLabel(DEFAULT_LABEL);
 
 //      observe user labels and update drawer when they change
@@ -204,6 +250,11 @@ public class MailsActivity extends AppCompatActivity {
                     (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
                 String query = searchInputText.getText().toString();
                 mailsViewModel.searchMails(query);
+                if (query.isEmpty()) {
+                    tvCurrentLabel.setText(currentLabel);
+                } else {
+                    tvCurrentLabel.setText(("Search: " + query).substring(0, Math.min(30, query.length() + 8)) + (query.length() > 30 ? "..." : ""));
+                }
                 // hide keyboard
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(searchInputText.getWindowToken(), 0);
@@ -220,13 +271,32 @@ public class MailsActivity extends AppCompatActivity {
         Log.d("MailsActivity", "onPause");
     }
 
+    public void onResume() {
+        super.onResume();
+        Log.d("MailsActivity", "onResume");
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d("MailsActivity", "onStart");
+        mailsViewModel.refreshCurrentList();
+        labelsViewModel.refreshLabels();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d("MailsActivity", "onStop");
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Log.d("MailsActivity", "onDestroy");
     }
 
-
+    // Helper Methods
     private List<DrawerItem.LabelItem> buildSystemLabels() {
         return Arrays.asList(
                 new DrawerItem.LabelItem(new Label("inbox")),
@@ -248,6 +318,7 @@ public class MailsActivity extends AppCompatActivity {
         }
         return items;
     }
+
     private void showAvatarMenu(View anchor) {
         PopupMenu popup = new PopupMenu(this, anchor);
         popup.getMenuInflater().inflate(R.menu.user_settings, popup.getMenu());
@@ -261,6 +332,8 @@ public class MailsActivity extends AppCompatActivity {
         });
         popup.show();
     }
+
+
     private void handleLogout() {
         userViewModel.logout();
 

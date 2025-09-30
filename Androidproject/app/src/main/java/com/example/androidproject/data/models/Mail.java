@@ -20,7 +20,6 @@ public class Mail {
     private List<String> labels;
     private String createdAt;
 
-
     // Getters and setters
 
 

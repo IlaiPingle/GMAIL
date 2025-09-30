@@ -10,6 +10,7 @@ constraintlayout = "2.1.4"
 roomCommonJvm = "2.7.2"
 roomRuntime = "2.7.2"
 roomCompiler = "2.7.2"
+lifecycleViewmodel = "2.9.4"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -22,6 +23,7 @@ constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayo
 room-common-jvm = { group = "androidx.room", name = "room-common-jvm", version.ref = "roomCommonJvm" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "roomRuntime" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomCompiler" }
+lifecycle-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "lifecycleViewmodel" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

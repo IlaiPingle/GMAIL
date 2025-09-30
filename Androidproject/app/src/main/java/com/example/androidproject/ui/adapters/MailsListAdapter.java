@@ -75,10 +75,6 @@ public class MailsListAdapter extends RecyclerView.Adapter<MailsListAdapter.Mail
             imgStar.setOnClickListener(v -> {
                 boolean newStar = !(labels != null && labels.contains("starred"));
                 imgStar.setImageResource(newStar ? R.drawable.ic_star_filled : R.drawable.ic_star);
-                int newTint = ContextCompat.getColor(itemView.getContext(),
-                        newStar ? R.color.star_yellow : R.color.icon_default);
-                ImageViewCompat.setImageTintList(imgStar, ColorStateList.valueOf(newTint));
-
                 if (mail.getLabels() == null) mail.setLabels(new ArrayList<>());
                 if (newStar) {
                     if (!mail.getLabels().contains("starred")) mail.getLabels().add("starred");

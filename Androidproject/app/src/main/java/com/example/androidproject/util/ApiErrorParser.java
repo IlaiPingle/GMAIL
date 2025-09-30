@@ -9,8 +9,8 @@ import retrofit2.Response;
  * Provides methods to extract meaningful error messages from Retrofit Response objects.
  * Assumes error responses are in JSON format with a "message" field.
  */
-public final class ApiErrorUtils {
-    private ApiErrorUtils() {
+public final class ApiErrorParser {
+    private ApiErrorParser() {
     }
 
     static class ErrorResponse {

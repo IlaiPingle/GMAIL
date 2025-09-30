@@ -43,6 +43,7 @@ dependencies {
     implementation("de.hdodenhof:circleimageview:3.1.0")
     implementation(libs.room.common.jvm)
     implementation(libs.room.runtime)
+    implementation(libs.lifecycle.viewmodel)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

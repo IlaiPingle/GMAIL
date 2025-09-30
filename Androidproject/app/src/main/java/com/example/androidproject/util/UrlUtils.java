@@ -8,19 +8,19 @@ import java.util.Set;
 public final class UrlUtils {
     private UrlUtils() {}
 
-    public static List<String> extractUrlsLikeFrontend(String subject, String body, String sender) {
+    public static List<String> extractUrlsFromMail(String subject, String body, String sender) {
         String text = (subject == null ? "" : subject) + " "
-                + (body == null ? "" : body) + " sender: "
+                + (body == null ? "" : body) +  " "
                 + (sender == null ? "" : sender);
 
         String[] words = text.split("\\s+");
         String urlRegex = "^https?://[^\\s]+$";
-        Set<String> unique = new HashSet<>();
+        Set<String> URLs = new HashSet<>();
         for (String w : words) {
             if (w.matches(urlRegex)) {
-                unique.add(w);
+                URLs.add(w);
             }
         }
-        return new ArrayList<>(unique);
+        return new ArrayList<>(URLs);
     }
 }

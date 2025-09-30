@@ -2,15 +2,8 @@ package com.example.androidproject.data.remote.net;
 
 import android.content.Context;
 
-import java.net.CookieManager;
-import java.net.CookiePolicy;
-import java.net.CookieStore;
-import java.net.HttpCookie;
 import java.util.concurrent.TimeUnit;
 
-import com.example.androidproject.BuildConfig;
-
-import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
@@ -26,7 +19,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 public class ApiClient {
     private static final String BASE_URL = "http://10.0.2.2:8080/api/"; // Localhost for Android emulator
-    private static OkHttpClient client;
     private static Retrofit retrofit;
 
     public static Retrofit getClient(Context context) {
@@ -35,9 +27,13 @@ public class ApiClient {
         // Add logging for debugging
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY);
 
-        client = new OkHttpClient.Builder()
-                .cookieJar(new SessionCookieJar(context))
+        SessionManager sessionManager = SessionManager.getInstance(context);
+        PersistentCookieJar cookieJar = new PersistentCookieJar(context);
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .cookieJar(cookieJar)
                 .addInterceptor(logging)
+                .addInterceptor(new AuthErrorInterceptor(sessionManager, cookieJar))
                 .connectTimeout(15, TimeUnit.SECONDS)
                 .readTimeout(15, TimeUnit.SECONDS)
                 .build();
@@ -52,10 +48,10 @@ public class ApiClient {
     }
 
     public static boolean hasSession(Context context) {
-        return new SessionCookieJar(context).hasSession();
+        return new PersistentCookieJar(context).hasSession();
     }
 
     public static void clearCookies(Context context) {
-        new SessionCookieJar(context).clear();
+        new PersistentCookieJar(context).clear();
     }
 }

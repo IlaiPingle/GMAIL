@@ -92,4 +92,7 @@ public interface WebServiceAPI {
     /* blacklist endpoints */
     @POST("blacklist")
     Call<Void> addToBlacklist(@Body Map<String, String> body);
+
+    @DELETE("blacklist/{id}")
+    Call<Void> removeFromBlacklist(@Path("id") String url);
 }
