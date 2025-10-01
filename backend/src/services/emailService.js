@@ -126,6 +126,9 @@ async function updateMail(userId, mailId, receiver, subject, body) {
 		error.status = 404;
 		throw error;
 	}
+	mail.receiver = receiver ?? mail.receiver;
+	mail.subject = subject ?? mail.subject;
+	mail.body = body ?? mail.body;
 	const savedMail = await mail.save();
 	const { _id, ...rest } = savedMail.toObject();
 	return { id: _id.toString(), ...rest };

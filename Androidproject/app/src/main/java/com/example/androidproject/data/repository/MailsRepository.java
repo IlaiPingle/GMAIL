@@ -38,7 +38,7 @@ public class MailsRepository {
     private final MailAPIClient mailApi;
     private final Executor executor = Executors.newSingleThreadExecutor();
 
-    public MailsRepository(Context context) {
+    public  MailsRepository(Context context) {
         AppDB db = AppDB.getInstance(context.getApplicationContext());
         this.mailDao = db.mailDao();
         this.mailApi = new MailAPIClient(context);

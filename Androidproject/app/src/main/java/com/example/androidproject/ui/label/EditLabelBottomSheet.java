@@ -112,9 +112,9 @@ public class EditLabelBottomSheet extends BottomSheetDialogFragment {
             }
 
             btnSave.setEnabled(false);
-            labelsViewModel.updateLabel(oldName, newName, new Callback<Void>() {
+            labelsViewModel.updateLabel(oldName, newName, new Callback<>() {
                 @Override
-                public void onResponse(Call<Void> call, Response<Void> response) {
+                public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                     btnSave.setEnabled(true);
                     if (response.isSuccessful()) {
                         dismiss();
@@ -127,7 +127,7 @@ public class EditLabelBottomSheet extends BottomSheetDialogFragment {
                 }
 
                 @Override
-                public void onFailure(Call<Void> call, Throwable t) {
+                public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                     btnSave.setEnabled(true);
                     til.setError(t.getMessage() == null ? "Network error" : t.getMessage());
                 }
@@ -142,25 +142,25 @@ public class EditLabelBottomSheet extends BottomSheetDialogFragment {
                 return;
             }
             btnDelete.setEnabled(false);
-            labelsViewModel.deleteLabel(originalLabelName, new Callback<Void>() {
-                        @Override
-                        public void onResponse(Call<Void> call, Response<Void> response) {
-                            btnDelete.setEnabled(true);
-                            if (response.isSuccessful()) {
-                                dismiss();
-                            } else {
-                                til.setError(response.code() == 404 ? "Label not found"
-                                        : response.code() == 400 ? "Cannot delete system label"
-                                        : "Failed to delete label: (" + response.code() + ")");
-                            }
-                        }
+            labelsViewModel.deleteLabel(originalLabelName, new Callback<>() {
+                @Override
+                public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                    btnDelete.setEnabled(true);
+                    if (response.isSuccessful()) {
+                        dismiss();
+                    } else {
+                        til.setError(response.code() == 404 ? "Label not found"
+                                : response.code() == 400 ? "Cannot delete system label"
+                                : "Failed to delete label: (" + response.code() + ")");
+                    }
+                }
 
-                        @Override
-                        public void onFailure(Call<Void> call, Throwable t) {
-                            btnDelete.setEnabled(true);
-                            til.setError(t.getMessage() == null ? "Network error" : t.getMessage());
-                        }
-                    });
+                @Override
+                public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                    btnDelete.setEnabled(true);
+                    til.setError(t.getMessage() == null ? "Network error" : t.getMessage());
+                }
+            });
         });
 
         btnCancel.setOnClickListener(v13 -> dismiss());

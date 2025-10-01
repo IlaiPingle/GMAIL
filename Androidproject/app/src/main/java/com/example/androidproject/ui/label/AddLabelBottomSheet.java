@@ -87,7 +87,7 @@ public class AddLabelBottomSheet extends BottomSheetDialogFragment {
             // Call backend via repository; Room will update and observers will refresh the drawer.
             labelsViewModel.createLabel(name, new Callback<Label>() {
                 @Override
-                public void onResponse(Call<Label> call, Response<Label> response) {
+                public void onResponse(@NonNull Call<Label> call, @NonNull Response<Label> response) {
                     btnCreate.setEnabled(true);
                     if (response.isSuccessful() && response.body() != null) {
                         dismiss();
@@ -97,7 +97,7 @@ public class AddLabelBottomSheet extends BottomSheetDialogFragment {
                 }
 
                 @Override
-                public void onFailure(Call<Label> call, Throwable t) {
+                public void onFailure(@NonNull Call<Label> call, @NonNull Throwable t) {
                     btnCreate.setEnabled(true);
                     til.setError(t.getMessage() == null ? "create failed" : t.getMessage());
 

@@ -24,7 +24,7 @@ public class MailsViewModel extends AndroidViewModel {
     private final MediatorLiveData<List<Mail>> mailsData = new MediatorLiveData<>();
     private final MediatorLiveData<Resource<List<Mail>>> mailsState = new MediatorLiveData<>();
 
-    private String selectedLabel = "all";
+    private String selectedLabel = "inbox";
     private String currentQuery = null;
     private LiveData<Resource<List<Mail>>> currentMailsSource = null;
 
@@ -43,7 +43,7 @@ public class MailsViewModel extends AndroidViewModel {
     }
 
     public void setSelectedLabel(String label) {
-        if (label == null || label.trim().isEmpty()) label = "all";
+        if (label == null || label.trim().isEmpty()) label = "inbox";
         selectedLabel = label;
         currentQuery = null;
         attachListSource(repository.getMailsByLabel(label));

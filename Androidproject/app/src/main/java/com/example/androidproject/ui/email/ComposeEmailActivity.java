@@ -31,24 +31,35 @@ public class ComposeEmailActivity extends BaseActivity {
 
     // ===== Keys =====
     static final String EXTRA_DRAFT_ID = "draft_id";
-    private static final String K_TO   = "state_to";
-    private static final String K_SUB  = "state_sub";
+    private static final String K_TO = "state_to";
+    private static final String K_SUB = "state_sub";
     private static final String K_BODY = "state_body";
-    private static final String K_DRAFT= "state_draft";
+    private static final String K_DRAFT = "state_draft";
 
     // ===== UI =====
     private MaterialToolbar toolbar;
     private EditText toField, subjectField, bodyField;
-    @Nullable private MenuItem sendMenuItem;
+    @Nullable
+    private MenuItem sendMenuItem;
 
     // ===== State =====
     private MailsViewModel viewModel;
-    @Nullable private String draftId = null;
+    @Nullable
+    private String draftId = null;
+    //  ======= Flags =======
     private boolean isCreatingDraft = false;
+
+    private boolean savingInProgress = false;
+    private boolean discardInProgress = false;
+    private boolean sendingInProgress = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Intent in = getIntent();
+        if (in != null && in.hasExtra(EXTRA_DRAFT_ID)) {
+            draftId = in.getStringExtra(EXTRA_DRAFT_ID);
+        }
         setContentView(R.layout.activity_compose_email);
 
         toolbar = findViewById(R.id.composeToolbar);
@@ -62,12 +73,15 @@ public class ComposeEmailActivity extends BaseActivity {
         });
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
-            @Override public void handleOnBackPressed() { handleExit(); }
+            @Override
+            public void handleOnBackPressed() {
+                handleExit();
+            }
         });
 
-        toField      = findViewById(R.id.editTextTo);
+        toField = findViewById(R.id.editTextTo);
         subjectField = findViewById(R.id.editTextSubject);
-        bodyField    = findViewById(R.id.editTextBody);
+        bodyField = findViewById(R.id.editTextBody);
 
         viewModel = new ViewModelProvider(this).get(MailsViewModel.class);
 
@@ -87,13 +101,14 @@ public class ComposeEmailActivity extends BaseActivity {
         bodyField.addTextChangedListener(firstEditWatcher);
 
         toField.setOnEditorActionListener((v, actionId, e) -> {
-            if (actionId == EditorInfo.IME_ACTION_SEND) { attemptSend(); return true; }
+            if (actionId == EditorInfo.IME_ACTION_SEND) {
+                attemptSend();
+                return true;
+            }
             return false;
         });
 
-        Intent in = getIntent();
-        if (in != null && in.hasExtra(EXTRA_DRAFT_ID)) {
-            draftId = in.getStringExtra(EXTRA_DRAFT_ID);
+        if (draftId != null) {
             viewModel.getMail(draftId).observe(this, res -> {
                 if (res == null) return;
                 switch (res.getStatus()) {
@@ -110,7 +125,6 @@ public class ComposeEmailActivity extends BaseActivity {
             });
             viewModel.refreshMail(draftId);
         }
-
         updateSendEnabled();
     }
 
@@ -139,23 +153,46 @@ public class ComposeEmailActivity extends BaseActivity {
 
     // ===== Exit =====
     private void handleExit() {
-        if (!hasAnyContent()) { finish(); return; }
+        if (!hasAnyContent()) {
+            finish();
+            return;
+        }
         new AlertDialog.Builder(this)
                 .setMessage("Save draft?")
-                .setPositiveButton("Save", (d, w) -> saveAndFinish()) // לא קוראים finish פה; saveAndFinish ידאג לכך
-                .setNegativeButton("Discard", (d, w) -> { clearCompose(); finish(); })
+                .setPositiveButton("Save", (d, w) -> saveAndFinish())
+                .setNegativeButton("Discard", (d, w) -> {
+                    discardInProgress = true;
+                    isCreatingDraft = false;
+                    if (draftId != null) {
+                        Mail m = new Mail();
+                        m.setId(draftId);
+                        observeOnce(viewModel.deleteMail(m), res -> {
+                        });
+                    }
+                    clearCompose();
+                    finish();
+                })
                 .setNeutralButton("Cancel", null)
                 .show();
     }
 
     private void saveAndFinish() {
+        savingInProgress = true;
         if (draftId == null) {
-            createDraft(() -> { toast("Draft saved"); finish(); });
+            createDraft(() -> {
+                savingInProgress = false;
+                toast("Draft saved");
+                finish();
+            });
         } else {
             Mail mail = buildMailFromFields();
             mail.setId(draftId);
             observeOnce(viewModel.updateMail(mail), res -> {
-                if (res == null) { toast("Draft save error"); return; }
+                savingInProgress = false;
+                if (res == null) {
+                    toast("Draft save error");
+                    return;
+                }
                 switch (res.getStatus()) {
                     case SUCCESS:
                         toast("Draft saved");
@@ -175,9 +212,11 @@ public class ComposeEmailActivity extends BaseActivity {
         String to = safe(toField.getText()).trim();
         if (to.isEmpty()) {
             Toast.makeText(this, "Please enter a valid recipient", Toast.LENGTH_SHORT).show();
+            updateSendEnabled();
             return;
         }
         setSendEnabled(false);
+        sendingInProgress = true;
         if (draftId == null) {
             createDraft(this::sendNow);
         } else {
@@ -189,7 +228,12 @@ public class ComposeEmailActivity extends BaseActivity {
         Mail mail = buildMailFromFields();
         mail.setId(draftId);
         observeOnce(viewModel.sendMail(mail), res -> {
-            if (res == null) { toast("Send error"); setSendEnabled(true); return; }
+            sendingInProgress = false;
+            if (res == null) {
+                toast("Send error");
+                setSendEnabled(true);
+                return;
+            }
             switch (res.getStatus()) {
                 case SUCCESS:
                     toast("Email sent");
@@ -209,18 +253,29 @@ public class ComposeEmailActivity extends BaseActivity {
         if (draftId != null) return;
         if (!hasAnyContent()) return;
         if (isCreatingDraft) return;
+        if (savingInProgress || discardInProgress || sendingInProgress || isFinishing() || isDestroyed())
+            return; //
         createDraft(null);
     }
 
     private void createDraft(@Nullable Runnable onSuccessThen) {
+        if (savingInProgress || discardInProgress || sendingInProgress || isFinishing() || isDestroyed())
+            return; //
         isCreatingDraft = true;
         Mail draft = buildMailFromFields();
         observeOnce(viewModel.createDraft(draft), res -> {
             isCreatingDraft = false;
-            if (res == null) { toast("Draft creation error"); return; }
+            if (res == null) {
+                toast("Draft creation error");
+                return;
+            }
             switch (res.getStatus()) {
                 case SUCCESS:
                     if (res.getData() != null) {
+                        if (discardInProgress || savingInProgress || sendingInProgress || isFinishing() || isDestroyed()) {
+                            viewModel.deleteMail(res.getData());
+                            return;
+                        }
                         draftId = res.getData().getId();
                         if (onSuccessThen != null) onSuccessThen.run();
                     } else {
@@ -237,14 +292,16 @@ public class ComposeEmailActivity extends BaseActivity {
     // ===== Helpers =====
     private void bindMail(Mail mail) {
         if (mail == null) return;
-        if (TextUtils.isEmpty(safe(toField.getText())))      toField.setText(safe(mail.getReceiver()));
-        if (TextUtils.isEmpty(safe(subjectField.getText()))) subjectField.setText(safe(mail.getSubject()));
-        if (TextUtils.isEmpty(safe(bodyField.getText())))    bodyField.setText(safe(mail.getBody()));
+        if (TextUtils.isEmpty(safe(toField.getText()))) toField.setText(safe(mail.getReceiver()));
+        if (TextUtils.isEmpty(safe(subjectField.getText())))
+            subjectField.setText(safe(mail.getSubject()));
+        if (TextUtils.isEmpty(safe(bodyField.getText()))) bodyField.setText(safe(mail.getBody()));
         updateSendEnabled();
     }
 
     private Mail buildMailFromFields() {
         Mail m = new Mail();
+        if (draftId != null) m.setId(draftId);
         m.setReceiver(safe(toField.getText()).trim());
         m.setSubject(safe(subjectField.getText()));
         m.setBody(safe(bodyField.getText()));
@@ -280,15 +337,31 @@ public class ComposeEmailActivity extends BaseActivity {
         bodyField.setText("");
         draftId = null;
         isCreatingDraft = false;
+        savingInProgress = false;
+        discardInProgress = false;
+        sendingInProgress = false;
         updateSendEnabled();
     }
 
     private static class SimpleWatcher implements TextWatcher {
         private final Runnable onChange;
-        SimpleWatcher(Runnable onChange) { this.onChange = onChange; }
-        @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
-        @Override public void onTextChanged(CharSequence s, int st, int b, int c) { onChange.run(); }
-        @Override public void afterTextChanged(Editable s) {}
+
+        SimpleWatcher(Runnable onChange) {
+            this.onChange = onChange;
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int st, int c, int a) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int st, int b, int c) {
+            onChange.run();
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+        }
     }
 
     private void toast(String m) {
@@ -297,10 +370,12 @@ public class ComposeEmailActivity extends BaseActivity {
 
     private <T> void observeOnce(LiveData<Resource<T>> liveData, Observer<Resource<T>> observer) {
         liveData.observe(this, new Observer<>() {
-            @Override public void onChanged(Resource<T> resource) {
+            @Override
+            public void onChanged(Resource<T> resource) {
                 if (resource == null) return;
                 switch (resource.getStatus()) {
-                    case LOADING: break;
+                    case LOADING:
+                        break;
                     case ERROR:
                     case SUCCESS:
                         liveData.removeObserver(this);
@@ -319,8 +394,8 @@ public class ComposeEmailActivity extends BaseActivity {
     @Override
     protected void onSaveInstanceState(@NonNull Bundle out) {
         super.onSaveInstanceState(out);
-        out.putString(K_TO,   safe(toField.getText()));
-        out.putString(K_SUB,  safe(subjectField.getText()));
+        out.putString(K_TO, safe(toField.getText()));
+        out.putString(K_SUB, safe(subjectField.getText()));
         out.putString(K_BODY, safe(bodyField.getText()));
         out.putString(K_DRAFT, draftId);
     }

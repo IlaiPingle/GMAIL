@@ -84,6 +84,7 @@ public class MailsActivity extends BaseActivity {
                 if (mail.getLabels() != null && !mail.getLabels().contains("drafts")) {
                     intent = new Intent(MailsActivity.this, EmailDetailActivity.class);
                     intent.putExtra(EmailDetailActivity.EXTRA_MAIL_ID, mail.getId());
+                    intent.putExtra(EmailDetailActivity.EXTRA_ENTRY_LABEL, currentLabel);
                 } else {
                     intent = new Intent(MailsActivity.this, ComposeEmailActivity.class);
                     intent.putExtra(ComposeEmailActivity.EXTRA_DRAFT_ID, mail.getId());
