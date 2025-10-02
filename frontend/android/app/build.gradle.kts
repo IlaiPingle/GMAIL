@@ -1,3 +1,16 @@
+// --- ADD THESE IMPORTS AT THE TOP ---
+import java.util.Properties
+
+// --- ADD THIS HELPER TO LOAD android/.env ---
+fun loadDotEnv(path: String): Properties {
+    val props = Properties()
+    val file = rootProject.file(path)
+    if (file.exists()) file.inputStream().use { props.load(it) }
+    return props
+}
+
+// Load env once (points to android/.env at repo root)
+val env = loadDotEnv("android/.env")
 plugins {
     alias(libs.plugins.android.application)
 }
@@ -14,6 +27,16 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField(
+            "String",
+            "API_BASE_URL",
+            "\"${env.getProperty("API_BASE_URL", "http://10.0.2.2:8080")}\""
+        )
+        buildConfigField(
+            "String",
+            "ENV",
+            "\"${env.getProperty("ENV", "local")}\""
+        )
     }
 
     buildTypes {

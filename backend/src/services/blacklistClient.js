@@ -1,8 +1,7 @@
 const net = require('net');
 const { endianness } = require('os');
-const PORT = 4000;
-const HOST = 'bloom-server'; // while running in docker, this should be the name of the bloom server container
-
+const PORT = process.env.BLOOM_PORT || 4000;
+const HOST = process.env.BLOOM_HOST || 'bloom-server';
 function sendCommand(command, url) {
 	return new Promise((resolve, reject) => {
 		const client = new net.Socket();

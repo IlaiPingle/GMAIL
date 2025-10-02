@@ -19,7 +19,7 @@ services:
   web-server:
     build:
       context: ./backend
-      dockerfile: docker/Dockerfile
+      dockerfile: Dockerfile
     volumes:
       - ./backend/uploads:/app/uploads
     ports:

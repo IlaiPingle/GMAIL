@@ -51,35 +51,35 @@ public class MailsActivity extends BaseActivity {
     private MailsViewModel mailsViewModel;
     private LabelsViewModel labelsViewModel;
     private UserViewModel userViewModel;
-
+    
     private MailsListAdapter mailsListAdapter;
-
+    
     private DrawerLayout drawerLayout;
     private RecyclerView drawerRecycler;
     private DrawerAdapter drawerAdapter;
-
+    
     private EditText searchInputText;
     private TextView tvCurrentLabel;
     private static final String DEFAULT_LABEL = "inbox";
     private String currentLabel = DEFAULT_LABEL;
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.mail_list);
-
-//      set up navigation drawer
+        
+        //      set up navigation drawer
         drawerLayout = findViewById(R.id.drawerLayout);
         ImageButton avatarButton = findViewById(R.id.toolbarAvatar);
         ImageButton btnMenu = findViewById(R.id.btnMenu);
         avatarButton.setOnClickListener(this::showAvatarMenu);
         btnMenu.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
         ImageButton btnCompose = findViewById(R.id.btnCompose);
-
+        
         tvCurrentLabel = findViewById(R.id.tvCurrentLabel);
         tvCurrentLabel.setText(DEFAULT_LABEL);
-
-//      set up mails emails list
+        
+        //      set up mails emails list
         RecyclerView mailsRecycler = findViewById(R.id.mailsRecycler);
         mailsRecycler.setLayoutManager(new LinearLayoutManager(this));
         mailsListAdapter = new MailsListAdapter(new ArrayList<>(), new MailsListAdapter.OnMailsListAdapterListener() {
@@ -96,50 +96,50 @@ public class MailsActivity extends BaseActivity {
                 }
                 startActivity(intent);
             }
-
+            
             @Override
             public void onStarClick(Mail mail) {
                 boolean isStarred = mail.getLabels() != null && mail.getLabels().contains("starred");
                 observeOnce(
                 mailsViewModel.toggleStar(mail.getId(), isStarred),
-                         resource -> {
-                            if (resource != null && resource.isError()) {
-                                String msg = resource.getMessage() != null ? resource.getMessage() : "Error";
-                                Toast.makeText(MailsActivity.this, msg, Toast.LENGTH_SHORT).show();
-
-                                // revert UI quickly or refresh from server
-                                mailsViewModel.refreshCurrentList();
-                            }
-                        });
+                resource -> {
+                    if (resource != null && resource.isError()) {
+                        String msg = resource.getMessage() != null ? resource.getMessage() : "Error";
+                        Toast.makeText(MailsActivity.this, msg, Toast.LENGTH_SHORT).show();
+                        
+                        // revert UI quickly or refresh from server
+                        mailsViewModel.refreshCurrentList();
+                    }
+                });
             }
         });
         mailsListAdapter.setHasStableIds(true);
         mailsRecycler.setAdapter(mailsListAdapter);
-
+        
         searchInputText = findViewById(R.id.editTextSearch);
-
+        
         SwipeRefreshLayout swipeRefreshLayout = findViewById(R.id.swipeRefreshMails);
-
-//      set up view models
+        
+        //      set up view models
         mailsViewModel = new ViewModelProvider(this).get(MailsViewModel.class);
         labelsViewModel = new ViewModelProvider(this).get(LabelsViewModel.class);
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
-
+        
         mailsViewModel.fetchAllMails().observe(this, st -> {
             if (st == null) return;
             switch (st.getStatus()) {
                 case LOADING:
-                    swipeRefreshLayout.setRefreshing(true);
-                    break;
+                swipeRefreshLayout.setRefreshing(true);
+                break;
                 case SUCCESS:
-                    swipeRefreshLayout.setRefreshing(false);
-                    break;
+                swipeRefreshLayout.setRefreshing(false);
+                break;
                 case ERROR:
-                    swipeRefreshLayout.setRefreshing(false);
-                    Toast.makeText(this,
-                            st.getMessage() != null ? st.getMessage() : "Error",
-                            Toast.LENGTH_SHORT).show();
-                    break;
+                swipeRefreshLayout.setRefreshing(false);
+                Toast.makeText(this,
+                st.getMessage() != null ? st.getMessage() : "Error",
+                Toast.LENGTH_SHORT).show();
+                break;
             }
         });
         mailsViewModel.observeMailList().observe(this, mailsList -> {
@@ -151,68 +151,68 @@ public class MailsActivity extends BaseActivity {
             String avatar = (user != null) ? user.getPicture() : null;
             // If backend returns relative HTTP path, resolve to full emulator URL.
             String resolved = resolveAvatarUrlForEmulator(avatar);
-
+            
             Glide.with(MailsActivity.this)
-                    .load(resolved) // works with "data:image/..." too
-                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                    .placeholder(R.drawable.circle_background)
-                    .error(R.mipmap.default_avatar)
-                    .circleCrop()
-                    .into(avatarButton);
+            .load(resolved) // works with "data:image/..." too
+            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+            .placeholder(R.drawable.circle_background)
+            .error(R.mipmap.default_avatar)
+            .circleCrop()
+            .into(avatarButton);
         });
-
+        
         mailsViewModel.observeMailsState().observe(this, state -> {
             if (state == null) return;
             switch (state.getStatus()) {
                 case LOADING:
-                    swipeRefreshLayout.setRefreshing(true);
-                    break;
+                swipeRefreshLayout.setRefreshing(true);
+                break;
                 case SUCCESS:
-                    swipeRefreshLayout.setRefreshing(false);
-                    break;
+                swipeRefreshLayout.setRefreshing(false);
+                break;
                 case ERROR:
-                    swipeRefreshLayout.setRefreshing(false);
-                    Toast.makeText(this,
-                            state.getMessage() != null ? state.getMessage() : "Error",
-                            Toast.LENGTH_SHORT).show();
-
-                    break;
+                swipeRefreshLayout.setRefreshing(false);
+                Toast.makeText(this,
+                state.getMessage() != null ? state.getMessage() : "Error",
+                Toast.LENGTH_SHORT).show();
+                
+                break;
             }
         });
-
-//      set up swipe to refresh
+        
+        //      set up swipe to refresh
         swipeRefreshLayout.setOnRefreshListener(() -> mailsViewModel.refreshCurrentList());
-
-
-//      set up compose email button
+        
+        
+        //      set up compose email button
         btnCompose.setOnClickListener(v ->
-                startActivity((new Intent(
-                        MailsActivity.this, ComposeEmailActivity.class))));
-
-
+        startActivity((new Intent(
+        MailsActivity.this, ComposeEmailActivity.class))));
+        
+        
         drawerRecycler = findViewById(R.id.drawerRecycler);
         drawerRecycler.setLayoutManager(new LinearLayoutManager(this));
-
-//      set up navigation drawer
-
+        
+        //      set up navigation drawer
+        
         drawerAdapter = new DrawerAdapter(new DrawerAdapter.OnItemClickListener() {
             @Override
             public void onLabelClick(DrawerItem.LabelItem labelItem) {
                 String name = labelItem.label != null ? labelItem.label.getName() : DEFAULT_LABEL;
                 tvCurrentLabel.setText(name);
-
+                
                 mailsViewModel.setSelectedLabel(name);
-
+                
                 drawerAdapter.setSelectedLabel(name);
                 drawerLayout.closeDrawer(GravityCompat.START);
                 currentLabel = name;
             }
-
+            
             @Override
             public void onCreateLabelClick() {
                 new AddLabelBottomSheet().show(getSupportFragmentManager(), "add_label");
             }
-
+            
             @Override
             public void onManageLabelsClick() {
                 if (isUserLabel(currentLabel)) {
@@ -223,46 +223,46 @@ public class MailsActivity extends BaseActivity {
             }
         });
         drawerRecycler.setAdapter(drawerAdapter);
-
-
-//      create static items for drawer
+        
+        
+        //      create static items for drawer
         DrawerItem.HeaderItem headerItem = new DrawerItem.HeaderItem();
         DrawerItem.SectionItem sectionItem = new DrawerItem.SectionItem();
-
+        
         List<DrawerItem.LabelItem> systemLabels = buildSystemLabels();
-
-//      set static labels and create new List for user labels
+        
+        //      set static labels and create new List for user labels
         drawerAdapter.submitList(
-                DrawerItem.buildDrawerItems(headerItem, systemLabels, sectionItem, new ArrayList<>())
+        DrawerItem.buildDrawerItems(headerItem, systemLabels, sectionItem, new ArrayList<>())
         );
         mailsViewModel.setSelectedLabel(DEFAULT_LABEL);
         drawerAdapter.setSelectedLabel(DEFAULT_LABEL);
-
-//      observe user labels and update drawer when they change
+        
+        //      observe user labels and update drawer when they change
         labelsViewModel.getLabels().observe(this, userLabels -> {
             Log.d("LabelsVM", "observe: size=" + (userLabels == null ? -1 : userLabels.size()));
             List<DrawerItem.LabelItem> userLabelItems = buildUserLabels(userLabels);
-
+            
             List<DrawerItem> items = DrawerItem.buildDrawerItems(headerItem, systemLabels, sectionItem, userLabelItems);
             items.add(new DrawerItem.ActionItem(
-                    DrawerItem.ActionItem.Action.CREATE,
-                    R.drawable.ic_add,
-                    getString(R.string.create_new_label)
+            DrawerItem.ActionItem.Action.CREATE,
+            R.drawable.ic_add,
+            getString(R.string.create_new_label)
             ));
             items.add(new DrawerItem.ActionItem(
-                    DrawerItem.ActionItem.Action.MANAGE,
-                    R.drawable.ic_edit,
-                    getString(R.string.manage_labels)
+            DrawerItem.ActionItem.Action.MANAGE,
+            R.drawable.ic_edit,
+            getString(R.string.manage_labels)
             ));
             drawerAdapter.submitList(items);
         });
-
-
-//      set up search button
+        
+        
+        //      set up search button
         searchInputText.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH ||
-                    actionId == EditorInfo.IME_ACTION_DONE ||
-                    (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
+            actionId == EditorInfo.IME_ACTION_DONE ||
+            (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
                 String query = searchInputText.getText().toString();
                 mailsViewModel.searchMails(query);
                 if (query.isEmpty()) {
@@ -278,19 +278,19 @@ public class MailsActivity extends BaseActivity {
             return false;
         });
     }
-
-
+    
+    
     @Override
     protected void onPause() {
         super.onPause();
         Log.d("MailsActivity", "onPause");
     }
-
+    
     public void onResume() {
         super.onResume();
         Log.d("MailsActivity", "onResume");
     }
-
+    
     @Override
     protected void onStart() {
         super.onStart();
@@ -298,32 +298,32 @@ public class MailsActivity extends BaseActivity {
         mailsViewModel.refreshCurrentList();
         labelsViewModel.refreshLabels();
     }
-
+    
     @Override
     protected void onStop() {
         super.onStop();
         Log.d("MailsActivity", "onStop");
     }
-
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Log.d("MailsActivity", "onDestroy");
     }
-
+    
     // Helper Methods
     private List<DrawerItem.LabelItem> buildSystemLabels() {
         return Arrays.asList(
-                new DrawerItem.LabelItem(new Label("inbox")),
-                new DrawerItem.LabelItem(new Label("starred")),
-                new DrawerItem.LabelItem(new Label("sent")),
-                new DrawerItem.LabelItem(new Label("drafts")),
-                new DrawerItem.LabelItem(new Label("spam")),
-                new DrawerItem.LabelItem(new Label("bin")),
-                new DrawerItem.LabelItem(new Label("all"))
+        new DrawerItem.LabelItem(new Label("inbox")),
+        new DrawerItem.LabelItem(new Label("starred")),
+        new DrawerItem.LabelItem(new Label("sent")),
+        new DrawerItem.LabelItem(new Label("drafts")),
+        new DrawerItem.LabelItem(new Label("spam")),
+        new DrawerItem.LabelItem(new Label("bin")),
+        new DrawerItem.LabelItem(new Label("all"))
         );
     }
-
+    
     private List<DrawerItem.LabelItem> buildUserLabels(List<Label> userLabels) {
         List<DrawerItem.LabelItem> items = new ArrayList<>();
         if (userLabels != null) {
@@ -333,12 +333,12 @@ public class MailsActivity extends BaseActivity {
         }
         return items;
     }
-
-
+    
+    
     private void showAvatarMenu(View anchor) {
         PopupMenu popup = new PopupMenu(this, anchor);
         popup.getMenuInflater().inflate(R.menu.user_settings, popup.getMenu());
-
+        
         popup.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_logout) {
                 handleLogout();
@@ -348,39 +348,39 @@ public class MailsActivity extends BaseActivity {
         });
         popup.show();
     }
-
-
+    
+    
     private void handleLogout() {
         userViewModel.logout();
-
+        
         Intent intent = new Intent(this, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
     }
-
+    
     private boolean isUserLabel(String labelName) {
         if (labelName == null) return false;
         String lower = labelName.toLowerCase();
         List<String> systemLabels = Arrays.asList(
-                "inbox", "sent", "starred", "spam", "bin", "drafts", "all"
+        "inbox", "sent", "starred", "spam", "bin", "drafts", "all"
         );
         return !systemLabels.contains(lower);
     }
     private <T> void observeOnce(LiveData<Resource<T>> liveData,
-                                 Observer<Resource<T>> observer) {
+    Observer<Resource<T>> observer) {
         liveData.observe(this, new Observer<>() {
             @Override
             public void onChanged(Resource<T> resource) {
                 if (resource == null) return;
                 switch (resource.getStatus()) {
                     case LOADING:
-                        break;
+                    break;
                     case ERROR:
                     case SUCCESS:
-                        liveData.removeObserver(this);
-                        observer.onChanged(resource);
-                        break;
+                    liveData.removeObserver(this);
+                    observer.onChanged(resource);
+                    break;
                 }
             }
         });
@@ -389,7 +389,12 @@ public class MailsActivity extends BaseActivity {
         if (avatar == null || avatar.isEmpty()) return null;
         if (avatar.startsWith("data:image/")) return avatar; // base64 data URI
         if (avatar.startsWith("http://") || avatar.startsWith("https://")) return avatar;
-        // relative path from backend
-        return "http://10.0.2.2:8080" + (avatar.startsWith("/") ? avatar : ("/" + avatar));
+        if (avatar.startsWith("content://") || avatar.startsWith("file://")) {
+            return avatar;
+        }
+        String base = BuildConfig.API_BASE_URL;
+        if (base == null || base.isEmpty()) base = "http://10.0.2.2:8080";
+        String path = avatar.startsWith("/") ? avatar : ("/" + avatar);
+        return base + path;
     }
 }
