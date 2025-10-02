@@ -5,7 +5,7 @@ RUN apk add --no-cache python3 make g++
 
 # Creating new library for the application
 WORKDIR /app
-ENV NODE_ENV=production
+ENV NODE_ENV=development
 
 # Copying the package.json and package-lock.json files
 COPY ../package*.json ./

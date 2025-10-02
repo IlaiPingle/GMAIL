@@ -16,6 +16,7 @@ mongoose.connect(process.env.MONGODB_URI)
 const app = express()
 
 app.use(cors({
+	  origin: process.env.CORS_ORIGINS.split(","), // Allow multiple origins
 	credentials: true // Allow credentials (cookies) to be sent
 }));
 app.use('/uploads', express.static('uploads'));
