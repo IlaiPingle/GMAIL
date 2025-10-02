@@ -1,170 +1,99 @@
-# Email Application with Security Filtering
+# **Gmail App** 📬📨✨
 
-https://github.com/matanshaul7/EX1.git
+Welcome to the **Gmail App Project**, a full-stack application that simulates Gmail with authentication, labels, inbox management, and a Bloom Filter–based blacklist system.
 
-## Overview
+---
 
-This project is a complete email application with an integrated security system. It consists of three main components:
+## **Table of Contents**
 
-1. **Frontend (React)** - User interface for email management
-2. **Backend Server (Node.js)** - API handling user management, emails, and labels
-3. **Bloom Filter Server (C++)** - Security service that filters malicious URLs
+1. [Project Overview](#project-overview)  
+2. [Technologies Used](#technologies-used)  
+3. [Setup and Installation](#setup-and-installation)  
+4. [Development Process](#development-process)  
 
-The system provides a Gmail-like interface where users can:
-- Register and login
-- Send and receive emails
-- Organize emails with custom labels
-- Search for emails
-- Filter malicious content automatically before delivery
+---
 
-## Project Structure
+## **Project Overview**
 
-```
-EX1/
-├── frontend/             # React user interface
-├── backend/     		  # Node.js API server
-├── Bloom_Filter_Server/  # C++ security filter
-└── docker-compose.yml    # Container orchestration
-```
-# ⚠️**Note**:
-You must add a .env file in the backend folder for the system to work.
-At minimum, set a JWT_SECRET variable, for example:
+This project is a **Gmail-like mail system** designed for both **Web** and **Android** platforms.  
+The system allows users to:
 
-`EX1/backend/.env`
-```
-JWT_SECRET=YourSecretKeyHere
-```
+- 📝 Register and log in (with JWT-based authentication).  
+- 📥 Manage inbox, sent mails, drafts, and labels.  
+- 📤 Compose, send, and delete emails.  
+- 🏷️ Create and apply custom labels.  
+- 🚫 Use a **C++ Bloom Filter server** to check against blacklisted URLs.  
+- ☁️ Store all user and mail data in MongoDB.  
 
-## Running the Application
+The architecture is **client–server**, where the Node.js backend communicates with MongoDB and the Bloom Filter server. The React frontend and Android app consume the backend APIs.  
 
-### Prerequisites
-- Docker
-- Docker Compose
+All services (backend, frontend, bloom filter, database) are **containerized using Docker** and orchestrated with Docker Compose.
 
-### Start the System
+---
 
-```bash
-# Start both servers
-docker-compose up --build
-```
+## **Technologies Used**
 
+- **Docker & Docker Compose** → Containerizing backend, frontend, and services.  
+- **Node.js + Express** → Backend web server with REST API.  
+- **React (with Nginx)** → Frontend web client.  
+- **C++** → Bloom Filter server for blacklist checks.  
+- **MongoDB** → Database for users, emails, labels.  
+- **JWT (JSON Web Tokens)** → Secure authentication.  
+- **Android Studio** → Native Android client.  
+- **Room DB (Android)** → Local caching of user mails.  
 
-This will:
-- Build and start the Frontend, Backend, and Bloom Filter Server
-- Make the frontend available at http://localhost:3000
-- Make the backend API available at http://localhost:8080
-- Make the security filter available on port 4000
-To see the webpage itself, go to http://localhost:3000 in your web browser
+---
 
-### Stop the System
+## **Setup and Installation**
 
-```bash
-docker-compose down
-```
-or: `ctrl+c` at the same terminal
+For full details, see the [Wiki Setup Guide](wiki/01_setup.md).
 
-## Usage Examples
+### **Quick Setup Steps:**
 
-### User Registration & Login
+1. **Clone the Repository**
+   ```
+   git clone https://github.com/<your-username>/Gmail.git
+   cd Gmail
+    ```
 
-1. Creating a New Account
-- Navigate to http://localhost:3000/register
-- Fill in your desired username
-- Upload or link a profile picture (optional)
-- Click "Sign up" to create your account
+2. **Configure Environment Variables**
+   Follow the instructions in the [Wiki](wiki/01_setup.md#environment-setup) to set up the `.env` file.
 
-![User Registration Screen](Images/1.png)
+4. **Run with Docker**
 
-2. Logging In
-- Navigate to http://localhost:3000/login
-- Enter your username and password
-- Click "Sign in" to access your account
+   ```bash
+   docker compose up --build
+   ```
 
-![Login Screen](Images/2.png) 
+5. **Run the Android Client**
 
-### Email Management
+   * Open in Android Studio.
+   * Configure emulator or connect device.
+   * Press ▶ Run.
 
-3. Viewing Your Inbox
-- After logging in, you'll see your inbox with all received emails
-- Emails are sorted by date, with newest at the top
-- Unread emails appear in bold
+---
 
-![Inbox View](Images/3.png)
+## **Development Process**
 
-4. Composing a New Email
-- Click the "Compose" button in the sidebar
-- Enter recipient's username in the "To:" field
-- Add a subject line
-- Type your message in the body
-- Click "Send" to deliver your email
+1. **Bloom Filter Server (C++)**
+   Developed a multithreaded server handling URL blacklist checks.
 
-![Compose Email](Images/4.png)
+2. **Backend (Node.js)**
 
-5. Reading an Email
-- Click on any email in your inbox to open and read it
-- The full email content appears in the right panel
-- Sender information and timestamp are displayed at the top
+   * REST API for user authentication, inbox, labels, and mails.
+   * Integration with MongoDB and Bloom Filter server.
+   * JWT authentication with cookies.
 
-![Email Reading View](Images/5.png)
+3. **Frontend (React)**
 
-### Organization Features
+   * Gmail-style interface with sidebar, labels, inbox, and compose modal.
+   * Dark/light mode toggle and responsive design.
 
-6. Creating a Custom Label
-- Click the "+" icon next to "Labels" in the sidebar
-- Enter a label name (e.g., "Work", "Personal")
-- Click "Create" to add the new label
+4. **Android App**
 
-![Creating Label](Images/6.png)
+   * Native client with login, inbox, labels, compose, and swipe-to-delete.
+   * Local Room DB for offline mode.
 
-7. Applying Labels to Emails
-- Open an email or select it from the list
-- Click "Labels" dropdown
-- Check the labels you want to apply
+---
 
-![Applying Labels](Images/7.png)
-
-8. Filtering by Label
-- Click on any label name in the sidebar
-- The email list will show only emails with that label
-
-![Label Filtering](Images/8.png)
-
-### Security Features
-
-9. Reporting Spam
-- Open an unwanted email
-- Click "Report Spam" button
-- The email is moved to spam folder and its sender patterns are recorded
-
-![Report Spam](Images/9.png)
-
-### Advanced Features
-
-10. Searching Emails
-- Type keywords in the search bar at the top
-- Results update when you click the enter button, or the "search" icon
-- Click on any result to open that email
-
-![Email Search](Images/10.png)
-
-11. Email Actions
-Each email has quick action buttons for:
-- Back to the previous screen
-- Report as Spam
-- Delete
-- Mark as unread
-- Move to label
-
-![Email Actions](Images/11.png)
-
-12. Mobile Responsive Design
-- The application adapts to different screen sizes
-- Sidebar collapses to icons on smaller screens
-
-![Mobile View](Images/12.png)
-
-13. Theme Customization
-- Click on the settings icon
-- Choose between light and dark themes
-
-![Theme Settings](Images/13.png)
+Enjoy mailing! 📬✨📱💻
