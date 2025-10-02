@@ -46,7 +46,7 @@ All services (backend, frontend, bloom filter, database) are **containerized usi
 
 ## **Setup and Installation**
 
-For full details, see the [Wiki Setup Guide](wiki/01_setup.md).
+For full details, see the [Wiki Setup Guide](Wiki/01_setup.md).
 
 ### **Quick Setup Steps:**
 
@@ -57,7 +57,7 @@ For full details, see the [Wiki Setup Guide](wiki/01_setup.md).
     ```
 
 2. **Configure Environment Variables**
-   Follow the instructions in the [Wiki](wiki/01_setup.md#environment-setup) to set up the `.env` file.
+   Follow the instructions in the [Wiki](Wiki/01_setup.md#environment-setup) to set up the `.env` file.
 
 4. **Run with Docker**
 
