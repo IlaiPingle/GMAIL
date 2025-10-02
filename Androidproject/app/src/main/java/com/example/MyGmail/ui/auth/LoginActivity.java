@@ -79,6 +79,9 @@ public class LoginActivity extends AppCompatActivity {
                 Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
             }
         });
+        if(userViewModel.hasSession()){
+            userViewModel.refreshMe();
+        }
     }
 
     /**

@@ -33,6 +33,7 @@ public class EmailDetailActivity extends BaseActivity {
     private Mail currentMail;
     private @Nullable String entryLabel;
     private TextView tvFrom, tvTo, tvSubject, tvBody, tvLabels, tvSpamWarning;
+    private MaterialButton btnSpam, btnStar, btnRead;
 
 
     @Override
@@ -122,7 +123,9 @@ public class EmailDetailActivity extends BaseActivity {
 
         });
 
-        findViewById(R.id.btnStar).setOnClickListener(v -> {
+        btnStar = findViewById(R.id.btnStar);
+        btnStar.setText(currentMail != null && hasLabel(currentMail, "starred") ? "Unstar" : "Star");
+        btnStar.setOnClickListener(v -> {
             if (currentMail == null) return;
             v.setEnabled(false);
             boolean currentlyStarred = hasLabel(currentMail, "starred");
@@ -138,23 +141,31 @@ public class EmailDetailActivity extends BaseActivity {
             });
         });
 
-        findViewById(R.id.btnMarkUnread).setOnClickListener(v -> {
+        btnRead = findViewById(R.id.btnMarkUnread);
+        btnRead.setText(currentMail != null && hasLabel(currentMail, "unread") ? "Mark as read" : "Mark as unread");
+        btnRead.setOnClickListener(v -> {
             if (currentMail == null) return;
+            if (hasLabel(currentMail,"unread")){
+                v.setEnabled(false);
+                return;
+            }
             v.setEnabled(false);
             observeOnce(viewModel.addLabelToMail(currentMail, "unread"), st -> {
                 if (st != null && st.getStatus() == Resource.Status.ERROR) {
                     Toast.makeText(this,
                             st.getMessage() != null ? st.getMessage() : "Failed to mark unread",
                             Toast.LENGTH_SHORT).show();
-
+                    v.setEnabled(true);
                 } else {
                     Toast.makeText(this, "Marked as unread", Toast.LENGTH_SHORT).show();
+                    finish();
                 }
-                v.setEnabled(true);
+
             });
         });
-
-        findViewById(R.id.btnSpam).setOnClickListener(v -> {
+        btnSpam = findViewById(R.id.btnSpam);
+        btnSpam.setText(currentMail != null && hasLabel(currentMail, "spam") ? "Remove from spam" : "Mark as spam");
+        btnSpam.setOnClickListener(v -> {
             if (currentMail == null) return;
             v.setEnabled(false);
             if (hasLabel(currentMail, "spam")) {
@@ -170,7 +181,7 @@ public class EmailDetailActivity extends BaseActivity {
                     v.setEnabled(true);
                 });
             } else {
-                observeOnce(viewModel.markMailAsSpam(currentMail),st -> {
+                observeOnce(viewModel.markMailAsSpam(currentMail), st -> {
                     if (st != null && st.getStatus() == Resource.Status.ERROR) {
                         Toast.makeText(this,
                                 st.getMessage() != null ? st.getMessage() : "Failed to mark as spam",
