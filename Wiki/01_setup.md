@@ -99,7 +99,7 @@ BLOOM_PORT=4000
 **Path:** `EX1/android/.env` (loaded by Gradle into `BuildConfig`)
 ```env
 # For Android emulator to reach your host's backend
-API_BASE_URL=http://10.0.2.2:8080
+API_BASE_URL=http://10.0.2.2:8080/api/
 ENV=local
 ```
 In `app/build.gradle.kts`, load the file and define:
@@ -119,9 +119,17 @@ android {
     // ...
     defaultConfig {
         // ...
-        buildConfigField("String", "API_BASE_URL", ""${env.getProperty("API_BASE_URL", "http://10.0.2.2:8080")}"")
-        buildConfigField("String", "ENV", ""${env.getProperty("ENV", "local")}"")
-    }
+        buildConfigField(
+            "String",
+            "API_BASE_URL",
+            "\"${env.getProperty("API_BASE_URL", "http://10.0.2.2:8080/api/")}\""
+        )
+        buildConfigField(
+            "String",
+            "ENV",
+            "\"${env.getProperty("ENV", "local")}\""
+        )
+   }
 }
 ```
 ---
