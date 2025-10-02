@@ -2,43 +2,71 @@
 
 This guide explains how users can **sign up and log in** to the system.
 
+---
+
 ## 🚀 Authentication Flow
-1. **Sign Up Page** → Enter details, and upload a profile picture.
-2. **Log In Page** → Enter email & password to access the platform.
----
-![Landing Page in web](./images/landing-web.png)
-
-![Landing Page in android](./images/landing-and.png)
-
-
-## 📝 **User Registration (Sign Up)**
-To create an account, users need to provide:
-- **username** 📧
-- **Full Name** 🏷️
-- **Phone Number** 📞 (exactly 10 digits)
-- **Password** 🔒 (at least **8 characters**, including a **number** and special charachter)
-- **Profile Picture** 🖼️ (image file - png/jpeg)
-
-## You'll get a success message if the sign-up is successful, and an error message if it fails with the reason. Note that the username must be unique, and the password must meet the requirements. After successful registration, you'll be redirected to the login page.
-
-![Sign Up Page in web](./images/signup-web.png)
-![Sign Up Page in android](./images/signup-and.png)
+1. **Sign Up Page** → User enters details and uploads a profile picture.  
+2. **Log In Page** → User enters email & password to access the platform.  
+3. **Home Screen** → Authenticated users are redirected automatically to their dashboard.  
 
 ---
 
-## 📝 **User Login**
+### 🌐 Landing Pages
+![Landing Page - Web](./images/landing-web.png)  
+![Landing Page - Android](./images/landing-and.png)  
+
+---
+
+## 📝 User Registration (Sign Up)
+To create a new account, users must provide:
+
+- **Username (unique)** ✉️  
+- **Full Name** 🏷️  
+- **Phone Number** 📞 (exactly 10 digits)  
+- **Password** 🔒 (minimum **8 characters**, must include a **number** and a **special character**)  
+- **Profile Picture** 🖼️ (image file: `.png` / `.jpeg`)  
+
+✅ **On success:** The system shows a confirmation message and redirects to the **Login Page**.  
+❌ **On error:** The system displays the reason (e.g., *username already exists*, *invalid password format*).  
+
+---
+
+### 🖼️ Sign Up Screens
+![Sign Up - Web](./images/signup-web.png)  
+![Sign Up - Android](./images/signup-and.png)  
+
+---
+
+## 🔑 User Login
 To access the platform, users need to:
-- **Enter Email** 📧
-- **Enter Password** 🔒
 
-![Login Page](./images/sig-in-web.png)
+- **Enter Username/Email** ✉️  
+- **Enter Password** 🔒  
 
-## You'll get a success message if the login is successful, and an error message if the login fails.
+✅ **On success:** Users are redirected to the **Home Screen**.  
+❌ **On error:** The system displays an error message (e.g., *wrong credentials*).  
 
 ---
 
-## In a case of an already signed-in user, the system will automatically redirect to the home screen of the user. In that page you'll see in the up-right corner the user's name and profile picture, with a button of "Log Out" - that will log out the user from the system back to the landing page. 
+### 🖼️ Login Screen
+![Login Page - Web](./images/sig-in-web.png)  
 
-![Home Screen, sign-out in the top-right corner](./images/home-options-weeb.png)
+---
 
-- For un-logged users that try to access the Netflix pages (such as home page) - they will be redirected to the landing page with an alert message that they need to log in to access the page.
+## 🏠 Home Screen & Session Management
+- Once logged in, users are redirected to the **Home Screen**.  
+- At the **top-right corner**, the user’s **name** and **profile picture** are displayed.  
+- A **Log Out** button is available → clicking it logs the user out and redirects to the **Landing Page**.  
+
+![Home Screen - Web (with logout option)](./images/home-options-weeb.png)  
+
+---
+
+## 🔒 Unauthorized Access
+- If a **non-logged-in user** tries to access restricted pages (e.g., **Home Page**), the system will:  
+  1. Redirect them to the **Landing Page**.  
+  2. Display an **alert message**: *“You must log in to access this page.”*  
+
+---
+
+✨ With this flow, authentication is **secure, user-friendly, and consistent** across both **Web** and **Android** platforms.
