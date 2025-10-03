@@ -150,11 +150,16 @@ public class MailsActivity extends BaseActivity {
         });
         userViewModel.getUser().observe(this, user -> {
             String avatar = (user != null) ? user.getPicture() : null;
-            // If backend returns relative HTTP path, resolve to full emulator URL.
             String resolved = resolveAvatarUrlForEmulator(avatar);
+
+            if (resolved == null || resolved.isEmpty()) {
+                avatarButton.setImageResource(R.mipmap.default_avatar);
+                return;
+            }
+
             try {
                 Glide.with(MailsActivity.this)
-                        .load(resolved) // works with "data:image/..." too
+                        .load(resolved)
                         .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                         .placeholder(R.drawable.circle_background)
                         .error(R.mipmap.default_avatar)
@@ -300,8 +305,6 @@ public class MailsActivity extends BaseActivity {
     protected void onStart() {
         super.onStart();
         Log.d("MailsActivity", "onStart");
-        mailsViewModel.refreshCurrentList();
-        labelsViewModel.refreshLabels();
     }
 
     @Override
@@ -394,14 +397,15 @@ public class MailsActivity extends BaseActivity {
 
     private String resolveAvatarUrlForEmulator(String avatar) {
         if (avatar == null || avatar.isEmpty()) return null;
-        if (avatar.startsWith("data:image/")) return avatar; // base64 data URI
-        if (avatar.startsWith("http://") || avatar.startsWith("https://")) return avatar;
-        if (avatar.startsWith("content://") || avatar.startsWith("file://")) {
+        if (avatar.startsWith("data:image/") ||
+                avatar.startsWith("http://") || avatar.startsWith("https://") ||
+                avatar.startsWith("content://") || avatar.startsWith("file://")) {
             return avatar;
         }
         String base = BuildConfig.API_BASE_URL;
         if (base == null || base.isEmpty()) base = "http://10.0.2.2:8080";
-        String path = avatar.startsWith("/") ? avatar : ("/" + avatar);
-        return base + path;
+        if (base.endsWith("/")) base = base.substring(0, base.length() - 1);
+        String path = avatar.startsWith("/") ? avatar.substring(1) : avatar;
+        return base + "/" + path;
     }
 }

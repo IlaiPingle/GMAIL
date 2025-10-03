@@ -1,13 +1,14 @@
 package com.example.MyGmail.data.remote.net;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 public class SessionManager {
     private static volatile SessionManager instance;
-    private final MutableLiveData<Boolean> logoutEvents = new MutableLiveData<>();
+    private final MutableLiveData<Event<Boolean>> logoutEvents = new MutableLiveData<>();
 
     private SessionManager(Context appCtx) {}
 
@@ -20,7 +21,22 @@ public class SessionManager {
         return instance;
     }
 
-    public void notifyLogout() { logoutEvents.postValue(true); }
+    public LiveData<Event<Boolean>> observeLogout() {
+        return logoutEvents;
+    }
 
-    public LiveData<Boolean> observeLogout() { return logoutEvents; }
+    public void notifyLogout() {
+        Log.i("SessionManager", "Notifying global logout");
+        logoutEvents.postValue(new Event<>(true));
+    }
+    public class Event<T> {
+        private final T content;
+        private boolean hasBeenHandled = false;
+        public Event(T content) { this.content = content; }
+        public T getContentIfNotHandled() {
+            if (hasBeenHandled) return null;
+            hasBeenHandled = true;
+            return content;
+        }
+    }
 }

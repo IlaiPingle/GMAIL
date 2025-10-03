@@ -69,6 +69,9 @@ public class LoginActivity extends AppCompatActivity {
                 Intent intent = new Intent(this, MailsActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
+            } else {
+                showLoading(false);
+                btnSignIn.setEnabled(true);
             }
         });
         // Observe ViewModel LiveData errors

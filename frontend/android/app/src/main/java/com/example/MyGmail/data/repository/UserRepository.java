@@ -119,8 +119,6 @@ public class UserRepository {
             public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     upsertUser(response.body());
-                } else if (response.code() == 401) {
-                    clearLocal(); // unauthorized, clear local user
                 } else if (onError != null) {
                     String message = ApiErrorParser.parseMessage(response);
                     onError.onError("Failed to refresh user: (" + response.code() + ") " + message);

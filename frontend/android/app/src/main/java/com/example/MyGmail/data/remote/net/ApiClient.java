@@ -1,5 +1,4 @@
 package com.example.MyGmail.data.remote.net;
-
 import android.content.Context;
 
 import com.example.MyGmail.BuildConfig;
@@ -11,48 +10,49 @@ import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-
-/**
- * Singleton class to manage Retrofit instance for API calls.
- * - Configures OkHttpClient with cookie handling, timeouts, logging, and authentication.
- * - Provides a single Retrofit instance throughout the app.
- * - Must be initialized with application context before use.
- * - Includes method to clear cookies when needed.
- */
+// ApiClient.java
 public class ApiClient {
-    private static Retrofit retrofit;
+    private static volatile Retrofit retrofit;
+    private static volatile OkHttpClient client;
+    private static volatile PersistentCookieJar cookieJar;
+    private static volatile SessionManager sessionManager;
 
     public static Retrofit getClient(Context context) {
         if (retrofit != null) return retrofit;
+        synchronized (ApiClient.class) {
+            if (retrofit != null) return retrofit;
 
-        // Add logging for debugging
-        HttpLoggingInterceptor logging = new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY);
+            Context app = context.getApplicationContext();
+            sessionManager = SessionManager.getInstance(app);
+            cookieJar = new PersistentCookieJar(app);
 
-        SessionManager sessionManager = SessionManager.getInstance(context);
-        PersistentCookieJar cookieJar = new PersistentCookieJar(context);
+            HttpLoggingInterceptor logging = new HttpLoggingInterceptor()
+                    .setLevel(HttpLoggingInterceptor.Level.BODY);
 
-        OkHttpClient client = new OkHttpClient.Builder()
-                .cookieJar(cookieJar)
-                .addInterceptor(logging)
-                .addInterceptor(new AuthErrorInterceptor(sessionManager, cookieJar))
-                .connectTimeout(15, TimeUnit.SECONDS)
-                .readTimeout(15, TimeUnit.SECONDS)
-                .build();
+            client = new OkHttpClient.Builder()
+                    .cookieJar(cookieJar)
+                    .addInterceptor(logging)
+                    .addInterceptor(new AuthErrorInterceptor(sessionManager, cookieJar))
+                    .connectTimeout(15, TimeUnit.SECONDS)
+                    .readTimeout(15, TimeUnit.SECONDS)
+                    .build();
 
-        retrofit = new Retrofit.Builder()
-                .baseUrl(BuildConfig.API_BASE_URL)
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
+            retrofit = new Retrofit.Builder()
+                    .baseUrl(BuildConfig.API_BASE_URL)
+                    .client(client)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+        }
         return retrofit;
     }
 
     public static boolean hasSession(Context context) {
-        return new PersistentCookieJar(context).hasSession();
+        getClient(context.getApplicationContext());
+        return cookieJar.hasSession();
     }
 
     public static void clearCookies(Context context) {
-        new PersistentCookieJar(context).clear();
+        getClient(context.getApplicationContext());
+        cookieJar.clear();
     }
 }

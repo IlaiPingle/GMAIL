@@ -2,6 +2,7 @@ package com.example.MyGmail.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.annotation.CallSuper;
 import androidx.annotation.Nullable;
@@ -24,7 +25,9 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         SessionManager.getInstance(getApplicationContext())
                 .observeLogout()
-                .observe(this, shouldLogout -> {
+                .observe(this, ev -> {
+                    if (ev == null) return;
+                    Boolean shouldLogout = ev.getContentIfNotHandled();
                     if (Boolean.TRUE.equals(shouldLogout)) {
                         handleGlobalLogout();
                     }
@@ -36,7 +39,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         isHandlingLogout = true;
 
         onLogoutWillStart();
-
+        Log.i("BaseActivity", "Handling global logout");
         io.execute(() -> {
             try {
                 AppDB.getInstance(getApplicationContext()).clearAllTables();

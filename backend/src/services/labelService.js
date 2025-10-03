@@ -80,7 +80,12 @@ async function updateLabel(userId, labelName, newName) {
   
   await Email.updateMany(
     { owner: user._id, labels: labelName },
-    { $addToSet: { labels: newName }, $pull: { labels: labelName } }
+    { $addToSet: { labels: newName } }
+  );
+  
+  await Email.updateMany(
+    { owner: user._id, labels: labelName },
+    { $pull: { labels: labelName } }
   );
   
   return true;
