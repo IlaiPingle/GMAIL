@@ -1,0 +1,35 @@
+package com.example.MyGmail.data.remote.net;
+
+
+import androidx.annotation.NonNull;
+
+
+import java.io.IOException;
+
+import okhttp3.Interceptor;
+import okhttp3.Request;
+import okhttp3.Response;
+
+public class AuthErrorInterceptor implements Interceptor {
+    private final SessionManager sessionManager;
+    private final PersistentCookieJar cookieJar;
+
+    public AuthErrorInterceptor(SessionManager sessionManager, PersistentCookieJar cookieJar) {
+        this.sessionManager = sessionManager;
+        this.cookieJar = cookieJar;
+    }
+
+    @NonNull
+    @Override
+    public Response intercept(Chain chain) throws IOException {
+        Response res = chain.proceed(chain.request());
+        Request req = chain.request();
+        if ((res.code() == 401 || res.code() == 403)
+                && !req.url().encodedPath().equals("/api/tokens")) {
+            cookieJar.clear();
+            sessionManager.notifyLogout();
+        }
+        return res;
+    }
+}
+

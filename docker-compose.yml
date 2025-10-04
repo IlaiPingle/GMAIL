@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   mongodb:
     image: mongo:latest
@@ -19,7 +17,7 @@ services:
   web-server:
     build:
       context: ./backend
-      dockerfile: docker/Dockerfile
+      dockerfile: Dockerfile
     volumes:
       - ./backend/uploads:/app/uploads
     ports:
@@ -32,8 +30,8 @@ services:
 
   frontend:
     build:
-      context: ./frontend
-      dockerfile: docker/dockerfile
+      context: ./frontend/web
+      dockerfile: docker/Dockerfile
     ports:
       - "3000:80"
     depends_on:

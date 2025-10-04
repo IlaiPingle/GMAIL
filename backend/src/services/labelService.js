@@ -1,8 +1,8 @@
 const { findUserById, isSystemLabel } = require("./userService");
 const Email = require("../Models/emailModel");
 /**
- * Create a new label for a user
- */
+* Create a new label for a user
+*/
 async function createLabel(userId, labelName) {
   const user = await getUserOrThrow(userId);
   if (isSystemLabel(labelName)) {
@@ -16,25 +16,25 @@ async function createLabel(userId, labelName) {
     error.status = 409;
     throw error;
   }
-
+  
   user.labels.push({ name: labelName });
   await user.save(); // Save the user with the new label
   return { name: labelName }; // Return the created label
 }
 
 /**
- * Get all labels for a user
- */
+* Get all labels for a user
+*/
 async function getUserLabels(userId) {
   const user = await getUserOrThrow(userId);
   return user.labels
-    .filter((label) => !isSystemLabel(label.name)) // Filter out system labels
-    .map((label) => label.name); // Return only label names
+  .filter((label) => !isSystemLabel(label.name)) // Filter out system labels
+  .map((label) => label.name); // Return only label names
 }
 
 /**
- * Get a specific label by name
- */
+* Get a specific label by name
+*/
 async function getLabelByName(userId, labelName) {
   const user = await getUserOrThrow(userId);
   const label = user.labels.find((label) => label.name === labelName);
@@ -47,8 +47,8 @@ async function getLabelByName(userId, labelName) {
 }
 
 /**
- * Update a label name
- */
+* Update a label name
+*/
 async function updateLabel(userId, labelName, newName) {
   const user = await getUserOrThrow(userId);
   if (isSystemLabel(newName)) {
@@ -77,18 +77,23 @@ async function updateLabel(userId, labelName, newName) {
   // Update label name
   user.labels[labelIndex].name = newName;
   await user.save();
-
+  
   await Email.updateMany(
     { owner: user._id, labels: labelName },
-    { $addToSet: { labels: newName }, $pull: { labels: labelName } }
+    { $addToSet: { labels: newName } }
   );
-
+  
+  await Email.updateMany(
+    { owner: user._id, labels: labelName },
+    { $pull: { labels: labelName } }
+  );
+  
   return true;
 }
 
 /**
- * Delete a label
- */
+* Delete a label
+*/
 async function deleteLabel(userId, labelName) {
   const user = await getUserOrThrow(userId);
   if (isSystemLabel(labelName)) {
@@ -96,7 +101,7 @@ async function deleteLabel(userId, labelName) {
     error.status = 400;
     throw error;
   }
-
+  
   const before = user.labels?.length || 0;
   user.labels = user.labels.filter((label) => label.name !== labelName);
   if (before === user.labels?.length) {
@@ -105,7 +110,7 @@ async function deleteLabel(userId, labelName) {
     throw error;
   }
   await user.save();
-
+  
   // Remove the label from all associated mails
   await Email.updateMany(
     { owner: user._id, labels: labelName },
@@ -117,8 +122,8 @@ async function deleteLabel(userId, labelName) {
 async function addLabelToMail(userId, mailId, labelName) {
   const user = await getUserOrThrow(userId);
   const exists =
-    isSystemLabel(labelName) ||
-    user.labels.some((label) => label.name === labelName);
+  isSystemLabel(labelName) ||
+  user.labels.some((label) => label.name === labelName);
   // Check if label exists
   if (!exists) {
     const error = new Error("Label not found");
@@ -146,8 +151,8 @@ async function addLabelToMail(userId, mailId, labelName) {
   return true;
 }
 /**
- * Remove a label from a mail
- */
+* Remove a label from a mail
+*/
 async function removeLabelFromMail(userId, mailId, labelName) {
   const user = await getUserOrThrow(userId);
   try {
@@ -171,24 +176,31 @@ async function removeLabelFromMail(userId, mailId, labelName) {
   }
 }
 /**
- * Get all mails associated with a specific label for a user
- */
+* Get all mails associated with a specific label for a user
+*/
 async function getMailsByLabel(userId, labelName) {
-
-  const emails = await Email.find({ owner: userId, labels: labelName })
+  let query = { owner: userId };
+  if (labelName === "all") {
+    query.labels = { $nin:["spam", "bin"] };
+  } else if (labelName === "bin" || labelName === "spam") {
+    query.labels = labelName;
+  } else {
+    query.labels = { $all: [labelName], $nin: ['spam', 'bin'] };
+  }
+  const emails = await Email.find(query)
     .sort({ createdAt: -1 })
-	.limit(50)
+    .limit(50)
     .lean();
-	const mailsOut = emails.map(({ _id, ...rest }) => ({
-		id: _id.toString(),
-		...rest
-	}));
-	return mailsOut;
+  const mailsOut = emails.map(({ _id, ...rest }) => ({
+    id: _id.toString(),
+    ...rest
+  }));
+  return mailsOut;
 }
 
 /**
- * Helper function to get a user or throw an error
- */
+* Helper function to get a user or throw an error
+*/
 async function getUserOrThrow(userId) {
   if (!userId) {
     const error = new Error("User ID is required");
