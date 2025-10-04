@@ -9,8 +9,8 @@ fun loadDotEnv(path: String): Properties {
     return props
 }
 
-// Load env once (points to android/.env at repo root)
-val env = loadDotEnv("android/.env")
+// Load env once (points to .env at repo root)
+val env = loadDotEnv(".env")
 plugins {
     alias(libs.plugins.android.application)
 }
@@ -30,8 +30,13 @@ android {
         buildConfigField(
             "String",
             "API_BASE_URL",
-            "\"${env.getProperty("API_BASE_URL", "http://10.0.2.2:8080")}\""
+            "\"${env.getProperty("API_BASE_URL", "http://10.0.2.2:8080/api/")}\""
         )
+		buildConfigField(
+			"String",
+			"WS_BASE_URL",
+			"\"${env.getProperty("WS_BASE_URL", "http://10.0.2.2:8080/")}\""
+		)
         buildConfigField(
             "String",
             "ENV",

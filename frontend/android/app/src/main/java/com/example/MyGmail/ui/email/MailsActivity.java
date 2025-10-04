@@ -400,12 +400,16 @@ public class MailsActivity extends BaseActivity {
         if (avatar.startsWith("data:image/") ||
                 avatar.startsWith("http://") || avatar.startsWith("https://") ||
                 avatar.startsWith("content://") || avatar.startsWith("file://")) {
-            return avatar;
+            return avatar.replace('\\', '/');
         }
-        String base = BuildConfig.API_BASE_URL;
-        if (base == null || base.isEmpty()) base = "http://10.0.2.2:8080";
+        String base = BuildConfig.WS_BASE_URL;
+        if (base == null || base.isEmpty()) base = BuildConfig.API_BASE_URL;
+        if (base == null || base.isEmpty()) base = "http://10.0.2.2.8080/";
+        base = base.replace('\\', '/');
         if (base.endsWith("/")) base = base.substring(0, base.length() - 1);
-        String path = avatar.startsWith("/") ? avatar.substring(1) : avatar;
+        if (base.endsWith("/api")) base = base.substring(0, base.length() - 4);
+        String path = avatar.replace('\\', '/');
+        if (path.startsWith("/")) path = path.substring(1);
         return base + "/" + path;
     }
 }
