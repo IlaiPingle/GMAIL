@@ -25,8 +25,8 @@ To create a new account, users must provide:
 ---
 
 ### 🖼️ Sign Up Screens
-![Sign Up - Web](../images/signup-web.png)  
-![Sign Up - Android](../images/signup-and.png)  
+![Sign Up - Web](..//images/signup-web.png)  
+![Sign Up - Android](..//images/signup-and.png)  
 
 ---
 
@@ -42,7 +42,7 @@ To access the platform, users need to:
 ---
 
 ### 🖼️ Login Screen
-![Login Page - Web](../images/sign-in-web.png)  
+![Login Page - Web](..//images/sign-in-web.png)  
 ![Login page - Android](..//Images/sign-in-and.png)  
 
 ---
@@ -52,7 +52,7 @@ To access the platform, users need to:
 - At the **top-right corner**, the user’s **name** and **profile picture** are displayed.  
 - A **Log Out** button is available → clicking it logs the user out and redirects to the **Landing Page**.  
 
-![Home Screen - Web (with logout option)](../images/home-options-web.png)  
+![Home Screen - Web (with logout option)](..//images/home-options-web.png)  
 
 ---
 
