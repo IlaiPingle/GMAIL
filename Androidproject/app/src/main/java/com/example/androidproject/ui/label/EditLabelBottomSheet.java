@@ -5,9 +5,11 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
+
 import com.example.androidproject.R;
 import com.example.androidproject.data.models.Label;
 import com.example.androidproject.viewModel.LabelsViewModel;
@@ -15,9 +17,11 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -41,7 +45,8 @@ public class EditLabelBottomSheet extends BottomSheetDialogFragment {
 
     private LabelsViewModel labelsViewModel;
 
-    @Nullable @Override
+    @Nullable
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.bottomsheet_edit_label, container, false);
     }
@@ -68,57 +73,40 @@ public class EditLabelBottomSheet extends BottomSheetDialogFragment {
         });
 
         final Set<String> system = new HashSet<>(Arrays.asList(
-                "inbox","sent","starred","snoozed","spam","bin","trash","drafts","social","promotions","primary"
+                "inbox", "sent", "starred", "snoozed", "spam", "bin", "trash", "drafts", "social", "promotions", "primary"
         ));
 
         btnSave.setOnClickListener(v1 -> {
             String newName = et.getText() == null ? "" : et.getText().toString().trim();
             til.setError(null);
 
-            if (TextUtils.isEmpty(newName)) { til.setError(getString(R.string.error_required)); return; }
-            if (newName.length() > 30) { til.setError(getString(R.string.error_too_long)); return; }
+            if (TextUtils.isEmpty(newName)) {
+                til.setError(getString(R.string.error_required));
+                return;
+            }
+            if (newName.length() > 30) {
+                til.setError(getString(R.string.error_too_long));
+                return;
+            }
             String key = newName.toLowerCase();
-            if (system.contains(key)) { til.setError(getString(R.string.error_system_label)); return; }
+            if (system.contains(key)) {
+                til.setError(getString(R.string.error_system_label));
+                return;
+            }
             if (!newName.equalsIgnoreCase(oldName) && existing.contains(key)) {
-                til.setError(getString(R.string.error_label_exists)); return;
+                til.setError(getString(R.string.error_label_exists));
+                return;
             }
 
             btnSave.setEnabled(false);
-            labelsViewModel.updateLabel(oldName, newName, new Callback<Void>() {
-                @Override public void onResponse(Call<Void> call, Response<Void> res) {
-                    btnSave.setEnabled(true);
-                    if (res.isSuccessful()) dismiss();
-                    else {
-                        til.setError(res.code() == 404 ? "Label not found" :
-                                (res.code() == 409 || res.code() == 400) ? getString(R.string.error_label_exists) :
-                                        getString(R.string.error_required));
-                    }
-                }
-                @Override public void onFailure(Call<Void> call, Throwable t) {
-                    btnSave.setEnabled(true);
-                    til.setError(t.getMessage() == null ? "Network error" : t.getMessage());
-                }
-            });
+            labelsViewModel.updateLabel(oldName, newName);
         });
 
         btnDelete.setOnClickListener(v12 -> {
             btnDelete.setEnabled(false);
-            labelsViewModel.deleteLabel(oldName, new Callback<Void>() {
-                @Override public void onResponse(Call<Void> call, Response<Void> res) {
-                    btnDelete.setEnabled(true);
-                    if (res.isSuccessful()) dismiss();
-                    else {
-                        til.setError(res.code() == 400 ? "Cannot delete system label" :
-                                res.code() == 404 ? "Label not found" : "Delete failed");
-                    }
-                }
-                @Override public void onFailure(Call<Void> call, Throwable t) {
-                    btnDelete.setEnabled(true);
-                    til.setError(t.getMessage() == null ? "Network error" : t.getMessage());
-                }
-            });
-        });
+            labelsViewModel.deleteLabel(oldName);
 
-        btnCancel.setOnClickListener(v13 -> dismiss());
+            btnCancel.setOnClickListener(v13 -> dismiss());
+        });
     }
 }

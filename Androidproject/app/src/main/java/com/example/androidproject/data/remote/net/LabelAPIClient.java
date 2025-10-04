@@ -24,7 +24,7 @@ public class LabelAPIClient {
         this.labelApi = ApiClient.getClient(ctx).create(WebServiceAPI.class);
     }
 
-    public void getLabels(Callback<List<Label>> callback) {
+    public void getLabels(Callback<List<String>> callback) {
         labelApi.getLabels().enqueue(callback);
     }
     public void createLabel(String labelName, Callback<Label> callback) {

@@ -20,12 +20,10 @@ import retrofit2.Callback;
  */
 public class LabelsViewModel extends AndroidViewModel {
     private final LabelRepository repository;
-    private final LiveData<List<Label>> labels;
 
     public LabelsViewModel(@NonNull Application app) {
         super(app);
         repository = new LabelRepository(app);
-        labels = repository.getLabels();
         repository.fetchLabelsFromServer();
     }
 
@@ -56,7 +54,7 @@ public class LabelsViewModel extends AndroidViewModel {
      * The result of the operation is provided via the Callback parameter.
      * @param labelName The name of the label to be deleted.
      */
-    public void deleteLabel(String labelName {
+    public void deleteLabel(String labelName) {
         repository.deleteLabel(labelName);
     }
 
@@ -65,7 +63,6 @@ public class LabelsViewModel extends AndroidViewModel {
      * The result of the operation is provided via the Callback parameter.
      * @param oldName The current name of the label to be updated.
      * @param newName The new name for the label.
-     * @param cb Callback to handle the response or failure of the update operation.
      */
     public void updateLabel(String oldName, String newName) {
         repository.updateLabel(oldName, newName);

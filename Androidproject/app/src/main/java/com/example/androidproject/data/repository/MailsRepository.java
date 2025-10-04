@@ -56,6 +56,31 @@ public class MailsRepository {
         });
         return localMails;
     }
+    public LiveData<Mail> getMailById(String mailId) {
+        LiveData<Mail> local = mailDao.getMail(mailId); // LiveData from Room
+
+        mailApi.getMailById(mailId, new Callback<Mail>() {
+            @Override
+            public void onResponse(@NonNull Call<Mail> call, @NonNull Response<Mail> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Mail remoteMail = response.body();
+                    executor.execute(() -> mailDao.insert(remoteMail));
+                } else if (response.code() == 404) {
+                    executor.execute(() -> {
+                        Mail current = mailDao.getMailNow(mailId);
+                        if (current != null) mailDao.delete(current);
+                    });
+                }
+            }
+            @Override
+            public void onFailure(@NonNull Call<Mail> call, @NonNull Throwable t) {
+                t.printStackTrace();
+            }
+        });
+
+        return local;
+    }
+
     public void createDraft(Mail mail) {
         mailApi.createDraft(mail, new Callback<Mail>() {
             @Override

@@ -22,7 +22,7 @@
     <color name="md_theme_light_error">#D93025</color>             <!-- Error color -->
 
     <!-- Additional suggestions -->
-    <color name="icon_tint">#575C60
+    <color name="icon_tint">#80868B
     </color>                        <!-- Icon tint on light background -->
     <color name="secondary_text">#5F6368
     </color>                   <!-- Secondary text (hints, helper text) -->
@@ -32,5 +32,7 @@
     <color name="navbar_background">#FFFFFF</color>
     <color name="selected_icon_tint">#D13624</color>
     <color name="pressed_background_color">#BDBDBD</color>
-
+    <!--    star colors-->
+    <color name="star_yellow">#F7FBC02D</color>
+    <color name="icon_default">#80868B</color>
 </resources>
