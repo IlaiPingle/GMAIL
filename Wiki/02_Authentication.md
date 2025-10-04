@@ -11,20 +11,13 @@ This guide explains how users can **sign up and log in** to the system.
 
 ---
 
-### 🌐 Landing Pages
-![Landing Page - Web](./images/landing-web.png)  
-![Landing Page - Android](./images/landing-and.png)  
-
----
-
 ## 📝 User Registration (Sign Up)
 To create a new account, users must provide:
 
 - **Username (unique)** ✉️  
 - **Full Name** 🏷️  
-- **Phone Number** 📞 (exactly 10 digits)  
 - **Password** 🔒 (minimum **8 characters**, must include a **number** and a **special character**)  
-- **Profile Picture** 🖼️ (image file: `.png` / `.jpeg`)  
+- **Profile Picture (optional)** 🖼️ (image file: `.png` / `.jpeg`)  
 
 ✅ **On success:** The system shows a confirmation message and redirects to the **Login Page**.  
 ❌ **On error:** The system displays the reason (e.g., *username already exists*, *invalid password format*).  
@@ -32,8 +25,8 @@ To create a new account, users must provide:
 ---
 
 ### 🖼️ Sign Up Screens
-![Sign Up - Web](./images/signup-web.png)  
-![Sign Up - Android](./images/signup-and.png)  
+![Sign Up - Web](../images/signup-web.png)  
+![Sign Up - Android](../images/signup-and.png)  
 
 ---
 
@@ -49,7 +42,8 @@ To access the platform, users need to:
 ---
 
 ### 🖼️ Login Screen
-![Login Page - Web](./images/sig-in-web.png)  
+![Login Page - Web](../images/sign-in-web.png)  
+![Login page - Android](..//Images/sign-in-and.png)  
 
 ---
 
@@ -58,7 +52,7 @@ To access the platform, users need to:
 - At the **top-right corner**, the user’s **name** and **profile picture** are displayed.  
 - A **Log Out** button is available → clicking it logs the user out and redirects to the **Landing Page**.  
 
-![Home Screen - Web (with logout option)](./images/home-options-weeb.png)  
+![Home Screen - Web (with logout option)](../images/home-options-web.png)  
 
 ---
 

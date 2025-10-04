@@ -74,7 +74,7 @@ CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
 ---
 
 ### Frontend `.env`
-**Path:** `EX1/frontend/.env` (read at **build-time** by React)
+**Path:** `EX1/frontend/web/.env` (read at **build-time** by React)
 ```env
 # React build-time variables must start with REACT_APP_
 REACT_APP_API_BASE=http://localhost:8080
@@ -96,7 +96,7 @@ BLOOM_PORT=4000
 ---
 
 ### Android `.env`
-**Path:** `EX1/android/.env` (loaded by Gradle into `BuildConfig`)
+**Path:** `EX1/frontend/android/.env` (loaded by Gradle into `BuildConfig`)
 ```env
 # For Android emulator to reach your host's backend
 API_BASE_URL=http://10.0.2.2:8080/api/
@@ -124,6 +124,11 @@ android {
             "API_BASE_URL",
             "\"${env.getProperty("API_BASE_URL", "http://10.0.2.2:8080/api/")}\""
         )
+		buildConfigField(
+			"String",
+			"WS_BASE_URL",
+			"\"${env.getProperty("WS_BASE_URL", "http://10.0.2.2:8080/")}\""
+		)
         buildConfigField(
             "String",
             "ENV",

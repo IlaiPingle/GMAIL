@@ -26,10 +26,10 @@ After logging in, users land on the **Inbox**. It includes:
 - ➕ **Compose** button to create a new email (Web: top-left; Android: FAB in the bottom-right).
 
 **Web - Inbox example**
-![Inbox - Web](./images/gmail-home-web.png)
+![Inbox - Web](../images/gmail-home-web.png)
 
 **Android - Inbox example**
-![Inbox - Android](./images/gmail-home-android.png)
+![Inbox - Android](../images/gmail-home-android.png)
 
 ---
 
@@ -40,10 +40,10 @@ After logging in, users land on the **Inbox**. It includes:
 Results appear in a **Search Results** screen where you can refine the query or open any mail.
 
 **Search - Web**
-![Search - Web](./images/gmail-search-web.png)
+![Search - Web](../images/gmail-search-web.png)
 
 **Search - Android**
-![Search - Android](./images/gmail-search-android.png)
+![Search - Android](../images/gmail-search-android.png)
 
 ---
 
@@ -60,10 +60,10 @@ Open any mail from Inbox, Sent, or Search to view its details:
 **Android:** Opens as a full screen; use the **Back** button to return to the list.
 
 **Message - Web**
-![Read Message - Web](./images/gmail-read-web.png)
+![Read Message - Web](../images/gmail-read-web.png)
 
 **Message - Android**
-![Read Message - Android](./images/gmail-read-android.png)
+![Read Message - Android](../images/gmail-read-android.png)
 
 ---
 
@@ -75,20 +75,16 @@ Tap **Compose** to open the editor.
 - **Subject**
 - **Body** (supports basic formatting)
 
-**Optional**
-- **Cc / Bcc**
-- **Attachments**: images or files (`.png`, `.jpg`, `.pdf`, etc.)
-
 **Drafts flow**
 - A draft is created immediately when you start composing.
 - Closing the editor saves the **Draft** automatically.
 - Sending removes the draft and creates a **Sent** message.
 
 **Web - Compose**
-![Compose - Web](./images/gmail-compose-web.png)
+![Compose - Web](../images/gmail-compose-web.png)
 
 **Android - Compose**
-![Compose - Android](./images/gmail-compose-android.png)
+![Compose - Android](../images/gmail-compose-android.png)
 
 ---
 
@@ -99,7 +95,8 @@ Tap **Compose** to open the editor.
 - **Filters**: Search by label (e.g., `label:work`), or combine queries (e.g., `from:alice subject:report has:attachment`).
 
 **Sidebar / Drawer**
-![Labels - Web](./images/gmail-labels-web.png)
+![Labels - Web](../images/gmail-labels-web.png)  
+![Labels - Android](../Images/gmail-labels-android.png)
 
 ---
 
@@ -113,7 +110,7 @@ Tap **Compose** to open the editor.
 - **Android:** Pull **down** on the list to **refresh** Inbox, Search results, or label views.
 
 **Pull to Refresh - Android**
-![Refresh - Android](./images/gmail-refresh-android.png)
+![Refresh - Android](../images/gmail-refresh-android.png)
 
 ---
 
@@ -125,17 +122,8 @@ Switch between **Light** and **Dark** themes:
 > The chosen theme is **persisted** and applied across all app screens.
 
 **Theme Toggle - Web/Android**
-![Theme - Android Options](./images/gmail-theme-android.png)
-
----
-
-## 🔔 Notifications (Android)
-- Receive **new mail notifications** when the app is in the background.
-- Tapping a notification opens the relevant **thread**.
-- You can mute specific labels or disable notifications from system settings.
-
-**Notifications - Android**
-![Notifications - Android](./images/gmail-notifications-android.png)
+![Theme - Web Options](../Images/gmail-theme-web.png)  
+![Theme - Android Options](../images/gmail-theme-android.png)
 
 ---
 
