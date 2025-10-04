@@ -18,7 +18,7 @@ const emailSchema = new Schema({
     type: String,
     required: false,
     index: true,
-    maxlength: 50
+    maxlength: 100
   },
   subject: {
     type: String,
@@ -28,7 +28,7 @@ const emailSchema = new Schema({
   body: {
     type: String,
     default: '',
-    maxlength: 500
+    maxlength: 10000
   },
   labels: {
     type: [String],
