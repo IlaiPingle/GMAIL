@@ -100,6 +100,7 @@ BLOOM_PORT=4000
 ```env
 # For Android emulator to reach your host's backend
 API_BASE_URL=http://10.0.2.2:8080/api/
+WS_BASE_URL=http://10.0.2.2:8080/
 ENV=local
 ```
 In `app/build.gradle.kts`, load the file and define:
@@ -113,28 +114,39 @@ fun loadDotEnv(path: String): Properties {
     return props
 }
 
-val env = loadDotEnv("android/.env")
+// ADD THIS AT THE TOP (after any 'import' statements, before 'plugins')
+val env = loadDotEnv(".env") // <--- This calls the function from the other file
+// END OF ADDED CODE
+
+plugins {
+    // ...
+}
 
 android {
-    // ...
-    defaultConfig {
-        // ...
-        buildConfigField(
-            "String",
-            "API_BASE_URL",
-            "\"${env.getProperty("API_BASE_URL", "http://10.0.2.2:8080/api/")}\""
-        )
+    // ...
+    defaultConfig {
+        // ... (applicationId, minSdk, etc.)
+
+        // --- ADD THE CODE BLOCK BELOW ---
+        // This will fail the build if .env variables are missing
+        buildConfigField(
+            "String",
+            "API_BASE_URL",
+            "\"${env.getProperty("API_BASE_URL") ?: throw GradleException("ERROR: Missing 'API_BASE_URL' in .env file.")}\""
+        )
 		buildConfigField(
 			"String",
 			"WS_BASE_URL",
-			"\"${env.getProperty("WS_BASE_URL", "http://10.0.2.2:8080/")}\""
+			"\"${env.getProperty("WS_BASE_URL") ?: throw GradleException("ERROR: Missing 'WS_BASE_URL' in .env file.")}\""
 		)
-        buildConfigField(
-            "String",
-            "ENV",
-            "\"${env.getProperty("ENV", "local")}\""
-        )
-   }
+        buildConfigField(
+            "String",
+            "ENV",
+            "\"${env.getProperty("ENV") ?: throw GradleException("ERROR: Missing 'ENV' in .env file.")}\""
+        )
+        // --- END OF ADDED CODE ---
+    }
+    // ... rest of the file
 }
 ```
 ---
@@ -207,11 +219,13 @@ android {
 ## 📱 Running the Android Client
 
 1. Open **Android Studio**.
-2. Load the **Android project** inside the repository.
-3. Run on:
+2. **CRUCIAL STEP** Select File > Open. Do NOT open the entire EX1 folder. You must navigate to and open the specific project folder:
+Path: `EX1/frontend/android`
+3. Load the **Android project** inside the repository.
+4. Run on:
    * **Physical Device** → Enable developer mode & USB debugging.
    * **Emulator** → Set up via **AVD Manager**.
-4. Press ▶ (Play) in Android Studio to build & run the app.
+5. Press ▶ (Play) in Android Studio to build & run the app.
 
 > For the emulator, the backend is typically reachable at `http://10.0.2.2:8080` — configured in `android/.env`.
 
